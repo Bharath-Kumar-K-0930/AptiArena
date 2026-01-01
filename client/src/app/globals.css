@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+:root {
+  /* Core Colors from User */
+  --color-deep-blue: #051622;
+  --color-teal: #1BA098;
+  --color-gold: #DEB992;
+
+  /* Semantic Variables (Shadcn-compatible) */
+  --background: #051622;
+  --foreground: #eef2f6;
+
+  --card: #0b1f2d;
+  /* Slightly lighter than bg */
+  --card-foreground: #eef2f6;
+
+  --popover: #051622;
+  --popover-foreground: #eef2f6;
+
+  --primary: #1BA098;
+  /* Teal */
+  --primary-foreground: #ffffff;
+
+  --secondary: #DEB992;
+  /* Gold */
+  --secondary-foreground: #051622;
+
+  --muted: #0f2937;
+  --muted-foreground: #94a3b8;
+
+  --accent: #1BA098;
+  --accent-foreground: #ffffff;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: #1e3a4a;
+  --input: #1e3a4a;
+  --ring: #1BA098;
+
+  --radius: 0.75rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Utilities for the specific hex codes if needed explicitly */
+.bg-deep-blue {
+  background-color: var(--color-deep-blue);
+}
+
+.text-gold {
+  color: var(--color-gold);
+}
+
+.text-teal {
+  color: var(--color-teal);
+}
+
+.bg-teal {
+  background-color: var(--color-teal);
+}
+
+.bg-gold {
+  background-color: var(--color-gold);
+}
+
+.border-gold {
+  border-color: var(--color-gold);
+}
+
+.border-teal {
+  border-color: var(--color-teal);
+}
+
+/* Scrollbar styling for premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
