@@ -10,7 +10,9 @@ import { ChevronRight, StopCircle, BarChart3, Users, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function HostLivePage() {
+import { Suspense } from "react";
+
+function HostLiveContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pin = searchParams.get("pin");
@@ -92,8 +94,8 @@ export default function HostLivePage() {
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: i * 0.1 }}
                                     className={`flex items-center justify-between p-4 rounded-xl border ${i === 0 ? 'bg-yellow-900/20 border-yellow-500/50' :
-                                            i === 1 ? 'bg-gray-800 border-gray-600' :
-                                                i === 2 ? 'bg-orange-900/20 border-orange-700' : 'bg-gray-900 border-gray-800'
+                                        i === 1 ? 'bg-gray-800 border-gray-600' :
+                                            i === 2 ? 'bg-orange-900/20 border-orange-700' : 'bg-gray-900 border-gray-800'
                                         }`}
                                 >
                                     <div className="flex items-center gap-4">
@@ -154,10 +156,10 @@ export default function HostLivePage() {
                         <Card
                             key={i}
                             className={`border-2 transition-all duration-500 flex items-center justify-center p-6 min-h-[120px] ${showResults
-                                    ? opt.isCorrect
-                                        ? 'bg-green-600 border-green-400 opacity-100'
-                                        : 'bg-gray-900 border-gray-800 opacity-50'
-                                    : 'bg-gray-800 border-gray-700'
+                                ? opt.isCorrect
+                                    ? 'bg-green-600 border-green-400 opacity-100'
+                                    : 'bg-gray-900 border-gray-800 opacity-50'
+                                : 'bg-gray-800 border-gray-700'
                                 }`}
                         >
                             <span className="text-2xl font-semibold text-center">{opt.text}</span>
@@ -212,4 +214,12 @@ function Trophy(props: any) {
             <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
         </svg>
     )
+}
+
+export default function HostLivePage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading Live Game...</div>}>
+            <HostLiveContent />
+        </Suspense>
+    );
 }

@@ -10,7 +10,9 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { io, Socket } from "socket.io-client";
 
-export default function PlayPage() {
+import { Suspense } from "react";
+
+function PlayContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -383,5 +385,13 @@ export default function PlayPage() {
                 )}
             </AnimatePresence>
         </div>
+    );
+}
+
+export default function PlayPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center">Loading Game...</div>}>
+            <PlayContent />
+        </Suspense>
     );
 }

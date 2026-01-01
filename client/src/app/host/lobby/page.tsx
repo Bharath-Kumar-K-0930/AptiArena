@@ -10,7 +10,9 @@ import { Users, Play, MonitorPlay, Zap, Trophy, ArrowRight, Loader2, Copy } from
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
 
-export default function LobbyPage() {
+import { Suspense } from "react";
+
+function LobbyContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const quizId = searchParams.get("quizId");
@@ -182,5 +184,13 @@ export default function LobbyPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function LobbyPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-black text-white flex items-center justify-center">Loading Lobby...</div>}>
+            <LobbyContent />
+        </Suspense>
     );
 }
