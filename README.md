@@ -60,7 +60,7 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000` to start quizzing!
+Visit `[http://localhost:3000]` <a href="https://apti-arena.vercel.app/"> Hosted <b>AptiArena Vercel App</b> </a> to start quizzing!
 
 ## 🤝 Contribution
 Feel free to fork and submit PRs.
