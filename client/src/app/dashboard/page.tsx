@@ -32,6 +32,19 @@ export default function DashboardPage() {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [stats, setStats] = useState<Stats>({ totalQuizzes: 0, totalSessions: 0, totalParticipants: 0 });
     const [loading, setLoading] = useState(true);
+    const [memberSince, setMemberSince] = useState<string>("N/A");
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const user = JSON.parse(localStorage.getItem("user") || "{}");
+                const date = new Date(user.createdAt || Date.now());
+                setMemberSince(date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }));
+            } catch (e) {
+                console.error("Date parsing error", e);
+            }
+        }
+    }, []);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -208,7 +221,7 @@ export default function DashboardPage() {
                                     <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
                                         <span className="text-gray-400">Member Since</span>
                                         <span className="text-gray-300 text-sm">
-                                            {typeof window !== 'undefined' ? new Date(JSON.parse(localStorage.getItem("user") || "{}").createdAt || Date.now()).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}
+                                            {memberSince}
                                         </span>
                                     </div>
                                     <div className="space-y-1 pt-2">
