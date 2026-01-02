@@ -88,8 +88,55 @@ export default function FeaturesPage() {
                             </li>
                         </ul>
                     </div>
-                    <div className="flex-1 h-64 bg-gradient-to-br from-teal/20 to-purple-500/20 rounded-2xl border border-white/10 flex items-center justify-center">
-                        <span className="text-muted-foreground italic">Interactive Demo Visual Placeholder</span>
+                    {/* Interactive Mock Visual */}
+                    <div className="flex-1 h-[400px] relative flex items-center justify-center">
+                        {/* Blob Background */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-purple-600/20 rounded-full blur-3xl opacity-50 animate-pulse" />
+
+                        {/* Mock Phone UI */}
+                        <div className="relative w-64 h-[500px] bg-gray-900 border-4 border-gray-800 rounded-[3rem] shadow-2xl overflow-hidden transform rotate-[-5deg] hover:rotate-0 transition-all duration-500">
+                            {/* Phone Notch */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-xl z-20" />
+
+                            {/* Screen Content */}
+                            <div className="h-full w-full bg-gray-950 p-6 flex flex-col items-center pt-16 relative z-10">
+                                {/* Logo */}
+                                <div className="text-teal font-bold text-xl mb-8 flex items-center gap-2">
+                                    <BrainCircuit className="h-6 w-6" /> AptiArena
+                                </div>
+
+                                {/* Join Card */}
+                                <div className="w-full bg-gray-900 p-4 rounded-xl border border-gray-800 shadow-lg space-y-4">
+                                    <div className="space-y-2">
+                                        <div className="text-xs text-gray-400 uppercase tracking-widest text-center">Enter Game PIN</div>
+                                        <div className="h-12 bg-black border border-gray-700 rounded-lg flex items-center justify-center text-2xl font-mono text-white tracking-[0.5em] animate-pulse">
+                                            3948
+                                        </div>
+                                    </div>
+                                    <div className="h-10 bg-teal rounded-lg w-full flex items-center justify-center font-bold text-gray-900 shadow-[0_0_15px_rgba(20,184,166,0.5)]">
+                                        Join
+                                    </div>
+                                </div>
+
+                                {/* Participants Bubble */}
+                                <div className="mt-8 flex items-center gap-3 bg-gray-800/50 px-4 py-2 rounded-full border border-gray-700">
+                                    <div className="flex -space-x-2">
+                                        {[1, 2, 3].map(i => (
+                                            <div key={i} className={`w-6 h-6 rounded-full border-2 border-gray-900 bg-gradient-to-br ${i === 1 ? 'from-purple-500 to-indigo-500' : i === 2 ? 'from-teal-500 to-green-500' : 'from-pink-500 to-red-500'}`} />
+                                        ))}
+                                    </div>
+                                    <span className="text-xs text-gray-300 font-medium">24 joined</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Floating Elements */}
+                        <div className="absolute top-10 right-10 bg-gray-800 p-3 rounded-xl border border-gray-700 shadow-xl animate-bounce">
+                            <Zap className="text-yellow-400 h-6 w-6" fill="currentColor" />
+                        </div>
+                        <div className="absolute bottom-20 left-10 bg-gray-800 p-3 rounded-xl border border-gray-700 shadow-xl animate-[bounce_3s_infinite]">
+                            <BarChart className="text-purple-400 h-6 w-6" />
+                        </div>
                     </div>
                 </div>
             </section>

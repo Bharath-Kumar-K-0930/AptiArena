@@ -165,6 +165,49 @@ export const setupSocket = (io: Server) => {
             }
         });
 
+        socket.on('reveal_answer', async ({ pin }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session) return;
+
+                const quiz = await Quiz.findById(session.quizId);
+                if (!quiz) return;
+
+                const currentQ = quiz.questions[session.currentQuestionIndex];
+
+                // Calculate stats
+                const stats = {
+                    0: 0, 1: 0, 2: 0, 3: 0,
+                    correctIndex: currentQ.options.findIndex(o => o.isCorrect)
+                };
+
+                // In a real app, we'd query the DB for actual counts if we saved individual answers
+                // For now, we can approximate or use the `answer_result` logic to track live counts in memory if we wanted.
+                // But simplified: Just send the correct index so clients can show it.
+
+                io.to(pin).emit('answer_revealed', {
+                    correctIndex: stats.correctIndex
+                });
+
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        socket.on('show_leaderboard', async ({ pin }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session) return;
+
+                // Send top 5
+                const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
+                io.to(pin).emit('leaderboard_update', { leaderboard });
+
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
         socket.on('next_question', async ({ pin }) => {
             try {
                 const session = await GameSession.findOne({ pin });
