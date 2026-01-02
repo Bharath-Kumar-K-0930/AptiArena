@@ -44,10 +44,10 @@ export default function Sidebar() {
         <div className="mt-auto p-4 border-t border-gray-800">
             <div className="flex items-center gap-3 mb-4">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center font-bold text-white uppercase">
-                    {user?.name?.[0] || "U"}
+                    {(user?.name?.[0] || user?.username?.[0] || "U").toUpperCase()}
                 </div>
                 <div className="overflow-hidden">
-                    <p className="text-sm font-bold text-white truncate">{user?.name || "User"}</p>
+                    <p className="text-sm font-bold text-white truncate">{user?.name || user?.username || "User"}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email || "user@example.com"}</p>
                 </div>
             </div>
