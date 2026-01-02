@@ -235,8 +235,17 @@ function HostLiveContent() {
 
                     {phase === 'leaderboard' ? (
                         <Card className="bg-slate-900 border-slate-800 flex-1 flex flex-col">
-                            <CardHeader className="text-center">
+                            <CardHeader className="text-center pb-2">
                                 <CardTitle className="text-3xl bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">Top 5 Leaders</CardTitle>
+                                {leaderboard[0] && (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="text-yellow-400 font-medium text-lg mt-2 animate-pulse"
+                                    >
+                                        {`${leaderboard[0].name} is dominating! 👑`}
+                                    </motion.div>
+                                )}
                             </CardHeader>
                             <CardContent className="flex-1 flex flex-col justify-center gap-4 max-w-3xl mx-auto w-full">
                                 {leaderboard.map((p, i) => (
@@ -301,6 +310,23 @@ function HostLiveContent() {
                                     )
                                 })}
                             </div>
+
+                            <AnimatePresence>
+                                {phase === 'reveal' && currentQuestion.explanation && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="max-w-3xl mx-auto bg-blue-950/40 border border-blue-500/30 rounded-xl p-6 text-center"
+                                    >
+                                        <div className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-2 flex items-center justify-center gap-2">
+                                            <Zap className="w-4 h-4" /> Insight
+                                        </div>
+                                        <p className="text-xl text-blue-100 font-medium">
+                                            {currentQuestion.explanation}
+                                        </p>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     )}
                 </div>

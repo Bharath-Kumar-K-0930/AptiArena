@@ -67,9 +67,9 @@ function PlayContent() {
             setResult({ isCorrect, score });
         });
 
-        newSocket.on("answer_revealed", ({ correctIndex }) => {
+        newSocket.on("answer_revealed", ({ correctIndex, explanation }) => {
             setGameState("result");
-            setResult((prev: any) => ({ ...prev, correctIndex }));
+            setResult((prev: any) => ({ ...prev, correctIndex, explanation }));
         });
 
         newSocket.on("leaderboard_update", () => {
@@ -236,10 +236,20 @@ function PlayContent() {
                             {result.isCorrect ? <CheckCircle className="w-16 h-16" /> : <XCircle className="w-16 h-16" />}
                         </div>
                         <h2 className="text-4xl font-black">{result.isCorrect ? "Correct!" : "Incorrect"}</h2>
-                        <div className="bg-white/10 p-4 rounded-xl inline-block">
+                        <div className="bg-white/10 p-4 rounded-xl inline-block mb-4">
                             <span className="text-sm text-gray-400 uppercase tracking-widest block mb-1">Score</span>
                             <span className="text-3xl font-mono">+{result.score}</span>
                         </div>
+                        {result.explanation && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-blue-900/30 p-4 rounded-xl border border-blue-500/30 max-w-sm mx-auto"
+                            >
+                                <div className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">Reason</div>
+                                <p className="text-blue-100 text-sm">{result.explanation}</p>
+                            </motion.div>
+                        )}
                     </div>
                 )}
 

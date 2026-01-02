@@ -17,7 +17,7 @@ export default function Footer() {
                     <div className="flex gap-8">
                         <Link href="/terms" className="hover:text-white transition">Privacy & Terms</Link>
                         <Link href="https://github.com/Bharath-Kumar-K-0930/AptiArena/blob/main/LICENSE" target="_blank" className="hover:text-white transition">MIT License</Link>
-                        <Link href="/connect" className="hover:text-white transition">Contact</Link>
+                        <Link href="mailto:apti.arenahelpdesk@gmail.com" className="hover:text-white transition">Feedback</Link>
                     </div>
 
                     {/* Social / Repo */}

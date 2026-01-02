@@ -186,7 +186,8 @@ export const setupSocket = (io: Server) => {
                 // But simplified: Just send the correct index so clients can show it.
 
                 io.to(pin).emit('answer_revealed', {
-                    correctIndex: stats.correctIndex
+                    correctIndex: stats.correctIndex,
+                    explanation: currentQ.explanation
                 });
 
             } catch (error) {
