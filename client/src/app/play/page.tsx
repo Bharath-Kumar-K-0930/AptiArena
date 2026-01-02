@@ -200,8 +200,13 @@ function PlayContent() {
 
                 {gameState === "playing" && currentQuestion && (
                     <div className="space-y-8">
-                        <div className="text-white text-center text-lg font-medium">
-                            Question {questionIndex + 1}
+                        <div className="text-white text-center space-y-4">
+                            <span className="inline-block px-3 py-1 rounded-full bg-slate-800 text-slate-400 text-xs font-medium border border-slate-700">
+                                Question {questionIndex + 1}
+                            </span>
+                            <h2 className="text-2xl md:text-3xl font-bold leading-tight px-2">
+                                {currentQuestion.text}
+                            </h2>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             {['A', 'B', 'C', 'D'].map((option, i) => (

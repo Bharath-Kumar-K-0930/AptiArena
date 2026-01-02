@@ -22,6 +22,7 @@ const GameSessionSchema = new Schema({
         socketId: { type: String },
         name: { type: String },
         score: { type: Number, default: 0 },
+        streak: { type: Number, default: 0 },
         lastAnsweredQuestionIndex: { type: Number, default: -1 } // Track if they answered the current question
     }],
     status: { type: String, enum: ['waiting', 'live', 'finished'], default: 'waiting' },

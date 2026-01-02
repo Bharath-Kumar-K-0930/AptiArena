@@ -254,15 +254,40 @@ function HostLiveContent() {
                                         initial={{ opacity: 0, x: -50 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: i * 0.1 }}
-                                        className="bg-slate-800 p-4 rounded-xl flex items-center justify-between border border-slate-700"
+                                        className={`
+                                            p-4 rounded-xl flex items-center justify-between border transition-all duration-300
+                                            ${i === 0
+                                                ? 'bg-gradient-to-r from-yellow-900/40 to-slate-900 border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.2)]'
+                                                : 'bg-slate-800 border-slate-700'
+                                            }
+                                        `}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className={`h-10 w-10 flex items-center justify-center rounded-full font-bold ${i === 0 ? 'bg-yellow-500 text-black' : i === 1 ? 'bg-gray-400 text-black' : i === 2 ? 'bg-orange-500 text-black' : 'bg-slate-700 text-white'}`}>
+                                            {/* Rank Badge */}
+                                            <div className={`h-12 w-12 flex items-center justify-center rounded-xl font-black text-xl shadow-lg relative overflow-hidden
+                                                ${i === 0 ? 'bg-yellow-400 text-yellow-950' : i === 1 ? 'bg-gray-300 text-gray-900' : i === 2 ? 'bg-orange-400 text-orange-950' : 'bg-slate-700 text-slate-400'}
+                                            `}>
                                                 {i + 1}
+                                                {/* Shine effect */}
+                                                {(i < 3) && <div className="absolute inset-0 bg-white/30 animate-pulse" />}
                                             </div>
-                                            <span className="text-xl font-bold text-white">{p.name}</span>
+
+                                            <div className="flex flex-col">
+                                                <span className={`text-xl font-bold ${i === 0 ? 'text-yellow-400' : 'text-white'}`}>{p.name}</span>
+                                                {/* Streak Badge */}
+                                                {p.streak > 2 && (
+                                                    <div className="flex items-center gap-1 text-xs font-bold text-orange-400 animate-pulse">
+                                                        <Zap className="h-3 w-3 fill-orange-400" />
+                                                        {p.streak} Streak!
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <span className="text-2xl font-mono text-teal-400">{p.score}</span>
+
+                                        <div className="text-right">
+                                            <div className="text-xs text-gray-500 uppercase tracking-widest font-bold">Score</div>
+                                            <div className="text-2xl font-mono text-teal-400 font-bold">{p.score}</div>
+                                        </div>
                                     </motion.div>
                                 ))}
                             </CardContent>

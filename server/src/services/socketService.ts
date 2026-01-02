@@ -147,6 +147,13 @@ export const setupSocket = (io: Server) => {
                 const pIndex = session.participants.findIndex(p => p.socketId === socket.id);
                 if (pIndex !== -1) {
                     session.participants[pIndex].score += score;
+
+                    if (isCorrect) {
+                        session.participants[pIndex].streak = (session.participants[pIndex].streak || 0) + 1;
+                    } else {
+                        session.participants[pIndex].streak = 0;
+                    }
+
                     session.participants[pIndex].lastAnsweredQuestionIndex = qIndex;
                     await session.save();
 
