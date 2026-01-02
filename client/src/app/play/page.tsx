@@ -67,9 +67,10 @@ function PlayContent() {
             setResult({ isCorrect, score });
         });
 
-        newSocket.on("answer_revealed", ({ correctIndex, explanation }) => {
+        newSocket.on("answer_revealed", ({ correctIndex, explanation, leaderboard }) => {
             setGameState("result");
             setResult((prev: any) => ({ ...prev, correctIndex, explanation }));
+            if (leaderboard) setLeaderboard(leaderboard);
         });
 
         newSocket.on("leaderboard_update", () => {
@@ -117,8 +118,17 @@ function PlayContent() {
 
     if (gameState === "join") {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-black flex items-center justify-center p-4">
-                <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border-white/20 text-white">
+            <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="/images/hero-bg.png"
+                        alt="Background"
+                        className="w-full h-full object-cover opacity-50"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-indigo-900/50 to-black/80" />
+                </div>
+
+                <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border-white/20 text-white relative z-10 shadow-2xl">
                     <CardHeader className="text-center">
                         <MonitorPlay className="w-12 h-12 mx-auto text-teal-400 mb-4" />
                         <CardTitle className="text-3xl font-bold">Join Quiz</CardTitle>
@@ -241,10 +251,20 @@ function PlayContent() {
                             {result.isCorrect ? <CheckCircle className="w-16 h-16" /> : <XCircle className="w-16 h-16" />}
                         </div>
                         <h2 className="text-4xl font-black">{result.isCorrect ? "Correct!" : "Incorrect"}</h2>
-                        <div className="bg-white/10 p-4 rounded-xl inline-block mb-4">
-                            <span className="text-sm text-gray-400 uppercase tracking-widest block mb-1">Score</span>
-                            <span className="text-3xl font-mono">+{result.score}</span>
+
+                        <div className="flex justify-center gap-4">
+                            <div className="bg-white/10 p-4 rounded-xl inline-block mb-4 min-w-[100px]">
+                                <span className="text-sm text-gray-400 uppercase tracking-widest block mb-1">Score</span>
+                                <span className="text-3xl font-mono">{result.score || (leaderboard.find(p => p.name === name)?.score) || 0}</span>
+                            </div>
+                            <div className="bg-white/10 p-4 rounded-xl inline-block mb-4 min-w-[100px]">
+                                <span className="text-sm text-gray-400 uppercase tracking-widest block mb-1">Rank</span>
+                                <span className="text-3xl font-mono">
+                                    #{leaderboard.findIndex(p => p.name === name) + 1}
+                                </span>
+                            </div>
                         </div>
+
                         {result.explanation && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}

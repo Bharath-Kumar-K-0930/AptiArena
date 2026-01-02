@@ -67,7 +67,13 @@ export const setupSocket = (io: Server) => {
                         return;
                     }
 
-                    session.participants.push({ socketId: socket.id, name, score: 0, lastAnsweredQuestionIndex: -1 });
+                    session.participants.push({
+                        socketId: socket.id,
+                        name,
+                        score: 0,
+                        streak: 0,
+                        lastAnsweredQuestionIndex: -1
+                    });
                     await session.save();
 
                     socket.join(pin);
@@ -182,19 +188,22 @@ export const setupSocket = (io: Server) => {
 
                 const currentQ = quiz.questions[session.currentQuestionIndex];
 
-                // Calculate stats
-                const stats = {
-                    0: 0, 1: 0, 2: 0, 3: 0,
-                    correctIndex: currentQ.options.findIndex(o => o.isCorrect)
-                };
+                const correctIndex = currentQ.options.findIndex(o => o.isCorrect);
 
-                // In a real app, we'd query the DB for actual counts if we saved individual answers
-                // For now, we can approximate or use the `answer_result` logic to track live counts in memory if we wanted.
-                // But simplified: Just send the correct index so clients can show it.
+                // Calculate leaderboard
+                const leaderboard = session.participants
+                    .sort((a, b) => b.score - a.score)
+                    .map(p => ({
+                        name: p.name,
+                        score: p.score,
+                        streak: p.streak,
+                        socketId: p.socketId
+                    }));
 
                 io.to(pin).emit('answer_revealed', {
-                    correctIndex: stats.correctIndex,
-                    explanation: currentQ.explanation
+                    correctIndex,
+                    explanation: currentQ.explanation,
+                    leaderboard
                 });
 
             } catch (error) {

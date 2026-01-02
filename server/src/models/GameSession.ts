@@ -7,6 +7,7 @@ export interface IGameSession extends Document {
         socketId: string;
         name: string;
         score: number;
+        streak: number;
         lastAnsweredQuestionIndex: number;
     }[];
     status: 'waiting' | 'live' | 'finished';

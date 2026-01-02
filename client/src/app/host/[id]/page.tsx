@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper } from "lucide-react";
+import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 // Assuming we don't have react-confetti installed, I'll use a simple embedded component or just CSS animations for now.
@@ -57,20 +57,38 @@ export default function HostGamePage() {
         if (!gameMode || initialized.current) return;
         initialized.current = true;
 
+        console.log("Connecting to socket...");
         const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
         setSocket(newSocket);
 
-        // ... (connection handlers same as before)
         newSocket.on("connect", () => {
+            console.log("Socket connected, creating game...", { quizId: id, gameMode });
             setConnectionStatus("Connected to Server");
             const user = JSON.parse(localStorage.getItem("user") || "{}");
-            const hostId = user.id || user._id;
+            const hostId = user.id || user._id; // Handle both id formats
+
+            if (!hostId) {
+                toast.error("User ID not found. Please login again.");
+                return;
+            }
+
             newSocket.emit("create_game", { quizId: id, hostId, gameMode });
         });
 
-        // ... (error handlers same as before)
+        newSocket.on("connect_error", (err) => {
+            console.error("Socket connection error:", err);
+            toast.error("Connection failed. Retrying...");
+            setConnectionStatus("Connection Error");
+        });
+
+        newSocket.on("error", (msg) => {
+            console.error("Socket error:", msg);
+            toast.error(msg);
+            setStatus("waiting"); // Fallback to avoid sticking on loading if possible, or handle specific errors
+        });
 
         newSocket.on("game_created", ({ pin }) => {
+            console.log("Game created:", pin);
             setPin(pin);
             setStatus("waiting");
             toast.success("Game Session Created!");
@@ -86,24 +104,26 @@ export default function HostGamePage() {
             setCurrentQuestion(question);
             setQuestionIndex(index);
             setTotalQuestions(total);
-            setAnsweredCount(0); // Reset for new question
+            setAnsweredCount(0);
             setLastAnsweredPlayer(null);
             setShowAnswer(false);
-            setShowLeaderboard(false); // Hide leaderboard when new question starts
+            setShowLeaderboard(false);
         });
 
         newSocket.on("player_answered", ({ name, count, total }) => {
             setAnsweredCount(count);
             setLastAnsweredPlayer(name);
-            // Optional: toast.success(`${name} answered!`);
+        });
+
+        newSocket.on("leaderboard_update", ({ leaderboard }) => {
+            setLeaderboard(leaderboard);
+            setShowLeaderboard(true);
         });
 
         newSocket.on("game_over", ({ leaderboard }) => {
             setStatus("finished");
             setLeaderboard(leaderboard);
         });
-
-        // Handling Socket.io auto-reconnect behavior if needed
 
         return () => {
             newSocket.disconnect();
@@ -229,25 +249,59 @@ export default function HostGamePage() {
                             <div className="flex justify-center gap-4 mt-12">
                                 {!showAnswer && <Button size="lg" variant="outline" className="text-xl px-8 py-6 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10" onClick={() => setShowAnswer(true)}>Eye Reveal Answer</Button>}
                                 {showAnswer && (
-                                    <Button size="lg" className="text-xl px-12 py-6 bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-900/20"
-                                        onClick={() => {
-                                            // TODO: Request leaderboard from server before showing it? 
-                                            // Actually server sends 'new_question' or 'game_over'. To get intermediate status, we might need a socket event. 
-                                            // Or we just proceed to next question if we don't have explicit round leaderboard data in this minimal v1.
-                                            // Wait, user asked for "live leader bord ... after each question".
-                                            // Since I didn't add a 'get_leaderboard' event in socketService yet, I'll just skip to next question for now or mock it if data isn't there.
-                                            // BUT, `game_over` sends leaderboard. I should probably refactor socket to send leaderboard on `answer_result` broadcast or add a specific event.
-                                            // For now, let's just go next question to follow strict flow, or improve socketService next.
-                                            nextQuestion();
-                                        }}>
-                                        Next Question <ArrowRight className="ml-2 h-6 w-6" />
-                                    </Button>
+                                    <>
+                                        <Button size="lg" className="text-xl px-8 py-6 bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-900/20"
+                                            onClick={() => {
+                                                if (socket && pin) {
+                                                    socket.emit("show_leaderboard", { pin });
+                                                }
+                                            }}>
+                                            Show Leaderboard <Trophy className="ml-2 h-6 w-6" />
+                                        </Button>
+                                    </>
                                 )}
                             </div>
                         </>
                     ) : (
-                        // Placeholder for intermediate leaderboard if we had the data
-                        <div>Intermediate Leaderboard</div>
+                        // Intermediate Leaderboard View
+                        <div className="w-full max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-10">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                                    <Trophy className="text-yellow-500 h-8 w-8" /> Leaderboard
+                                </h2>
+                                <Button size="lg" className="text-lg bg-teal-600 hover:bg-teal-500 text-white" onClick={nextQuestion}>
+                                    Next Question <ArrowRight className="ml-2 h-5 w-5" />
+                                </Button>
+                            </div>
+
+                            <Card className="bg-gray-900 border-gray-800 shadow-2xl">
+                                <CardContent className="p-0">
+                                    {leaderboard.length === 0 ? (
+                                        <div className="p-8 text-center text-gray-500">No data available yet...</div>
+                                    ) : (
+                                        <div className="divide-y divide-gray-800">
+                                            {leaderboard.slice(0, 5).map((p, i) => (
+                                                <div key={i} className={`flex justify-between items-center p-6 ${i === 0 ? 'bg-yellow-900/10' : ''}`}>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold 
+                                                            ${i === 0 ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' :
+                                                                i === 1 ? 'bg-gray-400 text-black' :
+                                                                    i === 2 ? 'bg-orange-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
+                                                            {i + 1}
+                                                        </div>
+                                                        <div>
+                                                            <div className="text-xl font-bold text-white">{p.name}</div>
+                                                            {p.streak > 2 && <div className="text-xs text-orange-400 font-bold flex items-center gap-1"><Zap className="h-3 w-3" /> {p.streak} Streak</div>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-2xl font-mono text-teal-400 font-bold">{p.score}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </div>
                     )}
                 </div>
             )}
