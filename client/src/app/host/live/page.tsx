@@ -384,8 +384,14 @@ function CheckCircle(props: any) {
     )
 }
 
+import { Suspense } from "react";
+
+// ... existing code ...
+
 export default function HostLivePage() {
     return (
-        <HostLiveContent />
+        <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-teal-400">Loading Host...</div>}>
+            <HostLiveContent />
+        </Suspense>
     )
 }
