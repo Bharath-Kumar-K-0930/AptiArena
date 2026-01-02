@@ -74,7 +74,7 @@ export default function FeaturesPage() {
             {/* Detailed Sections */}
             <section className="py-24 container mx-auto px-4 space-y-32">
                 <div className="flex flex-col md:flex-row items-center gap-12">
-                    <div className="flex-1 space-y-6">
+                    <div className="flex-1 space-y-6 flex flex-col justify-center">
                         <h2 className="text-3xl font-bold text-white">Hosting made simple</h2>
                         <ul className="space-y-4">
                             <li className="flex items-center gap-4 text-lg text-gray-300">
@@ -89,7 +89,7 @@ export default function FeaturesPage() {
                         </ul>
                     </div>
                     {/* Interactive Mock Visual */}
-                    <div className="flex-1 h-[400px] relative flex items-center justify-center">
+                    <div className="flex-1 min-h-[500px] relative flex items-center justify-center">
                         {/* Blob Background */}
                         <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-purple-600/20 rounded-full blur-3xl opacity-50 animate-pulse" />
 
