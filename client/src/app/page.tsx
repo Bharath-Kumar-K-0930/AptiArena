@@ -236,21 +236,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-background py-12 border-t border-border text-muted-foreground text-sm">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex justify-center items-center gap-2 mb-8">
-            <BrainCircuit className="h-6 w-6 text-teal" />
-            <span className="text-lg font-bold text-white">AptiArena</span>
-          </div>
-          <div className="flex justify-center gap-8 mb-8">
-            <Link href="#" className="hover:text-white transition">Privacy</Link>
-            <Link href="#" className="hover:text-white transition">Terms</Link>
-            <Link href="#" className="hover:text-white transition">Contact</Link>
-          </div>
-          <p>© 2025 AptiArena. All rights reserved.</p>
-        </div>
-      </footer>
+
 
     </div>
   );
