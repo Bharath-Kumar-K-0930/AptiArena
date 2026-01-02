@@ -339,6 +339,19 @@ Reason: Explanation here...`}
                                                     </div>
                                                 ))}
                                             </div>
+                                            <div className="mt-4 pt-4 border-t border-gray-800">
+                                                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 block">Reason for Answer</label>
+                                                <Textarea
+                                                    value={q.explanation || ""}
+                                                    onChange={(e) => {
+                                                        const updated = [...questions];
+                                                        updated[i].explanation = e.target.value;
+                                                        setQuestions(updated);
+                                                    }}
+                                                    className="bg-gray-800/50 border-gray-700 min-h-[60px]"
+                                                    placeholder="Add an explanation..."
+                                                />
+                                            </div>
                                         </CardContent>
                                     </Card>
                                 ))}

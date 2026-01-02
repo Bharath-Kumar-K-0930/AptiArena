@@ -289,6 +289,16 @@ export default function EditQuizPage() {
                                                 </div>
                                             ))}
                                         </div>
+
+                                        <div className="mt-4 pt-4 border-t border-gray-800">
+                                            <Label className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-2 block">Reason for Correct Answer (Optional)</Label>
+                                            <Textarea
+                                                value={q.explanation || ""}
+                                                onChange={(e) => handleQuestionChange(qIndex, 'explanation', e.target.value)}
+                                                className="bg-gray-800 border-gray-700 placeholder:text-gray-600"
+                                                placeholder="Explain why this answer is correct..."
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </CardContent>
