@@ -88,7 +88,7 @@ export default function Sidebar() {
     return (
         <>
             {/* Mobile Toggle Button */}
-            <div className="md:hidden fixed bottom-6 right-6 z-50">
+            <div className="md:hidden fixed top-20 left-4 z-50">
                 <Button
                     onClick={() => setIsMobileOpen(!isMobileOpen)}
                     className="rounded-full h-14 w-14 shadow-2xl bg-teal-500 hover:bg-teal-600 text-white p-0 flex items-center justify-center"
