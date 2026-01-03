@@ -182,175 +182,409 @@ export default function HostGamePage() {
     // ... (Waiting status same as before, simplified for this replace)
 
     return (
-        <div className="container mx-auto p-6 flex flex-col items-center justify-center min-h-[80vh] text-center space-y-8">
+        <div className="min-h-screen bg-slate-950 relative overflow-hidden flex flex-col font-sans">
+            {/* Background Layer */}
+            <div className="absolute inset-0 z-0">
+                <img
+                    src="/images/quiz-bg-generated.png"
+                    alt="Background"
+                    className="w-full h-full object-cover opacity-40"
+                />
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/70 to-slate-950/90" />
+            </div>
 
-            {/* Waiting State (Abbreviated) */}
-            {status === "waiting" && (
-                <>
-                    {/* ... existing waiting UI ... */}
-                    <div className="space-y-4">
-                        <h1 className="text-4xl font-bold text-white">Join Code</h1>
-                        <div className="text-7xl font-mono font-bold text-blue-500 tracking-widest">{pin}</div>
-                        <p className="text-gray-400">Go to aptiarena.com/play and enter this code</p>
-                        <div className="inline-block px-4 py-1 rounded-full bg-gray-800 text-sm text-gray-300 uppercase tracking-wide border border-gray-700">Mode: {gameMode}</div>
-                    </div>
-                    <Card className="w-full max-w-3xl bg-gray-900 border-gray-800">
-                        <CardHeader><CardTitle className="flex items-center justify-center gap-2"><Users className="text-purple-500" /> Players ({players.length})</CardTitle></CardHeader>
-                        <CardContent>
-                            {players.length === 0 ? <div className="h-32 flex items-center justify-center text-gray-500 italic">Waiting for players to join...</div> :
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">{players.map((p, i) => <div key={i} className="bg-gray-800 p-3 rounded text-white animate-in zoom-in">{p}</div>)}</div>}
-                        </CardContent>
-                    </Card>
-                    <Button size="lg" className="text-xl px-12 py-6 bg-green-600 hover:bg-green-700" onClick={startGame} disabled={players.length === 0 && gameMode !== 'slideshow'}><Play className="mr-2 h-6 w-6" /> {gameMode === 'slideshow' ? 'Start Presentation' : 'Start Game'}</Button>
-                </>
-            )}
+            {/* Content Layer */}
+            <div className="relative z-10 container mx-auto p-4 md:p-8 flex-1 flex flex-col items-center justify-center">
 
-            {/* Live State (Enhanced) */}
-            {status === "live" && currentQuestion && (
-                <div className="w-full max-w-5xl space-y-8 min-h-[60vh] flex flex-col justify-center relative">
-
-                    {/* Live Stats Bar */}
-                    <div className="absolute top-0 right-0 p-4 bg-gray-900/80 rounded-xl border border-gray-800 backdrop-blur-sm">
-                        <div className="text-sm text-gray-400 mb-1">Answers</div>
-                        <div className="text-2xl font-bold text-white flex items-baseline gap-1">
-                            <span className="text-green-500">{answeredCount}</span>
-                            <span className="text-gray-600">/</span>
-                            <span>{players.length}</span>
+                {/* Waiting State */}
+                {status === "waiting" && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-full max-w-4xl flex flex-col items-center space-y-8 text-center"
+                    >
+                        <div className="space-y-6 bg-slate-900/50 p-8 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
+                            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                                Join Code
+                            </h1>
+                            <div className="text-6xl md:text-8xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 tracking-widest drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                                {pin}
+                            </div>
+                            <div className="space-y-2">
+                                <p className="text-xl text-gray-300">Join at <span className="font-bold text-white">aptiarena.com/play</span></p>
+                                <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-sm text-cyan-200 font-medium uppercase tracking-wider border border-white/10">
+                                    Mode: {gameMode}
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    {!showLeaderboard ? (
-                        <>
-                            <div className="flex justify-between items-center text-gray-400 border-b border-gray-800 pb-4">
-                                <span className="text-lg">Question {questionIndex + 1} / {totalQuestions}</span>
-                                {gameMode === 'slideshow' && <span className="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-sm border border-purple-500/30">Presentation Mode</span>}
-                            </div>
-
-                            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">{currentQuestion.text}</h1>
-
-                            {currentQuestion.image && (
-                                <div className="flex justify-center my-6"><img src={currentQuestion.image} alt="Question" className="max-h-[40vh] w-auto object-contain rounded-xl border-2 border-gray-700 shadow-2xl" /></div>
-                            )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                                {currentQuestion.options.map((opt: any, i: number) => {
-                                    let cardClass = "p-8 rounded-xl text-2xl font-semibold transition-all duration-300 border-2 ";
-                                    if (showAnswer) {
-                                        if (opt.isCorrect) cardClass += "bg-green-600/20 border-green-500 text-green-100 shadow-[0_0_30px_rgba(34,197,94,0.3)] scale-105";
-                                        else cardClass += "bg-gray-800/50 border-transparent text-gray-500 opacity-50";
-                                    } else {
-                                        const colors = ['bg-red-500', 'bg-blue-500', 'bg-yellow-500', 'bg-green-500'];
-                                        cardClass += `${colors[i % 4]} border-transparent text-white`;
-                                    }
-                                    return <div key={i} className={cardClass}><div className="flex items-center gap-4"><span className="opacity-70 text-lg uppercase tracking-wider">{String.fromCharCode(65 + i)}</span><span>{opt.text}</span></div></div>;
-                                })}
-                            </div>
-
-                            <div className="flex justify-center gap-4 mt-12">
-                                {!showAnswer && <Button size="lg" variant="outline" className="text-xl px-8 py-6 border-yellow-500/50 text-yellow-500 hover:bg-yellow-500/10" onClick={() => setShowAnswer(true)}>Eye Reveal Answer</Button>}
-                                {showAnswer && (
-                                    <>
-                                        <Button size="lg" className="text-xl px-8 py-6 bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-900/20"
-                                            onClick={() => {
-                                                if (socket && pin) {
-                                                    socket.emit("show_leaderboard", { pin });
-                                                }
-                                            }}>
-                                            Show Leaderboard <Trophy className="ml-2 h-6 w-6" />
-                                        </Button>
-                                    </>
+                        <Card className="w-full bg-slate-900/60 border-white/10 backdrop-blur-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center justify-center gap-3 text-2xl text-white">
+                                    <Users className="text-cyan-400 w-8 h-8" />
+                                    Players Connected ({players.length})
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {players.length === 0 ? (
+                                    <div className="h-40 flex flex-col items-center justify-center text-gray-500 italic gap-2">
+                                        <div className="w-3 h-3 bg-gray-600 rounded-full animate-ping" />
+                                        Waiting for gladiators...
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                        {players.map((p, i) => (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ opacity: 0, scale: 0.5 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                className="bg-white/10 p-3 rounded-lg text-white font-medium text-center border border-white/5 hover:bg-white/20 transition-colors"
+                                            >
+                                                {p}
+                                            </motion.div>
+                                        ))}
+                                    </div>
                                 )}
-                            </div>
-                        </>
-                    ) : (
-                        // Intermediate Leaderboard View
-                        <div className="w-full max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-10">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-                                    <Trophy className="text-yellow-500 h-8 w-8" /> Leaderboard
-                                </h2>
-                                <Button size="lg" className="text-lg bg-teal-600 hover:bg-teal-500 text-white" onClick={nextQuestion}>
-                                    Next Question <ArrowRight className="ml-2 h-5 w-5" />
-                                </Button>
-                            </div>
+                            </CardContent>
+                        </Card>
 
-                            <Card className="bg-gray-900 border-gray-800 shadow-2xl">
-                                <CardContent className="p-0">
-                                    {leaderboard.length === 0 ? (
-                                        <div className="p-8 text-center text-gray-500">No data available yet...</div>
-                                    ) : (
-                                        <div className="divide-y divide-gray-800">
-                                            {leaderboard.slice(0, 5).map((p, i) => (
-                                                <div key={i} className={`flex justify-between items-center p-6 ${i === 0 ? 'bg-yellow-900/10' : ''}`}>
-                                                    <div className="flex items-center gap-6">
-                                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold 
-                                                            ${i === 0 ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' :
-                                                                i === 1 ? 'bg-gray-400 text-black' :
-                                                                    i === 2 ? 'bg-orange-600 text-white' : 'bg-gray-800 text-gray-400'}`}>
-                                                            {i + 1}
+                        <Button
+                            size="lg"
+                            className="text-2xl px-16 py-8 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.4)] transition-all hover:scale-105"
+                            onClick={startGame}
+                            disabled={players.length === 0 && gameMode !== 'slideshow'}
+                        >
+                            <Play className="mr-3 h-8 w-8 fill-current" />
+                            {gameMode === 'slideshow' ? 'Start Presentation' : 'Start Competition'}
+                        </Button>
+                    </motion.div>
+                )}
+
+                {/* Live State */}
+                {status === "live" && currentQuestion && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="w-full max-w-6xl space-y-8 min-h-[70vh] flex flex-col relative"
+                    >
+                        {/* Live Stats Bar */}
+                        <div className="absolute top-0 right-0 p-4 bg-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg z-20">
+                            <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-bold">Responded</div>
+                            <div className="text-3xl font-black text-white flex items-baseline gap-1">
+                                <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">{answeredCount}</span>
+                                <span className="text-gray-600 text-lg">/</span>
+                                <span className="text-gray-400 text-lg">{players.length}</span>
+                            </div>
+                        </div>
+
+                        {!showLeaderboard ? (
+                            <div className="flex-1 flex flex-col justify-center h-full max-h-[85vh]">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center text-gray-400 border-b border-white/10 pb-4 mb-4 gap-4 shrink-0">
+                                    <span className="text-lg font-medium bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">
+                                        Question <span className="text-white font-bold">{questionIndex + 1}</span> of {totalQuestions}
+                                    </span>
+                                    {gameMode === 'slideshow' && <span className="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-xs border border-purple-500/30">Presentation Mode</span>}
+                                </div>
+
+                                <h1 className="text-2xl md:text-4xl font-black text-white leading-tight drop-shadow-lg mb-6 max-h-[30vh] flex items-center justify-center">
+                                    {currentQuestion.text}
+                                </h1>
+
+                                {currentQuestion.image && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="flex justify-center mb-6 shrink-0"
+                                    >
+                                        <img src={currentQuestion.image} alt="Question" className="max-h-[35vh] w-auto object-contain rounded-xl border-4 border-white/20 shadow-2xl bg-black/50" />
+                                    </motion.div>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full shrink-0">
+                                    {currentQuestion.options.map((opt: any, i: number) => {
+                                        // "Full Color" - Solid backgrounds with slight gradient
+                                        const baseColors = [
+                                            'bg-gradient-to-br from-red-500 to-red-700 border-red-900',
+                                            'bg-gradient-to-br from-blue-500 to-blue-700 border-blue-900',
+                                            'bg-gradient-to-br from-yellow-500 to-amber-600 border-yellow-800',
+                                            'bg-gradient-to-br from-green-500 to-green-700 border-green-900'
+                                        ];
+
+                                        let cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 shadow-xl flex items-center relative overflow-hidden group ";
+
+                                        if (showAnswer) {
+                                            if (opt.isCorrect) {
+                                                // Correct: Light transformation (Glowing Green)
+                                                cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 border-green-500 shadow-[0_0_50px_rgba(74,222,128,0.8)] flex items-center relative overflow-hidden group bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 text-white scale-105 z-10 ring-4 ring-green-300/50";
+                                            } else {
+                                                // Incorrect: Fade out
+                                                cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 shadow-none flex items-center relative overflow-hidden group bg-slate-800/80 border-transparent text-gray-500 opacity-30 grayscale blur-[1px]";
+                                            }
+                                        } else {
+                                            // Default: Full Color
+                                            cardClass += `${baseColors[i % 4]} text-white hover:brightness-110 hover:scale-[1.01] active:scale-[0.98] cursor-default`;
+                                        }
+
+                                        return (
+                                            <motion.div
+                                                key={i}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: i * 0.05 }}
+                                                className={cardClass}
+                                            >
+                                                {/* Correct Answer Shine Effect */}
+                                                {showAnswer && opt.isCorrect && (
+                                                    <motion.div
+                                                        initial={{ x: '-100%', opacity: 0 }}
+                                                        animate={{ x: '200%', opacity: 0.5 }}
+                                                        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                                                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent transform skew-x-12"
+                                                        style={{ width: '50%' }}
+                                                    />
+                                                )}
+
+                                                <div className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl font-black bg-black/20 text-white/90 mr-4 shrink-0 relative z-10">
+                                                    {String.fromCharCode(65 + i)}
+                                                </div>
+                                                <span className="leading-snug drop-shadow-md relative z-10">{opt.text}</span>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+
+                                <div className="flex justify-center gap-4 mt-8 shrink-0">
+                                    {!showAnswer && (
+                                        <Button
+                                            size="lg"
+                                            className="text-lg px-8 py-6 bg-white text-black hover:bg-gray-200 font-bold rounded-full transition-all shadow-lg hover:scale-105"
+                                            onClick={() => setShowAnswer(true)}
+                                        >
+                                            <Star className="mr-2 h-5 w-5 text-yellow-500 fill-current" /> Reveal Answer
+                                        </Button>
+                                    )}
+                                    {showAnswer && (
+                                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+                                            <Button
+                                                size="lg"
+                                                className="text-lg px-8 py-6 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full shadow-[0_0_30px_rgba(147,51,234,0.6)] hover:scale-105 transition-all"
+                                                onClick={() => {
+                                                    if (socket && pin) {
+                                                        socket.emit("show_leaderboard", { pin });
+                                                    }
+                                                }}
+                                            >
+                                                Show Leaderboard <Trophy className="ml-2 h-6 w-6 text-yellow-300" />
+                                            </Button>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            // Intermediate Leaderboard View
+                            <motion.div
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="w-full max-w-5xl mx-auto flex-1 flex flex-col"
+                            >
+                                <div className="flex justify-between items-center mb-6 bg-slate-900/60 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                                    <h2 className="text-3xl font-black text-white flex items-center gap-4">
+                                        <Trophy className="text-yellow-500 h-8 w-8 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]" />
+                                        Top Players
+                                    </h2>
+                                    <Button
+                                        size="lg"
+                                        className="text-lg px-6 py-5 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl shadow-lg"
+                                        onClick={nextQuestion}
+                                    >
+                                        Next <ArrowRight className="ml-2 h-5 w-5" />
+                                    </Button>
+                                </div>
+
+                                <Card className="bg-slate-900/40 border-white/10 backdrop-blur-sm shadow-2xl flex-1 overflow-hidden">
+                                    <CardContent className="p-0">
+                                        {leaderboard.length === 0 ? (
+                                            <div className="p-12 text-center text-gray-500 text-xl">No scores to verify yet...</div>
+                                        ) : (
+                                            <div className="divide-y divide-white/5">
+                                                {leaderboard.slice(0, 5).map((p, i) => (
+                                                    <motion.div
+                                                        key={i}
+                                                        initial={{ opacity: 0, x: -50 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: i * 0.1 }}
+                                                        className={`flex justify-between items-center p-5 md:p-6 transition-colors hover:bg-white/5 
+                                                            ${i === 0 ? 'bg-gradient-to-r from-yellow-500/20 to-transparent' : ''}`}
+                                                    >
+                                                        <div className="flex items-center gap-6 md:gap-8">
+                                                            <div className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-xl md:text-2xl font-black shadow-lg ring-4 
+                                                                ${i === 0 ? 'bg-yellow-400 text-black ring-yellow-500/30' :
+                                                                    i === 1 ? 'bg-gray-300 text-black ring-gray-400/30' :
+                                                                        i === 2 ? 'bg-orange-400 text-white ring-orange-500/30' : 'bg-slate-700 text-gray-400 ring-transparent'}`}>
+                                                                {i + 1}
+                                                            </div>
+                                                            <div>
+                                                                <div className="text-xl md:text-2xl font-bold text-white mb-1">{p.name}</div>
+                                                                {p.streak > 2 && (
+                                                                    <div className="text-orange-400 text-sm font-bold flex items-center gap-1.5 animate-pulse">
+                                                                        <Zap className="h-3 w-3 fill-current" /> {p.streak} Streak 🔥
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <div className="text-xl font-bold text-white">{p.name}</div>
-                                                            {p.streak > 2 && <div className="text-xs text-orange-400 font-bold flex items-center gap-1"><Zap className="h-3 w-3" /> {p.streak} Streak</div>}
+                                                        <div className="text-2xl md:text-3xl font-mono text-cyan-400 font-black tracking-tight">{p.score}</div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        )}
+                    </motion.div>
+                )}
+
+                {/* Finished State - Split Layout */}
+                {status === "finished" && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="w-full max-w-7xl relative z-20 flex flex-col h-full justify-center"
+                    >
+                        {/* Confetti */}
+                        <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+                            {[...Array(50)].map((_, i) => (
+                                <div key={i} className="absolute animate-fall" style={{
+                                    left: `${Math.random() * 100}%`,
+                                    top: `-${Math.random() * 20}%`,
+                                    animationDuration: `${2 + Math.random() * 3}s`,
+                                    backgroundColor: ['#fbbf24', '#f87171', '#60a5fa', '#4ade80'][Math.floor(Math.random() * 4)],
+                                    width: '12px', height: '12px'
+                                }} />
+                            ))}
+                        </div>
+
+                        <div className="text-center mb-8">
+                            <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 drop-shadow-[0_0_30px_rgba(234,179,8,0.5)]">
+                                Game Over!
+                            </h1>
+                        </div>
+
+                        {leaderboard.length <= 3 ? (
+                            // Centered Layout for <= 3 Players
+                            <div className="flex flex-col items-center justify-center gap-8">
+                                <div className="flex items-end justify-center gap-4 md:gap-8">
+                                    {/* Silver - 2nd */}
+                                    {leaderboard[1] && (
+                                        <div className="flex flex-col items-center animate-in slide-in-from-bottom-10 fade-in duration-700 delay-300">
+                                            <div className="text-2xl font-bold text-gray-300 mb-2">{leaderboard[1].name}</div>
+                                            <div className="w-24 h-32 md:w-32 md:h-40 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-lg shadow-lg flex items-start justify-center pt-4 text-4xl font-black text-gray-600 border-t-4 border-gray-100">
+                                                2
+                                            </div>
+                                            <div className="bg-gray-800 px-4 py-1 rounded-full mt-2 text-gray-400 font-mono font-bold">{leaderboard[1].score} pts</div>
+                                        </div>
+                                    )}
+
+                                    {/* Gold - 1st */}
+                                    {leaderboard[0] && (
+                                        <div className="flex flex-col items-center z-10 animate-in slide-in-from-bottom-20 fade-in duration-700">
+                                            <Trophy className="h-16 w-16 text-yellow-400 mb-2 animate-bounce" />
+                                            <div className="text-4xl font-bold text-yellow-300 mb-4">{leaderboard[0].name}</div>
+                                            <div className="w-32 h-40 md:w-40 md:h-56 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-t-lg shadow-2xl flex items-start justify-center pt-6 text-6xl font-black text-yellow-700 border-t-4 border-yellow-100 relative">
+                                                1
+                                                <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                                            </div>
+                                            <div className="bg-yellow-900/80 px-6 py-2 rounded-full mt-4 text-yellow-300 font-mono font-bold text-xl border border-yellow-500/50">{leaderboard[0].score} pts</div>
+                                        </div>
+                                    )}
+
+                                    {/* Bronze - 3rd */}
+                                    {leaderboard[2] && (
+                                        <div className="flex flex-col items-center animate-in slide-in-from-bottom-10 fade-in duration-700 delay-500">
+                                            <div className="text-2xl font-bold text-orange-300 mb-2">{leaderboard[2].name}</div>
+                                            <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-lg shadow-lg flex items-start justify-center pt-4 text-4xl font-black text-orange-800 border-t-4 border-orange-200">
+                                                3
+                                            </div>
+                                            <div className="bg-orange-900/50 px-4 py-1 rounded-full mt-2 text-orange-400 font-mono font-bold">{leaderboard[2].score} pts</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
+                            // Split Layout for > 3 Players
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                                {/* Left Side: The Podium */}
+                                <div className="flex flex-col gap-6 justify-center">
+                                    <div className="bg-slate-900/50 p-6 rounded-3xl border border-white/10 relative overflow-hidden">
+                                        {/* 1st Place Card */}
+                                        <div className="flex items-center gap-6 p-6 mb-4 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-2xl shadow-lg transform hover:scale-105 transition-transform border-4 border-yellow-300">
+                                            <Trophy className="h-16 w-16 text-yellow-100 drop-shadow-md" />
+                                            <div>
+                                                <div className="text-yellow-100 font-bold uppercase tracking-wider text-sm">Winner</div>
+                                                <div className="text-4xl font-black text-white">{leaderboard[0]?.name}</div>
+                                                <div className="text-yellow-100 font-mono font-bold text-xl">{leaderboard[0]?.score} pts</div>
+                                            </div>
+                                        </div>
+
+                                        {/* 2nd Place Card */}
+                                        <div className="flex items-center gap-6 p-4 mb-4 bg-gradient-to-r from-gray-300 to-gray-400 rounded-2xl shadow-md border-4 border-gray-100 ml-8">
+                                            <div className="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center font-black text-2xl">2</div>
+                                            <div>
+                                                <div className="text-gray-100 font-bold uppercase tracking-wider text-xs">Runner Up</div>
+                                                <div className="text-2xl font-black text-white">{leaderboard[1]?.name}</div>
+                                                <div className="text-gray-100 font-mono font-bold">{leaderboard[1]?.score} pts</div>
+                                            </div>
+                                        </div>
+
+                                        {/* 3rd Place Card */}
+                                        <div className="flex items-center gap-6 p-4 bg-gradient-to-r from-orange-400 to-orange-500 rounded-2xl shadow-md border-4 border-orange-200 ml-16">
+                                            <div className="w-12 h-12 rounded-full bg-white/20 text-white flex items-center justify-center font-black text-2xl">3</div>
+                                            <div>
+                                                <div className="text-orange-100 font-bold uppercase tracking-wider text-xs">Third Place</div>
+                                                <div className="text-2xl font-black text-white">{leaderboard[2]?.name}</div>
+                                                <div className="text-orange-100 font-mono font-bold">{leaderboard[2]?.score} pts</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Side: The Rest */}
+                                <Card className="bg-slate-900/60 border-white/10 backdrop-blur-md h-[50vh] overflow-hidden flex flex-col">
+                                    <CardHeader className="bg-white/5 py-4 shrink-0">
+                                        <CardTitle className="text-gray-400 text-sm uppercase tracking-widest flex items-center gap-2">
+                                            <Users className="w-4 h-4" /> Honorable Mentions
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-0 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent flex-1">
+                                        <div className="divide-y divide-white/5">
+                                            {leaderboard.slice(3).map((p, i) => (
+                                                <div key={i + 3} className="flex justify-between items-center p-4 hover:bg-white/5 transition-colors">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-8 h-8 rounded-lg bg-slate-800 text-gray-400 flex items-center justify-center font-bold text-sm">
+                                                            {i + 4}
                                                         </div>
+                                                        <span className="text-gray-300 text-lg font-medium">{p.name}</span>
                                                     </div>
-                                                    <div className="text-2xl font-mono text-teal-400 font-bold">{p.score}</div>
+                                                    <span className="font-mono text-cyan-500 font-bold">{p.score}</span>
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Finished State (Celebration) */}
-            {status === "finished" && (
-                <div className="space-y-8 animate-in zoom-in relative">
-                    {/* Confetti Effect (CSS only for now) */}
-                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                        {[...Array(20)].map((_, i) => (
-                            <div key={i} className="absolute animate-fall" style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `-${Math.random() * 20}%`,
-                                animationDelay: `${Math.random() * 5}s`,
-                                backgroundColor: ['#ff0', '#f00', '#0f0', '#00f'][Math.floor(Math.random() * 4)],
-                                width: '10px', height: '10px'
-                            }} />
-                        ))}
-                    </div>
-
-                    <Trophy className="h-24 w-24 text-yellow-500 mx-auto animate-bounce" />
-                    <h1 className="text-5xl font-black text-white bg-clip-text text-transparent bg-gradient-to-br from-yellow-300 via-orange-500 to-red-500">
-                        Winner!
-                    </h1>
-                    {leaderboard.length > 0 && (
-                        <div className="text-2xl text-yellow-300 font-medium mb-8">
-                            {getCheerMessage(leaderboard[0].name)}
-                        </div>
-                    )}
-
-                    <Card className="w-full max-w-lg bg-gray-900 border-gray-800 mx-auto shadow-2xl shadow-yellow-500/10">
-                        <CardHeader><CardTitle className="text-2xl">Final Leaderboard</CardTitle></CardHeader>
-                        <CardContent className="space-y-3">
-                            {leaderboard.map((p, i) => (
-                                <div key={i} className={`flex justify-between items-center p-4 rounded-lg transition-all hover:scale-105 ${i === 0 ? 'bg-gradient-to-r from-yellow-600/20 to-yellow-900/20 border border-yellow-500/50' : 'bg-gray-800'}`}>
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${i === 0 ? 'bg-yellow-500 text-black' : i === 1 ? 'bg-gray-400 text-black' : i === 2 ? 'bg-orange-600 text-white' : 'bg-gray-700 text-gray-400'}`}>
-                                            {i + 1}
-                                        </div>
-                                        <span className="text-white text-lg font-medium">{p.name}</span>
-                                    </div>
-                                    <span className="font-mono text-blue-400 font-bold">{p.score} pts</span>
-                                </div>
-                            ))}
-                        </CardContent>
-                        <CardFooter><Button variant="outline" className="w-full" onClick={() => window.location.href = '/dashboard'}>Return to Dashboard</Button></CardFooter>
-                    </Card>
-                </div>
-            )}
+                                    </CardContent>
+                                    <CardFooter className="p-4 bg-white/5 shrink-0">
+                                        <Button
+                                            variant="outline"
+                                            className="w-full border-white/10 text-gray-300 hover:text-white hover:bg-white/10"
+                                            onClick={() => window.location.href = '/dashboard'}
+                                        >
+                                            Return to Dashboard
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            </div>
+                        )}
+                    </motion.div>
+                )}
+            </div>
         </div>
     );
 }

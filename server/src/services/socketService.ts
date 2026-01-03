@@ -52,11 +52,15 @@ export const setupSocket = (io: Server) => {
                     if (session.status === 'live') {
                         const quiz = await Quiz.findById(session.quizId);
                         if (quiz && quiz.questions[session.currentQuestionIndex]) {
-                            socket.emit('new_question', {
-                                question: quiz.questions[session.currentQuestionIndex],
-                                index: session.currentQuestionIndex,
-                                total: quiz.questions.length
-                            });
+                            const question = quiz.questions[session.currentQuestionIndex];
+                            // Sanitize question (remove isCorrect)
+                            const sanitizedQuestion = {
+                                text: question.text,
+                                options: question.options.map((o: any) => ({ text: o.text })),
+                                timeLimit: question.timeLimit,
+                                image: question.image
+                            };
+                            socket.emit('new_question', { question: sanitizedQuestion, index: session.currentQuestionIndex, total: quiz.questions.length });
                         }
                     }
                     console.log(`Player ${name} reconnected to game ${pin}`);
@@ -101,7 +105,18 @@ export const setupSocket = (io: Server) => {
 
                 // Send first question
                 const question = quiz.questions[0];
-                io.to(pin).emit('new_question', { question, index: 0, total: quiz.questions.length });
+
+                // 1. Send full question to Host (Sender)
+                socket.emit('new_question', { question, index: 0, total: quiz.questions.length });
+
+                // 2. Send sanitized question to Players (Everyone else in room)
+                const sanitizedQuestion = {
+                    text: question.text,
+                    options: question.options.map((o: any) => ({ text: o.text })),
+                    timeLimit: question.timeLimit,
+                    image: question.image
+                };
+                socket.to(pin).emit('new_question', { question: sanitizedQuestion, index: 0, total: quiz.questions.length });
 
                 console.log(`Game started: ${pin}`);
             } catch (error) {
@@ -119,7 +134,13 @@ export const setupSocket = (io: Server) => {
 
                 if (index < quiz.questions.length) {
                     const question = quiz.questions[index];
-                    socket.emit('new_question', { question, index, total: quiz.questions.length });
+                    const sanitizedQuestion = {
+                        text: question.text,
+                        options: question.options.map((o: any) => ({ text: o.text })),
+                        timeLimit: question.timeLimit,
+                        image: question.image
+                    };
+                    socket.emit('new_question', { question: sanitizedQuestion, index, total: quiz.questions.length });
                 } else {
                     const participant = session.participants.find(p => p.socketId === socket.id);
                     const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
@@ -189,6 +210,7 @@ export const setupSocket = (io: Server) => {
                 const currentQ = quiz.questions[session.currentQuestionIndex];
 
                 const correctIndex = currentQ.options.findIndex(o => o.isCorrect);
+                const answerText = currentQ.options[correctIndex]?.text;
 
                 // Calculate leaderboard
                 const leaderboard = session.participants
@@ -202,6 +224,7 @@ export const setupSocket = (io: Server) => {
 
                 io.to(pin).emit('answer_revealed', {
                     correctIndex,
+                    answerText,
                     explanation: currentQ.explanation,
                     leaderboard
                 });
@@ -240,7 +263,18 @@ export const setupSocket = (io: Server) => {
                     await session.save();
 
                     const question = quiz.questions[nextIndex];
-                    io.to(pin).emit('new_question', { question, index: nextIndex, total: quiz.questions.length });
+
+                    // 1. Send full question to Host
+                    socket.emit('new_question', { question, index: nextIndex, total: quiz.questions.length });
+
+                    // 2. Send sanitized question to Players
+                    const sanitizedQuestion = {
+                        text: question.text,
+                        options: question.options.map((o: any) => ({ text: o.text })),
+                        timeLimit: question.timeLimit,
+                        image: question.image
+                    };
+                    socket.to(pin).emit('new_question', { question: sanitizedQuestion, index: nextIndex, total: quiz.questions.length });
                 } else {
                     session.status = 'finished';
                     await session.save();
