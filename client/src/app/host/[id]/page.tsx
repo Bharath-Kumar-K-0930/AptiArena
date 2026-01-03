@@ -315,7 +315,7 @@ export default function HostGamePage() {
                                         if (showAnswer) {
                                             if (opt.isCorrect) {
                                                 // Correct: Light transformation (Glowing Green)
-                                                cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 border-green-500 shadow-[0_0_50px_rgba(74,222,128,0.8)] flex items-center relative overflow-hidden group bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 text-white scale-105 z-10 ring-4 ring-green-300/50";
+                                                cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 border-green-500 shadow-[0_0_50px_rgba(75,222,128,0.8)] flex items-center relative overflow-hidden group bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 text-white scale-105 z-10 ring-4 ring-green-300/50";
                                             } else {
                                                 // Incorrect: Fade out
                                                 cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 shadow-none flex items-center relative overflow-hidden group bg-slate-800/80 border-transparent text-gray-500 opacity-30 grayscale blur-[1px]";
