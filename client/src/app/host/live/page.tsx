@@ -107,77 +107,95 @@ function HostLiveContent() {
             <div className="min-h-screen bg-black overflow-hidden flex flex-col items-center justify-center p-4 relative">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/40 via-black to-black" />
 
-                {/* Podium Animation */}
-                <div className="relative z-10 w-full max-w-4xl flex items-end justify-center gap-4 h-[500px] mb-12">
-                    {/* 2nd Place */}
-                    {leaderboard[1] && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "40%", opacity: 1 }}
-                            transition={{ delay: 0.5, duration: 0.8 }}
-                            className="w-1/4 bg-gray-800 rounded-t-lg border-t-4 border-gray-500 relative flex flex-col items-center justify-end p-4 shadow-[0_0_50px_rgba(107,114,128,0.3)]"
-                        >
-                            <div className="absolute -top-16 text-center w-full">
-                                <div className="h-12 w-12 rounded-full bg-gray-500 flex items-center justify-center font-bold text-xl mb-2 mx-auto ring-4 ring-gray-800 text-white">{leaderboard[1].name[0]}</div>
-                                <div className="font-bold text-gray-400 truncate w-full">{leaderboard[1].name}</div>
-                                <div className="text-sm text-gray-500">{leaderboard[1].score} pts</div>
-                            </div>
-                            <div className="text-6xl font-black text-gray-700/50">2</div>
-                        </motion.div>
-                    )}
-
-                    {/* 1st Place */}
-                    {leaderboard[0] && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "60%", opacity: 1 }}
-                            transition={{ duration: 0.8 }}
-                            className="w-1/3 bg-yellow-600 rounded-t-lg border-t-4 border-yellow-300 relative flex flex-col items-center justify-end p-4 shadow-[0_0_100px_rgba(234,179,8,0.5)] z-20"
-                        >
-                            <div className="absolute -top-24 text-center w-full">
-                                <Trophy className="h-12 w-12 text-yellow-400 mx-auto mb-2 animate-bounce" />
-                                <div className="h-16 w-16 rounded-full bg-yellow-400 flex items-center justify-center font-bold text-2xl mb-2 mx-auto ring-4 ring-yellow-600 text-black">{leaderboard[0].name[0]}</div>
-                                <div className="font-bold text-yellow-200 text-xl truncate w-full">{leaderboard[0].name}</div>
-                                <div className="text-lg text-yellow-300/80">{leaderboard[0].score} pts</div>
-                            </div>
-                            <div className="text-8xl font-black text-yellow-800/50">1</div>
-                        </motion.div>
-                    )}
-
-                    {/* 3rd Place */}
-                    {leaderboard[2] && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "30%", opacity: 1 }}
-                            transition={{ delay: 1, duration: 0.8 }}
-                            className="w-1/4 bg-orange-800 rounded-t-lg border-t-4 border-orange-500 relative flex flex-col items-center justify-end p-4 shadow-[0_0_50px_rgba(249,115,22,0.3)]"
-                        >
-                            <div className="absolute -top-16 text-center w-full">
-                                <div className="h-12 w-12 rounded-full bg-orange-500 flex items-center justify-center font-bold text-xl mb-2 mx-auto ring-4 ring-orange-800 text-white">{leaderboard[2].name[0]}</div>
-                                <div className="font-bold text-orange-400 truncate w-full">{leaderboard[2].name}</div>
-                                <div className="text-sm text-orange-500">{leaderboard[2].score} pts</div>
-                            </div>
-                            <div className="text-6xl font-black text-orange-900/50">3</div>
-                        </motion.div>
-                    )}
-                </div>
-
-                <div className="relative z-10 w-full max-w-2xl bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-800 overflow-hidden">
-                    <div className="p-4 bg-gray-800/50 border-b border-gray-700 font-bold text-center text-white">Full Leaderboard</div>
-                    <div className="max-h-64 overflow-y-auto p-2">
-                        {leaderboard.map((p, i) => (
-                            <div key={i} className="flex justify-between items-center p-3 hover:bg-white/5 rounded-lg border-b border-white/5 last:border-0 text-gray-300">
-                                <div className="flex items-center gap-4">
-                                    <span className={`font-mono font-bold w-6 ${i < 3 ? 'text-yellow-400' : 'text-gray-500'}`}>#{i + 1}</span>
-                                    <span>{p.name}</span>
-                                </div>
-                                <span className="font-mono text-teal-400">{p.score}</span>
-                            </div>
-                        ))}
+                {(mode === 'slideshow') ? (
+                    <div className="relative z-10 text-center space-y-8 animate-in fade-in duration-1000">
+                        <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 drop-shadow-lg">
+                            Thank You!
+                        </h1>
+                        <p className="text-2xl text-gray-300 max-w-2xl mx-auto">
+                            The presentation has ended. We hope you enjoyed the session.
+                        </p>
+                        <div className="pt-8">
+                            <Button onClick={endGame} size="lg" className="bg-white text-black hover:bg-gray-200 text-xl px-12 py-6 rounded-full">
+                                Return to Dashboard
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <>
+                        {/* Podium Animation */}
+                        <div className="relative z-10 w-full max-w-4xl flex items-end justify-center gap-4 h-[500px] mb-12">
+                            {/* 2nd Place */}
+                            {leaderboard[1] && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "40%", opacity: 1 }}
+                                    transition={{ delay: 0.5, duration: 0.8 }}
+                                    className="w-1/4 bg-gray-800 rounded-t-lg border-t-4 border-gray-500 relative flex flex-col items-center justify-end p-4 shadow-[0_0_50px_rgba(107,114,128,0.3)]"
+                                >
+                                    <div className="absolute -top-16 text-center w-full">
+                                        <div className="h-12 w-12 rounded-full bg-gray-500 flex items-center justify-center font-bold text-xl mb-2 mx-auto ring-4 ring-gray-800 text-white">{leaderboard[1].name[0]}</div>
+                                        <div className="font-bold text-gray-400 truncate w-full">{leaderboard[1].name}</div>
+                                        <div className="text-sm text-gray-500">{leaderboard[1].score} pts</div>
+                                    </div>
+                                    <div className="text-6xl font-black text-gray-700/50">2</div>
+                                </motion.div>
+                            )}
 
-                <Button onClick={endGame} className="mt-8 relative z-10 bg-white text-black hover:bg-gray-200">Return to Dashboard</Button>
+                            {/* 1st Place */}
+                            {leaderboard[0] && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "60%", opacity: 1 }}
+                                    transition={{ duration: 0.8 }}
+                                    className="w-1/3 bg-yellow-600 rounded-t-lg border-t-4 border-yellow-300 relative flex flex-col items-center justify-end p-4 shadow-[0_0_100px_rgba(234,179,8,0.5)] z-20"
+                                >
+                                    <div className="absolute -top-24 text-center w-full">
+                                        <Trophy className="h-12 w-12 text-yellow-400 mx-auto mb-2 animate-bounce" />
+                                        <div className="h-16 w-16 rounded-full bg-yellow-400 flex items-center justify-center font-bold text-2xl mb-2 mx-auto ring-4 ring-yellow-600 text-black">{leaderboard[0].name[0]}</div>
+                                        <div className="font-bold text-yellow-200 text-xl truncate w-full">{leaderboard[0].name}</div>
+                                        <div className="text-lg text-yellow-300/80">{leaderboard[0].score} pts</div>
+                                    </div>
+                                    <div className="text-8xl font-black text-yellow-800/50">1</div>
+                                </motion.div>
+                            )}
+
+                            {/* 3rd Place */}
+                            {leaderboard[2] && (
+                                <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "30%", opacity: 1 }}
+                                    transition={{ delay: 1, duration: 0.8 }}
+                                    className="w-1/4 bg-orange-800 rounded-t-lg border-t-4 border-orange-500 relative flex flex-col items-center justify-end p-4 shadow-[0_0_50px_rgba(249,115,22,0.3)]"
+                                >
+                                    <div className="absolute -top-16 text-center w-full">
+                                        <div className="h-12 w-12 rounded-full bg-orange-500 flex items-center justify-center font-bold text-xl mb-2 mx-auto ring-4 ring-orange-800 text-white">{leaderboard[2].name[0]}</div>
+                                        <div className="font-bold text-orange-400 truncate w-full">{leaderboard[2].name}</div>
+                                        <div className="text-sm text-orange-500">{leaderboard[2].score} pts</div>
+                                    </div>
+                                    <div className="text-6xl font-black text-orange-900/50">3</div>
+                                </motion.div>
+                            )}
+                        </div>
+
+                        <div className="relative z-10 w-full max-w-2xl bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-800 overflow-hidden">
+                            <div className="p-4 bg-gray-800/50 border-b border-gray-700 font-bold text-center text-white">Full Leaderboard</div>
+                            <div className="max-h-64 overflow-y-auto p-2">
+                                {leaderboard.map((p, i) => (
+                                    <div key={i} className="flex justify-between items-center p-3 hover:bg-white/5 rounded-lg border-b border-white/5 last:border-0 text-gray-300">
+                                        <div className="flex items-center gap-4">
+                                            <span className={`font-mono font-bold w-6 ${i < 3 ? 'text-yellow-400' : 'text-gray-500'}`}>#{i + 1}</span>
+                                            <span>{p.name}</span>
+                                        </div>
+                                        <span className="font-mono text-teal-400">{p.score}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <Button onClick={endGame} className="mt-8 relative z-10 bg-white text-black hover:bg-gray-200">Return to Dashboard</Button>
+                    </>
+                )}
             </div>
         );
     }
@@ -192,10 +210,12 @@ function HostLiveContent() {
                         <span className="text-2xl font-black text-white tracking-widest">{pin}</span>
                     </div>
                     <div className="h-8 w-px bg-gray-700 mx-2" />
-                    <div className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-teal-400" />
-                        <span className="font-bold text-lg">{answerCount}</span>
-                    </div>
+                    {mode !== 'slideshow' && (
+                        <div className="flex items-center gap-2">
+                            <Users className="h-5 w-5 text-teal-400" />
+                            <span className="font-bold text-lg">{answerCount}</span>
+                        </div>
+                    )}
                 </div>
 
                 {/* Timer */}
@@ -370,9 +390,18 @@ function HostLiveContent() {
                             </Button>
                         )}
                         {phase === 'reveal' && (
-                            <Button size="lg" className="bg-purple-600 hover:bg-purple-500 text-white min-w-[200px]" onClick={handleShowLeaderboard}>
-                                Show Leaderboard
-                                <BarChart3 className="ml-2 h-4 w-4" />
+                            <Button size="lg" className="bg-purple-600 hover:bg-purple-500 text-white min-w-[200px]" onClick={mode === 'slideshow' ? nextQuestion : handleShowLeaderboard}>
+                                {mode === 'slideshow' ? (
+                                    <>
+                                        Next Question
+                                        <ChevronRight className="ml-2 h-4 w-4" />
+                                    </>
+                                ) : (
+                                    <>
+                                        Show Leaderboard
+                                        <BarChart3 className="ml-2 h-4 w-4" />
+                                    </>
+                                )}
                             </Button>
                         )}
                         {phase === 'leaderboard' && (

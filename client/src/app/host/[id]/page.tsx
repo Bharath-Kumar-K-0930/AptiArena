@@ -203,60 +203,98 @@ export default function HostGamePage() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="w-full max-w-4xl flex flex-col items-center space-y-8 text-center"
                     >
-                        <div className="space-y-6 bg-slate-900/50 p-8 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
-                            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
-                                Join Code
-                            </h1>
-                            <div className="text-6xl md:text-8xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 tracking-widest drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
-                                {pin}
-                            </div>
-                            <div className="space-y-2">
-                                <p className="text-xl text-gray-300">Join at <span className="font-bold text-white">aptiarena.com/play</span></p>
-                                <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-sm text-cyan-200 font-medium uppercase tracking-wider border border-white/10">
-                                    Mode: {gameMode}
+                        {gameMode === 'slideshow' ? (
+                            // Slideshow Specific Lobby
+                            <div className="space-y-8 animate-in fade-in duration-700">
+                                <div className="space-y-4">
+                                    <div className="inline-block px-4 py-1.5 rounded-full bg-purple-500/10 text-sm text-purple-300 font-medium uppercase tracking-wider border border-purple-500/30">
+                                        Presentation Mode
+                                    </div>
+                                    <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 leading-tight drop-shadow-lg">
+                                        {quizDetails?.title || "Ready to Present?"}
+                                    </h1>
+                                    <p className="text-2xl text-gray-300 max-w-2xl mx-auto">
+                                        Welcome, participants! We're about to begin.
+                                    </p>
                                 </div>
+
+                                <Card className="bg-slate-900/60 border-purple-500/20 backdrop-blur-sm max-w-2xl mx-auto">
+                                    <CardContent className="p-8">
+                                        <div className="flex flex-col items-center gap-4 text-purple-200/80">
+                                            <Play className="w-16 h-16 text-purple-500 mb-2" />
+                                            <p className="text-lg">Use the controls to navigate through slides.</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                <Button
+                                    size="lg"
+                                    className="text-2xl px-16 py-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(168,85,247,0.4)] transition-all hover:scale-105"
+                                    onClick={startGame}
+                                >
+                                    <Play className="mr-3 h-8 w-8 fill-current" />
+                                    Start Presentation
+                                </Button>
                             </div>
-                        </div>
-
-                        <Card className="w-full bg-slate-900/60 border-white/10 backdrop-blur-sm">
-                            <CardHeader>
-                                <CardTitle className="flex items-center justify-center gap-3 text-2xl text-white">
-                                    <Users className="text-cyan-400 w-8 h-8" />
-                                    Players Connected ({players.length})
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                {players.length === 0 ? (
-                                    <div className="h-40 flex flex-col items-center justify-center text-gray-500 italic gap-2">
-                                        <div className="w-3 h-3 bg-gray-600 rounded-full animate-ping" />
-                                        Waiting for gladiators...
+                        ) : (
+                            // Standard Lobby
+                            <>
+                                <div className="space-y-6 bg-slate-900/50 p-8 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
+                                    <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                                        Join Code
+                                    </h1>
+                                    <div className="text-6xl md:text-8xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 tracking-widest drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">
+                                        {pin}
                                     </div>
-                                ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                        {players.map((p, i) => (
-                                            <motion.div
-                                                key={i}
-                                                initial={{ opacity: 0, scale: 0.5 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                className="bg-white/10 p-3 rounded-lg text-white font-medium text-center border border-white/5 hover:bg-white/20 transition-colors"
-                                            >
-                                                {p}
-                                            </motion.div>
-                                        ))}
+                                    <div className="space-y-2">
+                                        <p className="text-xl text-gray-300">Join at <span className="font-bold text-white">aptiarena.com/play</span></p>
+                                        <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-sm text-cyan-200 font-medium uppercase tracking-wider border border-white/10">
+                                            Mode: {gameMode}
+                                        </div>
                                     </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                </div>
 
-                        <Button
-                            size="lg"
-                            className="text-2xl px-16 py-8 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.4)] transition-all hover:scale-105"
-                            onClick={startGame}
-                            disabled={players.length === 0 && gameMode !== 'slideshow'}
-                        >
-                            <Play className="mr-3 h-8 w-8 fill-current" />
-                            {gameMode === 'slideshow' ? 'Start Presentation' : 'Start Competition'}
-                        </Button>
+                                <Card className="w-full bg-slate-900/60 border-white/10 backdrop-blur-sm">
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center justify-center gap-3 text-2xl text-white">
+                                            <Users className="text-cyan-400 w-8 h-8" />
+                                            Players Connected ({players.length})
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        {players.length === 0 ? (
+                                            <div className="h-40 flex flex-col items-center justify-center text-gray-500 italic gap-2">
+                                                <div className="w-3 h-3 bg-gray-600 rounded-full animate-ping" />
+                                                Waiting for gladiators...
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                {players.map((p, i) => (
+                                                    <motion.div
+                                                        key={i}
+                                                        initial={{ opacity: 0, scale: 0.5 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        className="bg-white/10 p-3 rounded-lg text-white font-medium text-center border border-white/5 hover:bg-white/20 transition-colors"
+                                                    >
+                                                        {p}
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+                                <Button
+                                    size="lg"
+                                    className="text-2xl px-16 py-8 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-[0_0_40px_rgba(16,185,129,0.4)] transition-all hover:scale-105"
+                                    onClick={startGame}
+                                    disabled={players.length === 0}
+                                >
+                                    <Play className="mr-3 h-8 w-8 fill-current" />
+                                    Start Competition
+                                </Button>
+                            </>
+                        )}
                     </motion.div>
                 )}
 
@@ -267,15 +305,17 @@ export default function HostGamePage() {
                         animate={{ opacity: 1 }}
                         className="w-full max-w-6xl space-y-8 min-h-[70vh] flex flex-col relative"
                     >
-                        {/* Live Stats Bar */}
-                        <div className="absolute top-0 right-0 p-4 bg-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg z-20">
-                            <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-bold">Responded</div>
-                            <div className="text-3xl font-black text-white flex items-baseline gap-1">
-                                <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">{answeredCount}</span>
-                                <span className="text-gray-600 text-lg">/</span>
-                                <span className="text-gray-400 text-lg">{players.length}</span>
+                        {/* Live Stats Bar - Hide in Slide Show */}
+                        {gameMode !== 'slideshow' && (
+                            <div className="absolute top-0 right-0 p-4 bg-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg z-20">
+                                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-bold">Responded</div>
+                                <div className="text-3xl font-black text-white flex items-baseline gap-1">
+                                    <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">{answeredCount}</span>
+                                    <span className="text-gray-600 text-lg">/</span>
+                                    <span className="text-gray-400 text-lg">{players.length}</span>
+                                </div>
                             </div>
-                        </div>
+                        )}
 
                         {!showLeaderboard ? (
                             <div className="flex-1 flex flex-col justify-center h-full max-h-[85vh]">
@@ -370,11 +410,19 @@ export default function HostGamePage() {
                                                 className="text-lg px-8 py-6 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full shadow-[0_0_30px_rgba(147,51,234,0.6)] hover:scale-105 transition-all"
                                                 onClick={() => {
                                                     if (socket && pin) {
-                                                        socket.emit("show_leaderboard", { pin });
+                                                        if (gameMode === 'slideshow') {
+                                                            socket.emit("next_question", { pin });
+                                                        } else {
+                                                            socket.emit("show_leaderboard", { pin });
+                                                        }
                                                     }
                                                 }}
                                             >
-                                                Show Leaderboard <Trophy className="ml-2 h-6 w-6 text-yellow-300" />
+                                                {gameMode === 'slideshow' ? (
+                                                    <>Next Question <ArrowRight className="ml-2 h-6 w-6" /></>
+                                                ) : (
+                                                    <>Show Leaderboard <Trophy className="ml-2 h-6 w-6 text-yellow-300" /></>
+                                                )}
                                             </Button>
                                         </motion.div>
                                     )}
@@ -466,11 +514,25 @@ export default function HostGamePage() {
 
                         <div className="text-center mb-8">
                             <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-400 to-yellow-300 drop-shadow-[0_0_30px_rgba(234,179,8,0.5)]">
-                                Game Over!
+                                {gameMode === 'slideshow' ? "Thank You!" : "Game Over!"}
                             </h1>
+                            {gameMode === 'slideshow' && (
+                                <p className="text-2xl text-gray-300 mt-4 max-w-3xl mx-auto">
+                                    We hope you enjoyed the presentation!
+                                </p>
+                            )}
                         </div>
 
-                        {leaderboard.length <= 3 ? (
+                        {gameMode === 'slideshow' ? (
+                            <div className="flex justify-center mt-12">
+                                <Button
+                                    onClick={() => window.location.href = '/dashboard'}
+                                    className="text-xl px-12 py-6 bg-white text-black hover:bg-gray-200 rounded-full"
+                                >
+                                    Return to Dashboard
+                                </Button>
+                            </div>
+                        ) : leaderboard.length <= 3 ? (
                             // Centered Layout for <= 3 Players
                             <div className="flex flex-col items-center justify-center gap-8">
                                 <div className="flex items-end justify-center gap-4 md:gap-8">

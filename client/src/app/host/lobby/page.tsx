@@ -86,7 +86,7 @@ function LobbyContent() {
 
     return (
         <div className="min-h-screen bg-black text-white p-6">
-            <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 h-[85vh]">
+            <div className={`max-w-6xl mx-auto grid grid-cols-1 ${gameMode === 'slideshow' ? 'max-w-3xl' : 'lg:grid-cols-2'} gap-8 h-[85vh]`}>
 
                 {/* Left: Game Info & Modes */}
                 <div className="flex flex-col gap-6">
@@ -127,61 +127,80 @@ function LobbyContent() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-blue-900/20 border-blue-500/30 flex-1 flex flex-col justify-center items-center text-center p-8">
-                        <h2 className="text-xl text-blue-300 uppercase tracking-widest mb-2">Join at aptiarena.com/play</h2>
-                        <h1 className="text-8xl font-black text-white tracking-widest my-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                            {pin}
-                        </h1>
-                        <div className="flex gap-4">
-                            <Button variant="outline" onClick={copyLink} className="gap-2">
-                                <Copy size={16} /> Copy Link
+                    {gameMode !== 'slideshow' ? (
+                        <Card className="bg-blue-900/20 border-blue-500/30 flex-1 flex flex-col justify-center items-center text-center p-8">
+                            <h2 className="text-xl text-blue-300 uppercase tracking-widest mb-2">Join at aptiarena.com/play</h2>
+                            <h1 className="text-8xl font-black text-white tracking-widest my-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                                {pin}
+                            </h1>
+                            <div className="flex gap-4">
+                                <Button variant="outline" onClick={copyLink} className="gap-2">
+                                    <Copy size={16} /> Copy Link
+                                </Button>
+                            </div>
+                        </Card>
+                    ) : (
+                        <Card className="bg-purple-900/20 border-purple-500/30 flex-1 flex flex-col justify-center items-center text-center p-8">
+                            <MonitorPlay className="w-20 h-20 text-purple-400 mb-6" />
+                            <h2 className="text-3xl font-bold text-white mb-4">Presentation Mode</h2>
+                            <p className="text-xl text-gray-300 mb-8 max-w-md">
+                                Present questions without live players. No devices required.
+                            </p>
+                            <Button
+                                size="lg"
+                                onClick={startGame}
+                                className="w-full max-w-xs h-14 text-xl bg-purple-600 hover:bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                            >
+                                Start Presentation <Play className="ml-2 w-6 h-6" />
                             </Button>
-                        </div>
-                    </Card>
+                        </Card>
+                    )}
                 </div>
 
                 {/* Right: Players & QR */}
-                <div className="flex flex-col gap-6">
-                    <Card className="bg-gray-900 border-gray-800 flex-1 flex flex-col">
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle className="flex items-center gap-2">
-                                <Users className="text-green-500" />
-                                Players ({players.length})
-                            </CardTitle>
-                            <div className="bg-white p-2 rounded-lg">
-                                <QRCode value={`${typeof window !== 'undefined' ? window.location.origin : ''}/play?pin=${pin}`} size={80} />
-                            </div>
-                        </CardHeader>
-                        <CardContent className="flex-1 overflow-y-auto">
-                            {players.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 space-y-4">
-                                    <div className="animate-pulse">Waiting for players to join...</div>
-                                    <Loader2 className="h-8 w-8 animate-spin" />
+                {gameMode !== 'slideshow' && (
+                    <div className="flex flex-col gap-6">
+                        <Card className="bg-gray-900 border-gray-800 flex-1 flex flex-col">
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Users className="text-green-500" />
+                                    Players ({players.length})
+                                </CardTitle>
+                                <div className="bg-white p-2 rounded-lg">
+                                    <QRCode value={`${typeof window !== 'undefined' ? window.location.origin : ''}/play?pin=${pin}`} size={80} />
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                                    {players.map((p, i) => (
-                                        <div key={i} className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-2 animate-in fade-in zoom-in duration-300">
-                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold text-xs uppercase">
-                                                {p.name.substring(0, 2)}
+                            </CardHeader>
+                            <CardContent className="flex-1 overflow-y-auto">
+                                {players.length === 0 ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-gray-500 opacity-50 space-y-4">
+                                        <div className="animate-pulse">Waiting for players to join...</div>
+                                        <Loader2 className="h-8 w-8 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                        {players.map((p, i) => (
+                                            <div key={i} className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-2 animate-in fade-in zoom-in duration-300">
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold text-xs uppercase">
+                                                    {p.name.substring(0, 2)}
+                                                </div>
+                                                <span className="font-medium truncate">{p.name}</span>
                                             </div>
-                                            <span className="font-medium truncate">{p.name}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                    <Button
-                        size="lg"
-                        onClick={startGame}
-                        disabled={players.length === 0 && gameMode === 'live'}
-                        className="w-full h-16 text-xl bg-green-600 hover:bg-green-500 shadow-[0_0_20px_rgba(22,163,74,0.4)]"
-                    >
-                        Start Game <ArrowRight className="ml-2 w-6 h-6" />
-                    </Button>
-                </div>
+                        <Button
+                            size="lg"
+                            onClick={startGame}
+                            disabled={players.length === 0 && gameMode === 'live'}
+                            className="w-full h-16 text-xl bg-green-600 hover:bg-green-500 shadow-[0_0_20px_rgba(22,163,74,0.4)]"
+                        >
+                            Start Game <ArrowRight className="ml-2 w-6 h-6" />
+                        </Button>
+                    </div>
+                )}
             </div>
         </div>
     );
