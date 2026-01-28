@@ -39,6 +39,9 @@ export default function HostGamePage() {
     const [respondedPlayers, setRespondedPlayers] = useState<Set<string>>(new Set());
     const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+    // Confirmation Modals
+    const [showEndConfirm, setShowEndConfirm] = useState(false);
+
     // ... (useEffect for quiz details same as before)
     useEffect(() => {
         const fetchQuizDetails = async () => {
@@ -158,9 +161,13 @@ export default function HostGamePage() {
     };
 
     const endGame = () => {
-        if (!confirm("Are you sure you want to end this quiz session early?")) return;
+        setShowEndConfirm(true);
+    };
+
+    const confirmEndGame = () => {
         if (socket && pin) {
             socket.emit("end_game", { pin });
+            setShowEndConfirm(false);
         }
     };
 
@@ -594,6 +601,16 @@ export default function HostGamePage() {
                                 </Card>
                             </motion.div>
                         )}
+                        {/* End Quiz Button - Bottom Right (available throughout live phase) */}
+                        <div className="fixed bottom-6 right-6 z-50">
+                            <Button
+                                variant="destructive"
+                                className="rounded-xl shadow-xl hover:scale-105 transition-all gap-2"
+                                onClick={endGame}
+                            >
+                                <PowerOff className="w-4 h-4" /> End Session
+                            </Button>
+                        </div>
                     </motion.div>
                 )}
 
@@ -676,6 +693,14 @@ export default function HostGamePage() {
                                         </div>
                                     )}
                                 </div>
+                                <div className="mt-12">
+                                    <Button
+                                        onClick={() => window.location.href = '/dashboard'}
+                                        className="text-xl px-12 py-6 bg-white text-black hover:bg-gray-200 rounded-full shadow-lg hover:scale-105 transition-all"
+                                    >
+                                        Return to Dashboard
+                                    </Button>
+                                </div>
                             </div>
                         ) : (
                             // Split Layout for > 3 Players
@@ -749,19 +774,57 @@ export default function HostGamePage() {
                                 </Card>
                             </div>
                         )}
-
-                        {/* End Quiz Button - Bottom Right */}
-                        <div className="fixed bottom-6 right-6 z-50">
-                            <Button
-                                variant="destructive"
-                                className="rounded-xl shadow-xl hover:scale-105 transition-all gap-2"
-                                onClick={endGame}
-                            >
-                                <PowerOff className="w-4 h-4" /> End Session
-                            </Button>
-                        </div>
                     </motion.div>
                 )}
+
+                {/* Custom End Confirmation Modal */}
+                <AnimatePresence>
+                    {showEndConfirm && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="w-full max-w-md bg-slate-900 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
+                            >
+                                {/* Decorative Gradient */}
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500" />
+
+                                <div className="flex flex-col items-center text-center space-y-6">
+                                    <div className="w-20 h-20 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20">
+                                        <PowerOff className="w-10 h-10 text-red-500" />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <h3 className="text-2xl font-black text-white">End Quiz Session?</h3>
+                                        <p className="text-gray-400">
+                                            This will immediately terminate the game for all participants and show the final leaderboard. This action cannot be undone.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-col w-full gap-3 pt-4">
+                                        <Button
+                                            variant="destructive"
+                                            size="lg"
+                                            className="w-full rounded-2xl py-6 font-bold text-lg shadow-lg hover:shadow-red-500/20"
+                                            onClick={confirmEndGame}
+                                        >
+                                            Yes, End Session
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="lg"
+                                            className="w-full rounded-2xl py-6 font-bold text-gray-400 hover:text-white hover:bg-white/5"
+                                            onClick={() => setShowEndConfirm(false)}
+                                        >
+                                            No, Keep Playing
+                                        </Button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
