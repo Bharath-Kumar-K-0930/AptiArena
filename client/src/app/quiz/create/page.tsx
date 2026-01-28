@@ -298,22 +298,57 @@ Reason: Explanation here...`}
                                                 <span className="text-teal mr-2">Q{i + 1}.</span>
                                                 {q.text}
                                             </CardTitle>
-                                            <div className="ml-2 flex items-center gap-3">
-                                                <select
-                                                    className="bg-gray-800 border border-gray-700 text-xs text-gray-400 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal"
-                                                    value={q.timeLimit || 30}
-                                                    onChange={(e) => {
-                                                        const updated = [...questions];
-                                                        updated[i].timeLimit = parseInt(e.target.value);
-                                                        setQuestions(updated);
-                                                    }}
-                                                >
-                                                    <option value="10">10s</option>
-                                                    <option value="20">20s</option>
-                                                    <option value="30">30s</option>
-                                                    <option value="60">60s</option>
-                                                    <option value="120">2m</option>
-                                                </select>
+                                            <div className="ml-2 flex items-center gap-2">
+                                                {q.timeLimit && ![10, 20, 30, 60, 120].includes(q.timeLimit) ? (
+                                                    <div className="flex items-center gap-1">
+                                                        <Input
+                                                            type="number"
+                                                            value={q.timeLimit}
+                                                            onChange={(e) => {
+                                                                const val = parseInt(e.target.value);
+                                                                const updated = [...questions];
+                                                                updated[i].timeLimit = isNaN(val) ? 0 : val;
+                                                                setQuestions(updated);
+                                                            }}
+                                                            className="w-14 h-8 bg-gray-800 border-gray-700 text-xs px-2 focus:ring-teal"
+                                                            placeholder="Sec"
+                                                        />
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-6 px-1 text-gray-500 hover:text-white"
+                                                            onClick={() => {
+                                                                const updated = [...questions];
+                                                                updated[i].timeLimit = 30;
+                                                                setQuestions(updated);
+                                                            }}
+                                                        >
+                                                            ×
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <select
+                                                        className="bg-gray-800 border border-gray-700 text-xs text-gray-400 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal h-8"
+                                                        value={q.timeLimit || 30}
+                                                        onChange={(e) => {
+                                                            const val = e.target.value;
+                                                            const updated = [...questions];
+                                                            if (val === "custom") {
+                                                                updated[i].timeLimit = 45; // Default custom value
+                                                            } else {
+                                                                updated[i].timeLimit = parseInt(val);
+                                                            }
+                                                            setQuestions(updated);
+                                                        }}
+                                                    >
+                                                        <option value="10">10s</option>
+                                                        <option value="20">20s</option>
+                                                        <option value="30">30s</option>
+                                                        <option value="60">60s</option>
+                                                        <option value="120">2m</option>
+                                                        <option value="custom">Custom...</option>
+                                                    </select>
+                                                )}
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -321,8 +356,8 @@ Reason: Explanation here...`}
                                                     className="hidden"
                                                     onChange={(e) => handleImageUpload(e, i)}
                                                 />
-                                                <label htmlFor={`q-img-${i}`} className="cursor-pointer text-gray-400 hover:text-teal transition-colors" title="Add Image">
-                                                    <Upload className="w-5 h-5" />
+                                                <label htmlFor={`q-img-${i}`} className="cursor-pointer text-gray-400 hover:text-teal transition-colors flex items-center justify-center h-8 w-8 bg-gray-800 rounded-md border border-gray-700" title="Add Image">
+                                                    <Upload className="w-4 h-4" />
                                                 </label>
                                             </div>
                                         </CardHeader>
