@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap, Lightbulb } from "lucide-react";
+import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap, Lightbulb, PowerOff } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 // Assuming we don't have react-confetti installed, I'll use a simple embedded component or just CSS animations for now.
@@ -154,6 +154,13 @@ export default function HostGamePage() {
     const nextQuestion = () => {
         if (socket && pin) {
             socket.emit("next_question", { pin });
+        }
+    };
+
+    const endGame = () => {
+        if (!confirm("Are you sure you want to end this quiz session early?")) return;
+        if (socket && pin) {
+            socket.emit("end_game", { pin });
         }
     };
 
@@ -742,6 +749,17 @@ export default function HostGamePage() {
                                 </Card>
                             </div>
                         )}
+
+                        {/* End Quiz Button - Bottom Right */}
+                        <div className="fixed bottom-6 right-6 z-50">
+                            <Button
+                                variant="destructive"
+                                className="rounded-xl shadow-xl hover:scale-105 transition-all gap-2"
+                                onClick={endGame}
+                            >
+                                <PowerOff className="w-4 h-4" /> End Session
+                            </Button>
+                        </div>
                     </motion.div>
                 )}
             </div>

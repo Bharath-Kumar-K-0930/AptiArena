@@ -288,6 +288,23 @@ export const setupSocket = (io: Server) => {
             }
         });
 
+        socket.on('end_game', async ({ pin }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session) return;
+
+                session.status = 'finished';
+                await session.save();
+
+                // Send final leaderboard
+                const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
+                io.to(pin).emit('game_over', { leaderboard });
+                console.log(`Game ended early by host: ${pin}`);
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
         socket.on('disconnect', () => {
             console.log('Socket disconnected:', socket.id);
         });
