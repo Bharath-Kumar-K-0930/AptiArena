@@ -87,7 +87,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Link href="/quiz/create">
-                  <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-gradient-to-r from-gold to-orange-500 hover:from-gold/90 hover:to-orange-600 text-black font-bold shadow-[0_0_30px_-5px_rgba(255,191,0,0.4)] transition-all duration-300 transform hover:scale-105 gap-2">
+                  <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold shadow-[0_0_30px_-5px_rgba(168,85,247,0.4)] transition-all duration-300 transform hover:scale-105 gap-2">
                     <BrainCircuit className="h-5 w-5" /> Create Quiz
                   </Button>
                 </Link>
