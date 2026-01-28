@@ -179,12 +179,25 @@ export const getHostStats = async (req: Request, res: Response) => {
 
         const activity = Object.values(activityMap);
 
+        // Calculate Participation Stats (Where this user was a participant)
+        const participatedSessions = await GameSession.find({ "participants.userId": new mongoose.Types.ObjectId(hostId as string) });
+        const joinedQuizzes = participatedSessions.length;
+
+        // Calculate Avg Score for the user across all joined quizzes
+        let totalScore = 0;
+        participatedSessions.forEach(session => {
+            const me = session.participants.find(p => p.userId?.toString() === hostId.toString());
+            if (me) totalScore += me.score;
+        });
+        const avgScore = joinedQuizzes > 0 ? Math.round(totalScore / joinedQuizzes) : 0;
+
         res.json({
             totalQuizzes,
             totalSessions,
             totalParticipants,
             totalQuestions,
-            joinedQuizzes: 0,
+            joinedQuizzes,
+            avgScore,
             activity
         });
     } catch (error) {

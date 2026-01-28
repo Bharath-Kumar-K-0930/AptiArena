@@ -6,6 +6,7 @@ export interface IGameSession extends Document {
     participants: {
         socketId: string;
         name: string;
+        userId?: mongoose.Types.ObjectId;
         score: number;
         streak: number;
         lastAnsweredQuestionIndex: number;
@@ -22,6 +23,7 @@ const GameSessionSchema = new Schema({
     participants: [{
         socketId: { type: String },
         name: { type: String },
+        userId: { type: Schema.Types.ObjectId, ref: 'User' },
         score: { type: Number, default: 0 },
         streak: { type: Number, default: 0 },
         lastAnsweredQuestionIndex: { type: Number, default: -1 } // Track if they answered the current question

@@ -25,6 +25,7 @@ interface Stats {
     totalParticipants: number;
     totalQuestions?: number;
     joinedQuizzes?: number;
+    avgScore?: number;
 }
 
 export default function DashboardPage() {
@@ -194,7 +195,7 @@ export default function DashboardPage() {
                                 </h2>
                                 <p className="text-gray-400 mt-1">Detailed breakdown of your platform usage and activity.</p>
                             </div>
-                            <Link href="/analytics">
+                            <Link href="/dashboard/analytics">
                                 <Button variant="outline" className="border-teal/30 text-teal hover:bg-teal/10">
                                     View Full Report
                                 </Button>
@@ -250,7 +251,7 @@ export default function DashboardPage() {
                                             <div className="text-xs text-gray-400 uppercase tracking-wider">Quizzes Joined</div>
                                         </div>
                                         <div className="bg-gray-900 p-4 rounded-lg text-center border border-gray-700/50">
-                                            <div className="text-3xl font-bold text-white mb-1">--</div>
+                                            <div className="text-3xl font-bold text-white mb-1">{stats.avgScore !== undefined ? stats.avgScore : "--"}</div>
                                             <div className="text-xs text-gray-400 uppercase tracking-wider">Avg. Score</div>
                                         </div>
                                     </div>
@@ -264,10 +265,18 @@ export default function DashboardPage() {
                                     <div className="space-y-1 pt-2">
                                         <div className="flex justify-between text-xs text-gray-500">
                                             <span>Participation Level</span>
-                                            <span>Rookie</span>
+                                            <span>
+                                                {(stats.joinedQuizzes || 0) >= 20 ? "Legend" :
+                                                    (stats.joinedQuizzes || 0) >= 10 ? "Pro" :
+                                                        (stats.joinedQuizzes || 0) >= 5 ? "Veteran" :
+                                                            (stats.joinedQuizzes || 0) >= 1 ? "Amateur" : "Rookie"}
+                                            </span>
                                         </div>
                                         <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                            <div className="h-full bg-purple-500 w-[5%]"></div>
+                                            <div
+                                                className="h-full bg-purple-500 transition-all duration-1000"
+                                                style={{ width: `${Math.min(100, Math.max(5, (stats.joinedQuizzes || 0) * 5))}%` }}
+                                            ></div>
                                         </div>
                                     </div>
                                 </CardContent>

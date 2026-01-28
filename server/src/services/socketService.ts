@@ -30,7 +30,7 @@ export const setupSocket = (io: Server) => {
             }
         });
 
-        socket.on('join_game', async ({ pin, name }) => {
+        socket.on('join_game', async ({ pin, name, userId }) => {
             try {
                 const session = await GameSession.findOne({ pin });
                 if (!session) {
@@ -74,6 +74,7 @@ export const setupSocket = (io: Server) => {
                     session.participants.push({
                         socketId: socket.id,
                         name,
+                        userId: userId || undefined,
                         score: 0,
                         streak: 0,
                         lastAnsweredQuestionIndex: -1

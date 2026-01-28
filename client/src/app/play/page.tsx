@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, ArrowRight, Play, Trophy, AlertCircle, BarChart3, Zap } from "lucide-react";
+import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, ArrowRight, Play, Trophy, AlertCircle, BarChart3, Zap, Star } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { io, Socket } from "socket.io-client";
@@ -46,7 +46,8 @@ function PlayContent() {
         if (savedPin && savedName && !pin) {
             setPin(savedPin);
             setName(savedName);
-            newSocket.emit("join_game", { pin: savedPin, name: savedName });
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            newSocket.emit("join_game", { pin: savedPin, name: savedName, userId: user.id || user._id });
         }
 
         newSocket.on("joined_game", ({ pin, mode }) => {
@@ -65,7 +66,9 @@ function PlayContent() {
             setResult(null); // Reset result
 
             // Set Timer
-            if (question.timeLimit) {
+            if (question.timeLimit === 0) {
+                setTimeLeft(null);
+            } else if (question.timeLimit) {
                 setTimeLeft(question.timeLimit);
             } else {
                 setTimeLeft(30); // Default
@@ -128,7 +131,8 @@ function PlayContent() {
         e.preventDefault();
         setIsJoining(true);
         if (socket && pin && name) {
-            socket.emit("join_game", { pin, name });
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            socket.emit("join_game", { pin, name, userId: user.id || user._id });
         }
     };
 
@@ -252,13 +256,17 @@ function PlayContent() {
                                 <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-200 text-xs font-bold uppercase tracking-wider border border-white/10 backdrop-blur-md">
                                     Question {questionIndex + 1}
                                 </span>
-                                {timeLeft !== null && (
+                                {timeLeft !== null ? (
                                     <div className={`
                                         flex items-center gap-2 px-4 py-1.5 rounded-full border backdrop-blur-md font-mono font-bold text-sm transition-colors
                                         ${timeLeft <= 10 ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' : 'bg-white/10 border-white/10 text-white'}
                                     `}>
                                         <Zap className={`w-3.5 h-3.5 ${timeLeft <= 10 ? 'fill-red-400' : ''}`} />
                                         {timeLeft}s
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 backdrop-blur-md font-bold text-xs uppercase tracking-wider">
+                                        <Star className="w-3.5 h-3.5 fill-blue-400" /> Untimed
                                     </div>
                                 )}
                             </div>
