@@ -47,7 +47,7 @@ import { extractTextFromFile } from '../services/fileParser';
 
 export const generateQuiz = async (req: Request, res: Response) => {
     try {
-        let { topic, text, difficulty, amount } = req.body;
+        let { topic, text, difficulty, amount, mode } = req.body;
 
         // If file is uploaded, extract text
         // @ts-ignore
@@ -63,8 +63,8 @@ export const generateQuiz = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Please provide a topic, text, or upload a file.' });
         }
 
-        const questions = await generateQuizFromText(topic, text, difficulty, amount || 5);
-        res.json({ questions, topic, textSource: text ? 'Extracted/Provided' : 'Generated' });
+        const questions = await generateQuizFromText(topic, text, difficulty, amount || 5, mode);
+        res.json({ questions, topic, textSource: mode === 'web' ? 'Web Scraped' : text ? 'Extracted/Provided' : 'Generated' });
     } catch (error) {
         console.error('Quiz Generation Error:', error);
         res.status(500).json({ message: 'Error generating quiz', error });

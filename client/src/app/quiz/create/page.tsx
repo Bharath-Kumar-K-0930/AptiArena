@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BrainCircuit, Loader2, FileText, Upload, Type, FileType } from "lucide-react";
+import { BrainCircuit, Loader2, FileText, Upload, Type, FileType, Globe, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import Sidebar from "@/components/Sidebar";
@@ -30,6 +30,7 @@ export default function CreateQuizPage() {
 
     const handleGenerate = async () => {
         if (mode === "topic" && !topic) return toast.error("Please enter a topic");
+        if (mode === "web" && !topic) return toast.error("Please enter a topic for web search");
         if (mode === "text" && !rawText) return toast.error("Please paste some text");
         if (mode === "file" && !file) return toast.error("Please upload a file");
 
@@ -39,15 +40,15 @@ export default function CreateQuizPage() {
             const formData = new FormData();
             formData.append("difficulty", "Medium");
             formData.append("amount", qCount.toString());
+            formData.append("mode", mode);
 
-            if (mode === "topic") {
+            if (mode === "topic" || mode === "web") {
                 formData.append("topic", topic);
             } else if (mode === "text") {
                 formData.append("text", rawText);
                 formData.append("topic", topic || "Generated Quiz");
             } else if (mode === "file" && file) {
                 formData.append("file", file);
-                // formData.append("topic", topic); // Optional override
             }
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/quizzes/generate`, {
@@ -162,8 +163,9 @@ export default function CreateQuizPage() {
                     <CardContent className="space-y-6">
                         {step === "input" ? (
                             <Tabs defaultValue="topic" onValueChange={setMode} className="w-full">
-                                <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 p-1 mb-6 rounded-xl border border-gray-700/50">
+                                <TabsList className="grid w-full grid-cols-4 bg-gray-800/50 p-1 mb-6 rounded-xl border border-gray-700/50">
                                     <TabsTrigger value="topic" className="data-[state=active]:bg-teal data-[state=active]:text-white hover:bg-gray-700/50 hover:text-white transition-all duration-200 rounded-lg">Topic</TabsTrigger>
+                                    <TabsTrigger value="web" className="data-[state=active]:bg-teal data-[state=active]:text-white hover:bg-gray-700/50 hover:text-white transition-all duration-200 rounded-lg">Web Search</TabsTrigger>
                                     <TabsTrigger value="text" className="data-[state=active]:bg-teal data-[state=active]:text-white hover:bg-gray-700/50 hover:text-white transition-all duration-200 rounded-lg">Text</TabsTrigger>
                                     <TabsTrigger value="file" className="data-[state=active]:bg-teal data-[state=active]:text-white hover:bg-gray-700/50 hover:text-white transition-all duration-200 rounded-lg">File Upload</TabsTrigger>
                                 </TabsList>
@@ -229,6 +231,73 @@ export default function CreateQuizPage() {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="web" className="space-y-4">
+                                    <div className="p-8 border-2 border-dashed border-gray-700 rounded-xl bg-gray-900/50 flex flex-col items-center text-center space-y-4 hover:border-blue-500/50 transition-colors">
+                                        <div className="p-4 bg-blue-500/10 rounded-full">
+                                            <Globe className="w-8 h-8 text-blue-500" />
+                                        </div>
+                                        <div className="space-y-4 w-full max-w-md mx-auto">
+                                            <div className="space-y-2 text-left">
+                                                <label className="text-sm font-medium text-gray-400">Search Topic Online</label>
+                                                <div className="relative">
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                                    <Input
+                                                        placeholder="e.g. Quantitative Aptitude, GK 2024..."
+                                                        value={topic}
+                                                        onChange={(e) => setTopic(e.target.value)}
+                                                        className="bg-gray-800 border-gray-700 pl-10"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2 text-left">
+                                                <label className="text-sm font-medium text-gray-400">Quantity</label>
+                                                <div className="flex gap-2">
+                                                    {!isCustomQCount ? (
+                                                        <select
+                                                            className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-teal"
+                                                            value={qCount}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val === "custom") {
+                                                                    setIsCustomQCount(true);
+                                                                    setQCount(10);
+                                                                } else {
+                                                                    setQCount(parseInt(val));
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="5">5 Questions</option>
+                                                            <option value="10">10 Questions</option>
+                                                            <option value="15">15 Questions</option>
+                                                            <option value="20">20 Questions</option>
+                                                            <option value="custom">Custom...</option>
+                                                        </select>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 w-full">
+                                                            <Input
+                                                                type="number"
+                                                                min={1}
+                                                                max={50}
+                                                                value={qCount}
+                                                                onChange={(e) => setQCount(parseInt(e.target.value) || 1)}
+                                                                className="bg-gray-800 border-gray-700 h-10"
+                                                            />
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => setIsCustomQCount(false)}
+                                                                className="h-10 text-xs text-gray-500 hover:text-white"
+                                                            >
+                                                                Reset
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-gray-500 italic">I will crawl the web to find real, high-quality questions for you.</p>
                                     </div>
                                 </TabsContent>
 

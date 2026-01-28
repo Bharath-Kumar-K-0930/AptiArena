@@ -65,7 +65,7 @@ const parseQuizPattern = (text: string) => {
     }
 };
 
-export const generateQuizFromText = async (topic: string, text?: string, difficulty?: string, amount: number = 5) => {
+export const generateQuizFromText = async (topic: string, text?: string, difficulty?: string, amount: number = 5, mode?: string) => {
     // 1. Try Deterministic Regex Parsing first
     if (text) {
         const parsed = parseQuizPattern(text);
@@ -115,6 +115,35 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
                             { "text": "Option B", "isCorrect": true }
                         ],
                         "explanation": "High-quality explanation of the answer.",
+                        "timeLimit": 60
+                    }
+                ]
+            `;
+        } else if (mode === 'web') {
+            // Web Intelligence Mode
+            prompt = `
+                You are a sophisticated Web Crawler and Content Aggregator AI. 
+                Your goal is to find, retrieve, and synthesize REAL-WORLD multiple-choice questions (MCQs) for the topic: "${topic}".
+                
+                Search across your internal data for authentic questions commonly found on top educational, aptitude, and quiz websites (such as IndiaBix, Sanfoundry, GeeksforGeeks, Examveda, and PrepInsta).
+                
+                Requirements:
+                1. Authenticity: Provide ${amount} real-world questions that are actually used in competitive exams or aptitude tests.
+                2. Diversity: Include a mix of difficulty levels and sub-topics related to "${topic}".
+                3. Accuracy: Ensure the correct answer and the explanation are technically precise and pedagogical.
+                4. Professionalism: Every question must include a thorough explanation (2-3 sentences) explaining the logic.
+                
+                Return ONLY a raw JSON array (no markdown code blocks, no 'json' prefix) with this specific schema:
+                [
+                    {
+                        "text": "The authentic question text",
+                        "options": [
+                            { "text": "Option A", "isCorrect": false },
+                            { "text": "Option B", "isCorrect": true },
+                            { "text": "Option C", "isCorrect": false },
+                            { "text": "Option D", "isCorrect": false }
+                        ],
+                        "explanation": "A high-quality, pedagogical explanation for the correct answer.",
                         "timeLimit": 60
                     }
                 ]
@@ -193,6 +222,16 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
                 { text: "If A + B means A is the mother of B; A - B means A is the brother B; A % B means A is the father of B and A x B means A is the sister of B, which of the following shows that P is the maternal uncle of Q?", options: ["Q - N + M x P", "P + S x N - Q", "P - M + N x Q", "Q - S % P"], correct: 2, reason: "P - M means P is brother of M. M + N means M is mother of N. So P is uncle of N (and likely Q)." },
                 { text: "Introducing a boy, a girl said, 'He is the son of the daughter of the father of my uncle.' How is the boy related to the girl?", options: ["Brother", "Nephew", "Uncle", "Son-in-law"], correct: 0, reason: "Complex relation implies brother/cousin." },
                 { text: "A is B's sister. C is B's mother. D is C's father. E is D's mother. Then, how is A related to D?", options: ["Granddaughter", "Grandmother", "Daughter", "Grandfather"], correct: 0, reason: "A is daughter of C, C is daughter of D. So A is Granddaughter." }
+            ],
+            gk: [
+                { text: "Which is the largest coffee producing state of India?", options: ["Kerala", "Karnataka", "Tamil Nadu", "Arunachal Pradesh"], correct: 1, reason: "Karnataka is the largest producer of coffee in India." },
+                { text: "The state which has the largest number of sugar mills in India is?", options: ["Bihar", "Haryana", "Punjab", "Uttar Pradesh"], correct: 3, reason: "Uttar Pradesh has the highest number of sugar mills and is the lead producer." },
+                { text: "Which city is known as the 'Silicon Valley of India'?", options: ["Mumbai", "Delhi", "Bengaluru", "Hyderabad"], correct: 2, reason: "Bengaluru is the hub of India's high-tech industry." }
+            ],
+            it: [
+                { text: "What does HTTP stand for?", options: ["Hypertext Transfer Protocol", "High Transfer Text Protocol", "Hyper Transfer Text Processor", "None of these"], correct: 0, reason: "HTTP is the foundation of data communication for the World Wide Web." },
+                { text: "Which protocol is used to send emails?", options: ["HTTP", "FTP", "SMTP", "POP3"], correct: 2, reason: "Simple Mail Transfer Protocol (SMTP) is used for sending emails." },
+                { text: "In computing, what does SQL stand for?", options: ["Simple Query Language", "Structured Query Language", "Single Query Logic", "System Query Level"], correct: 1, reason: "SQL is used for managing and manipulating relational databases." }
             ]
         };
 
@@ -200,6 +239,8 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
         if (t.includes('age')) selectedTemplate = competitiveExams.ages;
         else if (t.includes('series') || t.includes('number')) selectedTemplate = competitiveExams.series;
         else if (t.includes('blood') || t.includes('relation') || t.includes('family')) selectedTemplate = competitiveExams.blood;
+        else if (t.includes('gk') || t.includes('general') || t.includes('knowledge') || t.includes('current')) selectedTemplate = competitiveExams.gk;
+        else if (t.includes('tech') || t.includes('it') || t.includes('comput') || t.includes('software') || t.includes('program')) selectedTemplate = competitiveExams.it;
 
         if (selectedTemplate) {
             console.log("Using Pre-defined Competitive Exam Questions");
