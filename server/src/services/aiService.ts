@@ -232,6 +232,12 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
                 { text: "What does HTTP stand for?", options: ["Hypertext Transfer Protocol", "High Transfer Text Protocol", "Hyper Transfer Text Processor", "None of these"], correct: 0, reason: "HTTP is the foundation of data communication for the World Wide Web." },
                 { text: "Which protocol is used to send emails?", options: ["HTTP", "FTP", "SMTP", "POP3"], correct: 2, reason: "Simple Mail Transfer Protocol (SMTP) is used for sending emails." },
                 { text: "In computing, what does SQL stand for?", options: ["Simple Query Language", "Structured Query Language", "Single Query Logic", "System Query Level"], correct: 1, reason: "SQL is used for managing and manipulating relational databases." }
+            ],
+            profit: [
+                { text: "A person buys a toy for $50 and sells it for $75. What is the profit percentage?", options: ["25%", "50%", "33.33%", "75%"], correct: 1, reason: "Profit = 75 - 50 = 25. Profit % = (25/50) * 100 = 50%." },
+                { text: "If the cost price of 10 articles is equal to the selling price of 8 articles, the gain percentage is:", options: ["20%", "22.5%", "25%", "30%"], correct: 2, reason: "Gain % = [(Difference of articles) / (Articles sold)] * 100 = (2/8) * 100 = 25%." },
+                { text: "A shopkeeper gives a discount of 10% on the marked price of $200. What is the selling price?", options: ["$170", "$180", "$190", "$160"], correct: 1, reason: "Discount = 10% of 200 = $20. Selling Price = 200 - 20 = $180." },
+                { text: "By selling a watch for $144, a man loses 10%. At what price should he sell it to gain 10%?", options: ["$158.40", "$176", "$180", "$192"], correct: 1, reason: "90% of CP = 144 => CP = 160. To gain 10%, SP = 1.10 * 160 = $176." }
             ]
         };
 
@@ -239,9 +245,9 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
         if (t.includes('age')) selectedTemplate = competitiveExams.ages;
         else if (t.includes('series') || t.includes('number')) selectedTemplate = competitiveExams.series;
         else if (t.includes('blood') || t.includes('relation') || t.includes('family')) selectedTemplate = competitiveExams.blood;
+        else if (t.includes('profit') || t.includes('loss') || t.includes('discount') || t.includes('math') || t.includes('percentage')) selectedTemplate = competitiveExams.profit;
         else if (t.includes('gk') || t.includes('general') || t.includes('knowledge') || t.includes('current')) selectedTemplate = competitiveExams.gk;
-        else if (t.includes('tech') || t.includes('it') || t.includes('comput') || t.includes('software') || t.includes('program')) selectedTemplate = competitiveExams.it;
-
+        else if (t.includes('tech') || t.includes('software') || t.includes('program') || t.includes('comput') || (t.includes('it') && t.length < 4)) selectedTemplate = competitiveExams.it;
         if (selectedTemplate) {
             console.log("Using Pre-defined Competitive Exam Questions");
             for (let i = 0; i < amount; i++) {
