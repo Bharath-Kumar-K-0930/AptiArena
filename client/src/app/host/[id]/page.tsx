@@ -240,7 +240,7 @@ export default function HostGamePage() {
 
                 {/* Floating Stats Bar - Fixed to screen to avoid overlap */}
                 {status === "live" && gameMode !== 'slideshow' && (
-                    <div className="fixed top-6 right-6 flex flex-col items-end gap-3 z-50">
+                    <div className="fixed top-20 right-6 flex flex-col items-end gap-3 z-50">
                         <motion.div
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
