@@ -53,9 +53,19 @@ export default function EditQuizPage() {
     }, [id, router]);
 
     const handleQuestionChange = (index: number, field: string, value: any) => {
-        const newQuestions = [...quiz.questions];
-        newQuestions[index] = { ...newQuestions[index], [field]: value };
-        setQuiz({ ...quiz, questions: newQuestions });
+        setQuiz((prev: any) => {
+            const newQuestions = [...prev.questions];
+            newQuestions[index] = { ...newQuestions[index], [field]: value };
+            return { ...prev, questions: newQuestions };
+        });
+    };
+
+    const handleQuestionUpdates = (index: number, updates: Record<string, any>) => {
+        setQuiz((prev: any) => {
+            const newQuestions = [...prev.questions];
+            newQuestions[index] = { ...newQuestions[index], ...updates };
+            return { ...prev, questions: newQuestions };
+        });
     };
 
     const handleOptionChange = (qIndex: number, oIndex: number, text: string) => {
@@ -243,24 +253,25 @@ export default function EditQuizPage() {
                                                 placeholder="Question text..."
                                             />
                                             <div className="flex-shrink-0 pt-2 flex items-center gap-2">
-                                                {q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit) ? (
+                                                {(q.isCustom || (q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
                                                     <div className="flex items-center gap-1 bg-gray-800/80 rounded-md border border-gray-700 p-0.5 h-9">
                                                         <Input
                                                             type="number"
-                                                            value={q.isMinutes ? Math.floor(q.timeLimit / 60) : q.timeLimit}
+                                                            value={q.isMinutes ? Math.floor((q.timeLimit || 0) / 60) : (q.timeLimit || 0)}
                                                             onChange={(e) => {
                                                                 const val = parseInt(e.target.value) || 0;
                                                                 handleQuestionChange(qIndex, 'timeLimit', q.isMinutes ? val * 60 : val);
                                                             }}
                                                             className="w-10 h-7 bg-transparent border-none text-[10px] px-1 focus:ring-0 text-white"
-                                                            placeholder="Val"
+                                                            placeholder="0"
                                                         />
                                                         <select
                                                             className="bg-transparent text-[10px] text-teal font-bold outline-none cursor-pointer pr-1"
                                                             value={q.isMinutes ? "m" : "s"}
                                                             onChange={(e) => {
                                                                 const isMin = e.target.value === "m";
-                                                                handleQuestionChange(qIndex, 'isMinutes', isMin);
+                                                                const currentVal = q.isMinutes ? Math.floor(q.timeLimit / 60) : q.timeLimit;
+                                                                handleQuestionUpdates(qIndex, { isMinutes: isMin, timeLimit: isMin ? currentVal * 60 : currentVal });
                                                             }}
                                                         >
                                                             <option value="s" className="bg-gray-900 text-white">s</option>
@@ -271,8 +282,7 @@ export default function EditQuizPage() {
                                                             variant="ghost"
                                                             className="h-7 w-5 px-1 text-gray-500 hover:text-white"
                                                             onClick={() => {
-                                                                handleQuestionChange(qIndex, 'timeLimit', 30);
-                                                                handleQuestionChange(qIndex, 'isMinutes', false);
+                                                                handleQuestionUpdates(qIndex, { timeLimit: 30, isMinutes: false, isCustom: false });
                                                             }}
                                                         >
                                                             ×
@@ -285,12 +295,14 @@ export default function EditQuizPage() {
                                                         onChange={(e) => {
                                                             const val = e.target.value;
                                                             if (val === "custom") {
-                                                                handleQuestionChange(qIndex, 'timeLimit', 45);
-                                                                handleQuestionChange(qIndex, 'isMinutes', false);
+                                                                handleQuestionUpdates(qIndex, { timeLimit: 45, isMinutes: false, isCustom: true });
                                                             } else {
                                                                 const limit = parseInt(val);
-                                                                handleQuestionChange(qIndex, 'timeLimit', limit);
-                                                                handleQuestionChange(qIndex, 'isMinutes', limit >= 60 && limit % 60 === 0);
+                                                                handleQuestionUpdates(qIndex, {
+                                                                    timeLimit: limit,
+                                                                    isMinutes: limit >= 60 && limit % 60 === 0,
+                                                                    isCustom: false
+                                                                });
                                                             }
                                                         }}
                                                     >

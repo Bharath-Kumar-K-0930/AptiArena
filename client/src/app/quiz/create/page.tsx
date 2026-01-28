@@ -299,11 +299,11 @@ Reason: Explanation here...`}
                                                 {q.text}
                                             </CardTitle>
                                             <div className="ml-2 flex items-center gap-2">
-                                                {q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit) ? (
+                                                {(q.isCustom || (q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
                                                     <div className="flex items-center gap-1 bg-gray-800/80 rounded-md border border-gray-700 p-0.5 h-8">
                                                         <Input
                                                             type="number"
-                                                            value={q.isMinutes ? Math.floor(q.timeLimit / 60) : q.timeLimit}
+                                                            value={q.isMinutes ? Math.floor((q.timeLimit || 0) / 60) : (q.timeLimit || 0)}
                                                             onChange={(e) => {
                                                                 const val = parseInt(e.target.value) || 0;
                                                                 const updated = [...questions];
@@ -311,7 +311,7 @@ Reason: Explanation here...`}
                                                                 setQuestions(updated);
                                                             }}
                                                             className="w-10 h-6 bg-transparent border-none text-[10px] px-1 focus:ring-0 text-white"
-                                                            placeholder="Val"
+                                                            placeholder="0"
                                                         />
                                                         <select
                                                             className="bg-transparent text-[10px] text-teal font-bold outline-none cursor-pointer pr-1"
@@ -319,10 +319,10 @@ Reason: Explanation here...`}
                                                             onChange={(e) => {
                                                                 const isMin = e.target.value === "m";
                                                                 const updated = [...questions];
+                                                                // Convert value to keep it somewhat sane
+                                                                const currentVal = q.isMinutes ? Math.floor(q.timeLimit / 60) : q.timeLimit;
                                                                 updated[i].isMinutes = isMin;
-                                                                // Convert current value to keep it somewhat sane if possible
-                                                                // If switching s->m, maybe divide by 60? 
-                                                                // Let's just toggle the flag, user can fix the number.
+                                                                updated[i].timeLimit = isMin ? currentVal * 60 : currentVal;
                                                                 setQuestions(updated);
                                                             }}
                                                         >
@@ -337,6 +337,7 @@ Reason: Explanation here...`}
                                                                 const updated = [...questions];
                                                                 updated[i].timeLimit = 30;
                                                                 updated[i].isMinutes = false;
+                                                                updated[i].isCustom = false;
                                                                 setQuestions(updated);
                                                             }}
                                                         >
@@ -353,9 +354,11 @@ Reason: Explanation here...`}
                                                             if (val === "custom") {
                                                                 updated[i].timeLimit = 45; // Default custom value
                                                                 updated[i].isMinutes = false;
+                                                                updated[i].isCustom = true;
                                                             } else {
                                                                 updated[i].timeLimit = parseInt(val);
                                                                 updated[i].isMinutes = parseInt(val) >= 60 && parseInt(val) % 60 === 0;
+                                                                updated[i].isCustom = false;
                                                             }
                                                             setQuestions(updated);
                                                         }}
