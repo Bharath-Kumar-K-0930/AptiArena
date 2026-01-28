@@ -65,7 +65,7 @@ export default function PricingPage() {
                             <li className="flex items-center gap-3 text-sm"><Check className="h-5 w-5 text-gold" /> Dedicated Success Manager</li>
                             <li className="flex items-center gap-3 text-sm"><Check className="h-5 w-5 text-gold" /> Custom Branding</li>
                         </ul>
-                        <Link href="/contact">
+                        <Link href="mailto:apti.arenahelpdesk@gmail.com">
                             <Button className="w-full bg-white/10 hover:bg-white/20 text-white">Contact Sales</Button>
                         </Link>
                     </div>

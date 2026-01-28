@@ -64,11 +64,11 @@ export const updateProfile = async (req: Request, res: Response) => {
     try {
         // @ts-ignore
         const userId = req.user.id;
-        const { username, bio, organization, jobTitle } = req.body;
+        const { username, name, bio, organization, jobTitle } = req.body;
 
         const updatedUser = await User.findByIdAndUpdate(
             userId,
-            { username, bio, organization, jobTitle },
+            { username, name, bio, organization, jobTitle },
             { new: true, runValidators: true }
         ).select('-password');
 

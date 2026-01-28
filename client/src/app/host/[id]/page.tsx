@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap } from "lucide-react";
+import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 // Assuming we don't have react-confetti installed, I'll use a simple embedded component or just CSS animations for now.
@@ -326,21 +326,21 @@ export default function HostGamePage() {
                                     {gameMode === 'slideshow' && <span className="bg-purple-900/50 text-purple-300 px-3 py-1 rounded-full text-xs border border-purple-500/30">Presentation Mode</span>}
                                 </div>
 
-                                <h1 className="text-2xl md:text-4xl font-black text-white leading-tight drop-shadow-lg mb-6 max-h-[30vh] flex items-center justify-center">
+                                <h1 className="text-xl md:text-2xl font-black text-white leading-tight drop-shadow-lg mb-4 max-h-[20vh] overflow-y-auto flex items-center justify-center text-center">
                                     {currentQuestion.text}
                                 </h1>
 
                                 {currentQuestion.image && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: 20 }}
+                                        initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="flex justify-center mb-6 shrink-0"
+                                        className="flex justify-center mb-4 shrink"
                                     >
-                                        <img src={currentQuestion.image} alt="Question" className="max-h-[35vh] w-auto object-contain rounded-xl border-4 border-white/20 shadow-2xl bg-black/50" />
+                                        <img src={currentQuestion.image} alt="Question" className="max-h-[25vh] md:max-h-[30vh] w-auto object-contain rounded-xl border-2 border-white/20 shadow-2xl bg-black/50" />
                                     </motion.div>
                                 )}
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full shrink-0">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full shrink">
                                     {currentQuestion.options.map((opt: any, i: number) => {
                                         // "Full Color" - Solid backgrounds with slight gradient
                                         const baseColors = [
@@ -350,25 +350,25 @@ export default function HostGamePage() {
                                             'bg-gradient-to-br from-green-500 to-green-700 border-green-900'
                                         ];
 
-                                        let cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 shadow-xl flex items-center relative overflow-hidden group ";
+                                        let cardClass = "p-3 md:p-4 rounded-xl text-base md:text-lg font-bold transition-all duration-500 border-b-4 shadow-lg flex items-center relative overflow-hidden group ";
 
                                         if (showAnswer) {
                                             if (opt.isCorrect) {
                                                 // Correct: Light transformation (Glowing Green)
-                                                cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 border-green-500 shadow-[0_0_50px_rgba(75,222,128,0.8)] flex items-center relative overflow-hidden group bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 text-white scale-105 z-10 ring-4 ring-green-300/50";
+                                                cardClass = "p-3 md:p-4 rounded-xl text-base md:text-lg font-bold transition-all duration-500 border-b-4 border-green-500 shadow-[0_0_50px_rgba(75,222,128,0.8)] flex items-center relative overflow-hidden group bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-500 text-white scale-105 z-10 ring-4 ring-green-300/50";
                                             } else {
                                                 // Incorrect: Fade out
-                                                cardClass = "p-4 md:p-6 rounded-xl text-lg md:text-xl font-bold transition-all duration-500 border-b-4 shadow-none flex items-center relative overflow-hidden group bg-slate-800/80 border-transparent text-gray-500 opacity-30 grayscale blur-[1px]";
+                                                cardClass = "p-3 md:p-4 rounded-xl text-base md:text-lg font-bold transition-all duration-500 border-b-4 shadow-none flex items-center relative overflow-hidden group bg-slate-800/80 border-transparent text-gray-500 opacity-30 grayscale blur-[1px]";
                                             }
                                         } else {
                                             // Default: Full Color
-                                            cardClass += `${baseColors[i % 4]} text-white hover:brightness-110 hover:scale-[1.01] active:scale-[0.98] cursor-default`;
+                                            cardClass += `${baseColors[i % 4]} text-white hover:brightness-110 hover:scale-[1.01] cursor-default`;
                                         }
 
                                         return (
                                             <motion.div
                                                 key={i}
-                                                initial={{ opacity: 0, y: 10 }}
+                                                initial={{ opacity: 0, y: 5 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ delay: i * 0.05 }}
                                                 className={cardClass}
@@ -384,30 +384,50 @@ export default function HostGamePage() {
                                                     />
                                                 )}
 
-                                                <div className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl font-black bg-black/20 text-white/90 mr-4 shrink-0 relative z-10">
+                                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center text-lg md:text-xl font-black bg-black/20 text-white/90 mr-3 shrink-0 relative z-10">
                                                     {String.fromCharCode(65 + i)}
                                                 </div>
-                                                <span className="leading-snug drop-shadow-md relative z-10">{opt.text}</span>
+                                                <span className="leading-tight drop-shadow-md relative z-10">{opt.text}</span>
                                             </motion.div>
                                         );
                                     })}
                                 </div>
 
-                                <div className="flex justify-center gap-4 mt-8 shrink-0">
+                                {showAnswer && currentQuestion.explanation && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10, height: 0 }}
+                                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                                        className="w-full bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mt-2 shrink-0 overflow-hidden"
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div className="bg-blue-500/20 p-2 rounded-lg shrink-0">
+                                                <Lightbulb className="w-5 h-5 text-blue-400" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="text-[10px] md:text-xs font-bold text-blue-300 uppercase tracking-widest mb-1">Reason for Correct Answer</h3>
+                                                <p className="text-gray-200 text-xs md:text-sm leading-relaxed line-clamp-3 md:line-clamp-none overflow-y-auto max-h-[10vh]">
+                                                    {currentQuestion.explanation}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                <div className="flex justify-center gap-4 mt-6 shrink-0">
                                     {!showAnswer && (
                                         <Button
                                             size="lg"
-                                            className="text-lg px-8 py-6 bg-white text-black hover:bg-gray-200 font-bold rounded-full transition-all shadow-lg hover:scale-105"
+                                            className="text-base px-6 py-4 bg-white text-black hover:bg-gray-200 font-bold rounded-full transition-all shadow-lg hover:scale-105"
                                             onClick={() => setShowAnswer(true)}
                                         >
-                                            <Star className="mr-2 h-5 w-5 text-yellow-500 fill-current" /> Reveal Answer
+                                            <Star className="mr-2 h-4 w-4 text-yellow-500 fill-current" /> Reveal Answer
                                         </Button>
                                     )}
                                     {showAnswer && (
                                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
                                             <Button
                                                 size="lg"
-                                                className="text-lg px-8 py-6 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full shadow-[0_0_30px_rgba(147,51,234,0.6)] hover:scale-105 transition-all"
+                                                className="text-base px-6 py-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full shadow-[0_0_30px_rgba(147,51,234,0.6)] hover:scale-105 transition-all"
                                                 onClick={() => {
                                                     if (socket && pin) {
                                                         if (gameMode === 'slideshow') {
@@ -419,9 +439,9 @@ export default function HostGamePage() {
                                                 }}
                                             >
                                                 {gameMode === 'slideshow' ? (
-                                                    <>Next Question <ArrowRight className="ml-2 h-6 w-6" /></>
+                                                    <>Next Question <ArrowRight className="ml-2 h-5 w-5" /></>
                                                 ) : (
-                                                    <>Show Leaderboard <Trophy className="ml-2 h-6 w-6 text-yellow-300" /></>
+                                                    <>Show Leaderboard <Trophy className="ml-2 h-5 w-5 text-yellow-300" /></>
                                                 )}
                                             </Button>
                                         </motion.div>

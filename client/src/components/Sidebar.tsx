@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, PlusCircle, History, BarChart2, Settings, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, BarChart2, Settings, LogOut, Menu, X, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,10 +15,21 @@ export default function Sidebar() {
 
     useEffect(() => {
         // Hydration safe user fetching
-        const userData = localStorage.getItem("user");
-        if (userData) {
-            setUser(JSON.parse(userData));
-        }
+        const fetchUser = () => {
+            const userData = localStorage.getItem("user");
+            if (userData) {
+                setUser(JSON.parse(userData));
+            }
+        };
+
+        fetchUser();
+
+        // Listen for storage changes (for profile updates)
+        window.addEventListener('storage', fetchUser);
+
+        return () => {
+            window.removeEventListener('storage', fetchUser);
+        };
     }, []);
 
     // Close mobile menu on route change
@@ -31,6 +42,7 @@ export default function Sidebar() {
         { href: "/quiz/create", label: "Create Quiz", icon: PlusCircle },
         { href: "/dashboard/quizzes", label: "My Quizzes", icon: History },
         { href: "/dashboard/analytics", label: "Analytics", icon: BarChart2 },
+        { href: "/dashboard/profile", label: "Profile", icon: User },
         { href: "/dashboard/settings", label: "Settings", icon: Settings },
     ];
 
@@ -41,16 +53,16 @@ export default function Sidebar() {
     };
 
     const UserProfile = () => (
-        <div className="mt-auto p-4 border-t border-gray-800">
-            <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center font-bold text-white uppercase">
+        <div className="mt-auto p-4 border-t border-gray-800 text-gray-400 text-sm">
+            <Link href="/dashboard/profile" className="flex items-center gap-3 mb-4 group hover:bg-gray-800/50 p-2 rounded-lg transition-colors">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center font-bold text-white uppercase shadow-lg group-hover:scale-105 transition-transform">
                     {(user?.name?.[0] || user?.username?.[0] || "U").toUpperCase()}
                 </div>
                 <div className="overflow-hidden">
-                    <p className="text-sm font-bold text-white truncate">{user?.name || user?.username || "User"}</p>
+                    <p className="text-sm font-bold text-white truncate group-hover:text-teal transition-colors">{user?.name || user?.username || "User"}</p>
                     <p className="text-xs text-gray-500 truncate">{user?.email || "user@example.com"}</p>
                 </div>
-            </div>
+            </Link>
             <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 text-red-400 hover:text-red-300 text-sm font-medium w-full"

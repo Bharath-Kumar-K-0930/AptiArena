@@ -314,13 +314,6 @@ export default function DashboardPage() {
                                             className="w-full h-full object-cover opacity-40 group-hover:scale-110 transition-transform duration-500"
                                         />
                                     </div>
-                                    <div className="relative z-10 hidden group-hover:flex absolute inset-0 items-center justify-center bg-black/60 transition-all duration-300">
-                                        <Link href={`/host/${quiz._id}`}>
-                                            <Button className="bg-teal hover:bg-teal/80 text-white rounded-full px-8 py-6 text-lg shadow-xl shadow-teal/20 transform hover:scale-105 transition-all">
-                                                <Play className="mr-2 h-5 w-5 fill-current" /> HOST NOW
-                                            </Button>
-                                        </Link>
-                                    </div>
 
                                     <div className="relative z-10">
                                         <CardHeader>

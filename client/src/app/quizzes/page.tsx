@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Search, Play, Star, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ExploreQuizzesPage() {
+    const router = useRouter();
     // Mock public quizzes
     const featuredQuizzes = [
         { id: 1, title: "General Knowledge 2024", description: "Test your awareness of current events and facts.", qCount: 20, plays: 1200, category: "General" },
@@ -17,6 +20,16 @@ export default function ExploreQuizzesPage() {
         { id: 5, title: "Science & Nature", description: "Physics, Biology, and Chemistry basics.", qCount: 30, plays: 980, category: "Science" },
         { id: 6, title: "Cinema Classics", description: "How well do you know the golden age of film?", qCount: 12, plays: 430, category: "Entertainment" },
     ];
+
+    const handleCreateQuiz = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast.error("To create quiz you have login");
+            router.push("/login");
+        } else {
+            router.push("/quiz/create");
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -117,11 +130,13 @@ export default function ExploreQuizzesPage() {
                     <p className="text-muted-foreground mb-8">
                         Use our AI generation tool to create the perfect quiz in seconds.
                     </p>
-                    <Link href="/quiz/create">
-                        <Button size="lg" className="bg-teal hover:bg-teal/80 text-white px-8">
-                            Create Your Own Quiz
-                        </Button>
-                    </Link>
+                    <Button
+                        size="lg"
+                        className="bg-teal hover:bg-teal/80 text-white px-8"
+                        onClick={handleCreateQuiz}
+                    >
+                        Create Your Own Quiz
+                    </Button>
                 </div>
             </div>
         </div>

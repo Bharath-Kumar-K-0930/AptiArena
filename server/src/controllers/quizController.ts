@@ -99,29 +99,96 @@ export const deleteQuiz = async (req: Request, res: Response) => {
 };
 
 import GameSession from '../models/GameSession';
+import mongoose from 'mongoose';
 
 export const getHostStats = async (req: Request, res: Response) => {
     try {
         // @ts-ignore
         const hostId = req.user.id;
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
         const quizzes = await Quiz.find({ hostId });
         const totalQuizzes = quizzes.length;
         const totalQuestions = quizzes.reduce((acc, quiz) => acc + quiz.questions.length, 0);
 
         const sessions = await GameSession.find({ hostId });
-
         const totalSessions = sessions.length;
         const totalParticipants = sessions.reduce((acc, session) => acc + session.participants.length, 0);
+
+        // Aggregate quiz activity per day
+        const quizActivity = await Quiz.aggregate([
+            {
+                $match: {
+                    hostId: new mongoose.Types.ObjectId(hostId),
+                    createdAt: { $gte: thirtyDaysAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Aggregate session activity per day
+        const sessionActivity = await GameSession.aggregate([
+            {
+                $match: {
+                    hostId: new mongoose.Types.ObjectId(hostId),
+                    createdAt: { $gte: thirtyDaysAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        // Merge activity data
+        const activityMap: { [key: string]: { date: string, created: number, sessions: number } } = {};
+
+        // Initialize with last 30 days
+        for (let i = 29; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateStr = date.toISOString().split('T')[0];
+            activityMap[dateStr] = {
+                date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                created: 0,
+                sessions: 0
+            };
+        }
+
+        quizActivity.forEach(item => {
+            if (activityMap[item._id]) {
+                activityMap[item._id].created = item.count;
+            }
+        });
+
+        sessionActivity.forEach(item => {
+            if (activityMap[item._id]) {
+                activityMap[item._id].sessions = item.count;
+            }
+        });
+
+        const activity = Object.values(activityMap);
 
         res.json({
             totalQuizzes,
             totalSessions,
             totalParticipants,
             totalQuestions,
-            joinedQuizzes: 0 // Placeholder until User model has participation history
+            joinedQuizzes: 0,
+            activity
         });
     } catch (error) {
+        console.error("Stats aggregation error:", error);
         res.status(500).json({ message: 'Error fetching stats', error });
     }
 };
