@@ -243,23 +243,37 @@ export default function EditQuizPage() {
                                                 placeholder="Question text..."
                                             />
                                             <div className="flex-shrink-0 pt-2 flex items-center gap-2">
-                                                {q.timeLimit && ![10, 20, 30, 60, 120].includes(q.timeLimit) ? (
-                                                    <div className="flex items-center gap-1">
+                                                {q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit) ? (
+                                                    <div className="flex items-center gap-1 bg-gray-800/80 rounded-md border border-gray-700 p-0.5 h-9">
                                                         <Input
                                                             type="number"
-                                                            value={q.timeLimit}
+                                                            value={q.isMinutes ? Math.floor(q.timeLimit / 60) : q.timeLimit}
                                                             onChange={(e) => {
-                                                                const val = parseInt(e.target.value);
-                                                                handleQuestionChange(qIndex, 'timeLimit', isNaN(val) ? 0 : val);
+                                                                const val = parseInt(e.target.value) || 0;
+                                                                handleQuestionChange(qIndex, 'timeLimit', q.isMinutes ? val * 60 : val);
                                                             }}
-                                                            className="w-14 h-9 bg-gray-800 border-gray-700 text-xs px-2 focus:ring-teal"
-                                                            placeholder="Sec"
+                                                            className="w-10 h-7 bg-transparent border-none text-[10px] px-1 focus:ring-0 text-white"
+                                                            placeholder="Val"
                                                         />
+                                                        <select
+                                                            className="bg-transparent text-[10px] text-teal font-bold outline-none cursor-pointer pr-1"
+                                                            value={q.isMinutes ? "m" : "s"}
+                                                            onChange={(e) => {
+                                                                const isMin = e.target.value === "m";
+                                                                handleQuestionChange(qIndex, 'isMinutes', isMin);
+                                                            }}
+                                                        >
+                                                            <option value="s" className="bg-gray-900 text-white">s</option>
+                                                            <option value="m" className="bg-gray-900 text-white">m</option>
+                                                        </select>
                                                         <Button
                                                             size="icon"
                                                             variant="ghost"
-                                                            className="h-9 w-6 px-1 text-gray-500 hover:text-white"
-                                                            onClick={() => handleQuestionChange(qIndex, 'timeLimit', 30)}
+                                                            className="h-7 w-5 px-1 text-gray-500 hover:text-white"
+                                                            onClick={() => {
+                                                                handleQuestionChange(qIndex, 'timeLimit', 30);
+                                                                handleQuestionChange(qIndex, 'isMinutes', false);
+                                                            }}
                                                         >
                                                             ×
                                                         </Button>
@@ -272,16 +286,21 @@ export default function EditQuizPage() {
                                                             const val = e.target.value;
                                                             if (val === "custom") {
                                                                 handleQuestionChange(qIndex, 'timeLimit', 45);
+                                                                handleQuestionChange(qIndex, 'isMinutes', false);
                                                             } else {
-                                                                handleQuestionChange(qIndex, 'timeLimit', parseInt(val));
+                                                                const limit = parseInt(val);
+                                                                handleQuestionChange(qIndex, 'timeLimit', limit);
+                                                                handleQuestionChange(qIndex, 'isMinutes', limit >= 60 && limit % 60 === 0);
                                                             }
                                                         }}
                                                     >
                                                         <option value="10">10s</option>
                                                         <option value="20">20s</option>
                                                         <option value="30">30s</option>
-                                                        <option value="60">60s</option>
+                                                        <option value="60">1m</option>
                                                         <option value="120">2m</option>
+                                                        <option value="180">3m</option>
+                                                        <option value="300">5m</option>
                                                         <option value="custom">Custom...</option>
                                                     </select>
                                                 )}
