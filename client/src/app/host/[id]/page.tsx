@@ -238,6 +238,52 @@ export default function HostGamePage() {
             {/* Content Layer */}
             <div className="relative z-10 container mx-auto p-4 md:p-8 flex-1 flex flex-col items-center justify-center">
 
+                {/* Floating Stats Bar - Fixed to screen to avoid overlap */}
+                {status === "live" && gameMode !== 'slideshow' && (
+                    <div className="fixed top-6 right-6 flex flex-col items-end gap-3 z-50">
+                        <motion.div
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="p-4 bg-slate-900/90 rounded-2xl border border-white/10 backdrop-blur-md shadow-2xl min-w-[140px]"
+                        >
+                            <div className="flex justify-between items-start mb-2">
+                                <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Responded</div>
+                                {timeLeft !== null && !showAnswer && (
+                                    <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold transition-colors ${timeLeft <= 10 ? 'bg-red-500/20 border-red-500/30 text-red-400 animate-pulse' : 'bg-orange-500/20 border-orange-500/30 text-orange-400'}`}>
+                                        <Zap className={`w-3 h-3 ${timeLeft <= 10 ? 'fill-red-400' : ''}`} /> {timeLeft}s
+                                    </div>
+                                )}
+                            </div>
+                            <div className="text-4xl font-black text-white flex items-baseline gap-1">
+                                <span className={`${answeredCount === players.length && players.length > 0 ? 'text-green-400' : 'text-cyan-400'} drop-shadow-[0_0_15px_rgba(34,211,238,0.3)]`}>{answeredCount}</span>
+                                <span className="text-gray-600 text-xl">/</span>
+                                <span className="text-gray-400 text-xl">{players.length}</span>
+                            </div>
+                        </motion.div>
+
+                        {/* Waiting For List */}
+                        <AnimatePresence>
+                            {!showAnswer && players.length > respondedPlayers.size && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    className="bg-black/40 backdrop-blur-md p-3 rounded-xl border border-white/10 max-w-[220px] text-right shadow-xl"
+                                >
+                                    <div className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-2 border-b border-white/5 pb-1">Waiting for</div>
+                                    <div className="flex flex-wrap justify-end gap-1.5 max-h-[30vh] overflow-y-auto pr-1 custom-scrollbar">
+                                        {players.filter(p => !respondedPlayers.has(p)).map((name, i) => (
+                                            <span key={i} className="text-[10px] text-gray-300 bg-white/5 px-2 py-0.5 rounded-md border border-white/10 whitespace-nowrap">
+                                                {name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
+
                 {/* Waiting State */}
                 {status === "waiting" && (
                     <motion.div
@@ -345,49 +391,9 @@ export default function HostGamePage() {
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="w-full max-w-6xl space-y-8 min-h-[70vh] flex flex-col relative"
+                        className="w-full max-w-5xl space-y-8 min-h-[70vh] flex flex-col relative"
                     >
-                        {/* Live Stats Bar - Hide in Slide Show */}
-                        {gameMode !== 'slideshow' && (
-                            <div className="absolute top-0 right-0 m-4 flex flex-col items-end gap-3 z-20">
-                                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg min-w-[120px]">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Responded</div>
-                                        {timeLeft !== null && !showAnswer && (
-                                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-bold">
-                                                <Zap className="w-3 h-3 animate-pulse" /> {timeLeft}s
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="text-3xl font-black text-white flex items-baseline gap-1">
-                                        <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">{answeredCount}</span>
-                                        <span className="text-gray-600 text-lg">/</span>
-                                        <span className="text-gray-400 text-lg">{players.length}</span>
-                                    </div>
-                                </div>
-
-                                {/* Waiting For List */}
-                                <AnimatePresence>
-                                    {!showAnswer && players.length > respondedPlayers.size && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: 20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: 20 }}
-                                            className="bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/5 max-w-[200px] text-right"
-                                        >
-                                            <div className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-1">Waiting for</div>
-                                            <div className="flex flex-wrap justify-end gap-1.5">
-                                                {players.filter(p => !respondedPlayers.has(p)).map((name, i) => (
-                                                    <span key={i} className="text-[10px] text-gray-300 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
-                                                        {name}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        )}
+                        {/* Live Stats Bar - Moved to top level for better visibility */}
 
                         {!showLeaderboard ? (
                             <div className="flex-1 flex flex-col justify-center h-full max-h-[85vh]">
