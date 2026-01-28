@@ -79,11 +79,26 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-6 justify-center"
           >
-            <Link href={isAuthenticated ? "/dashboard" : "/register"}>
-              <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-teal hover:bg-teal/80 text-white shadow-[0_0_30px_-5px_rgba(27,160,152,0.4)] transition-all duration-300 transform hover:scale-105">
-                {isAuthenticated ? "Go to Dashboard" : "Get Started for Free"}
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link href="/dashboard">
+                  <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-teal hover:bg-teal/80 text-white shadow-[0_0_30px_-5px_rgba(27,160,152,0.4)] transition-all duration-300 transform hover:scale-105">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+                <Link href="/quiz/create">
+                  <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-gradient-to-r from-gold to-orange-500 hover:from-gold/90 hover:to-orange-600 text-black font-bold shadow-[0_0_30px_-5px_rgba(255,191,0,0.4)] transition-all duration-300 transform hover:scale-105 gap-2">
+                    <BrainCircuit className="h-5 w-5" /> Create Quiz
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Link href="/register">
+                <Button size="lg" className="h-14 px-10 text-lg rounded-full bg-teal hover:bg-teal/80 text-white shadow-[0_0_30px_-5px_rgba(27,160,152,0.4)] transition-all duration-300 transform hover:scale-105">
+                  Get Started for Free
+                </Button>
+              </Link>
+            )}
           </motion.div>
 
           {/* Join Game Section */}
