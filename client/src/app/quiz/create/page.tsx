@@ -26,6 +26,7 @@ export default function CreateQuizPage() {
     const [rawText, setRawText] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [qCount, setQCount] = useState(5);
+    const [difficulty, setDifficulty] = useState("Medium");
     const [isCustomQCount, setIsCustomQCount] = useState(false);
 
     const handleGenerate = async () => {
@@ -38,7 +39,7 @@ export default function CreateQuizPage() {
         try {
             const token = localStorage.getItem("token");
             const formData = new FormData();
-            formData.append("difficulty", "Medium");
+            formData.append("difficulty", difficulty);
             formData.append("amount", qCount.toString());
             formData.append("mode", mode);
 
@@ -175,8 +176,8 @@ export default function CreateQuizPage() {
                                         <div className="p-4 bg-teal/10 rounded-full">
                                             <Type className="w-8 h-8 text-teal" />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
+                                        <div className="grid grid-cols-3 gap-4 w-full">
+                                            <div className="space-y-2 text-left">
                                                 <label className="text-sm font-medium text-gray-400">Enter a Topic</label>
                                                 <Input
                                                     placeholder="e.g. World War II..."
@@ -185,71 +186,17 @@ export default function CreateQuizPage() {
                                                     className="bg-gray-800 border-gray-700"
                                                 />
                                             </div>
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium text-gray-400">Question Count</label>
-                                                <div className="flex gap-2">
-                                                    {!isCustomQCount ? (
-                                                        <select
-                                                            className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                            value={qCount}
-                                                            onChange={(e) => {
-                                                                const val = e.target.value;
-                                                                if (val === "custom") {
-                                                                    setIsCustomQCount(true);
-                                                                    setQCount(10); // Default custom value
-                                                                } else {
-                                                                    setQCount(parseInt(val));
-                                                                }
-                                                            }}
-                                                        >
-                                                            <option value="5">5 Questions</option>
-                                                            <option value="10">10 Questions</option>
-                                                            <option value="15">15 Questions</option>
-                                                            <option value="20">20 Questions</option>
-                                                            <option value="custom">Custom...</option>
-                                                        </select>
-                                                    ) : (
-                                                        <div className="flex items-center gap-2 w-full">
-                                                            <Input
-                                                                type="number"
-                                                                min={1}
-                                                                max={50}
-                                                                value={qCount}
-                                                                onChange={(e) => setQCount(parseInt(e.target.value) || 1)}
-                                                                className="bg-gray-800 border-gray-700 h-10"
-                                                            />
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => setIsCustomQCount(false)}
-                                                                className="h-10 text-xs text-gray-500 hover:text-white"
-                                                            >
-                                                                Reset
-                                                            </Button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </TabsContent>
-                                <TabsContent value="web" className="space-y-4">
-                                    <div className="p-8 border-2 border-dashed border-gray-700 rounded-xl bg-gray-900/50 flex flex-col items-center text-center space-y-4 hover:border-blue-500/50 transition-colors">
-                                        <div className="p-4 bg-blue-500/10 rounded-full">
-                                            <Globe className="w-8 h-8 text-blue-500" />
-                                        </div>
-                                        <div className="space-y-4 w-full max-w-md mx-auto">
                                             <div className="space-y-2 text-left">
-                                                <label className="text-sm font-medium text-gray-400">Search Topic Online</label>
-                                                <div className="relative">
-                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                                                    <Input
-                                                        placeholder="e.g. Quantitative Aptitude, GK 2024..."
-                                                        value={topic}
-                                                        onChange={(e) => setTopic(e.target.value)}
-                                                        className="bg-gray-800 border-gray-700 pl-10"
-                                                    />
-                                                </div>
+                                                <label className="text-sm font-medium text-gray-400">Difficulty</label>
+                                                <select
+                                                    className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-teal"
+                                                    value={difficulty}
+                                                    onChange={(e) => setDifficulty(e.target.value)}
+                                                >
+                                                    <option value="Easy">Easy</option>
+                                                    <option value="Medium">Medium</option>
+                                                    <option value="Hard">Hard / Expert</option>
+                                                </select>
                                             </div>
                                             <div className="space-y-2 text-left">
                                                 <label className="text-sm font-medium text-gray-400">Quantity</label>
@@ -297,6 +244,87 @@ export default function CreateQuizPage() {
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="web" className="space-y-4">
+                                    <div className="p-8 border-2 border-dashed border-gray-700 rounded-xl bg-gray-900/50 flex flex-col items-center text-center space-y-4 hover:border-blue-500/50 transition-colors">
+                                        <div className="p-4 bg-blue-500/10 rounded-full">
+                                            <Globe className="w-8 h-8 text-blue-500" />
+                                        </div>
+                                        <div className="space-y-4 w-full max-w-lg mx-auto">
+                                            <div className="space-y-2 text-left">
+                                                <label className="text-sm font-medium text-gray-400">Search Topic Online</label>
+                                                <div className="relative">
+                                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                                    <Input
+                                                        placeholder="e.g. Quantitative Aptitude, GK 2024..."
+                                                        value={topic}
+                                                        onChange={(e) => setTopic(e.target.value)}
+                                                        className="bg-gray-800 border-gray-700 pl-10"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4 text-left">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium text-gray-400">Difficulty</label>
+                                                    <select
+                                                        className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-teal"
+                                                        value={difficulty}
+                                                        onChange={(e) => setDifficulty(e.target.value)}
+                                                    >
+                                                        <option value="Easy">Easy</option>
+                                                        <option value="Medium">Medium</option>
+                                                        <option value="Hard">Hard / Expert</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium text-gray-400">Quantity</label>
+                                                    <div className="flex gap-2">
+                                                        {!isCustomQCount ? (
+                                                            <select
+                                                                className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-teal"
+                                                                value={qCount}
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value;
+                                                                    if (val === "custom") {
+                                                                        setIsCustomQCount(true);
+                                                                        setQCount(10);
+                                                                    } else {
+                                                                        setQCount(parseInt(val));
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <option value="5">5 Questions</option>
+                                                                <option value="10">10 Questions</option>
+                                                                <option value="15">15 Questions</option>
+                                                                <option value="20">20 Questions</option>
+                                                                <option value="custom">Custom...</option>
+                                                            </select>
+                                                        ) : (
+                                                            <div className="flex items-center gap-2 w-full">
+                                                                <Input
+                                                                    type="number"
+                                                                    min={1}
+                                                                    max={50}
+                                                                    value={qCount}
+                                                                    onChange={(e) => setQCount(parseInt(e.target.value) || 1)}
+                                                                    className="bg-gray-800 border-gray-700 h-10"
+                                                                />
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => setIsCustomQCount(false)}
+                                                                    className="h-10 text-xs text-gray-500 hover:text-white"
+                                                                >
+                                                                    Reset
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <p className="text-xs text-gray-500 italic">I will crawl the web to find real, high-quality questions for you.</p>
                                     </div>
                                 </TabsContent>
@@ -309,8 +337,67 @@ export default function CreateQuizPage() {
                                             rows={8}
                                             value={rawText}
                                             onChange={(e) => setRawText(e.target.value)}
-                                            className="bg-gray-800 border-gray-700 font-mono text-sm"
+                                            className="bg-gray-800 border-gray-700 font-mono text-sm mb-6"
                                         />
+                                        <div className="grid grid-cols-2 gap-4 text-left mb-6">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-400">Target Difficulty</label>
+                                                <select
+                                                    className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-teal"
+                                                    value={difficulty}
+                                                    onChange={(e) => setDifficulty(e.target.value)}
+                                                >
+                                                    <option value="Easy">Easy</option>
+                                                    <option value="Medium">Medium</option>
+                                                    <option value="Hard">Hard / Expert</option>
+                                                </select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-medium text-gray-400">Question Count</label>
+                                                <div className="flex gap-2">
+                                                    {!isCustomQCount ? (
+                                                        <select
+                                                            className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-1 focus:ring-teal"
+                                                            value={qCount}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val === "custom") {
+                                                                    setIsCustomQCount(true);
+                                                                    setQCount(10);
+                                                                } else {
+                                                                    setQCount(parseInt(val));
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="5">5 Questions</option>
+                                                            <option value="10">10 Questions</option>
+                                                            <option value="15">15 Questions</option>
+                                                            <option value="20">20 Questions</option>
+                                                            <option value="custom">Custom...</option>
+                                                        </select>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 w-full">
+                                                            <Input
+                                                                type="number"
+                                                                min={1}
+                                                                max={50}
+                                                                value={qCount}
+                                                                onChange={(e) => setQCount(parseInt(e.target.value) || 1)}
+                                                                className="bg-gray-800 border-gray-700 h-10"
+                                                            />
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => setIsCustomQCount(false)}
+                                                                className="h-10 text-xs text-gray-500 hover:text-white"
+                                                            >
+                                                                Reset
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div className="bg-blue-900/20 border border-blue-500/20 rounded-lg p-4 text-sm text-gray-300 space-y-2">
                                             <p className="font-semibold text-blue-400 flex items-center gap-2">
                                                 <BrainCircuit className="w-4 h-4" />

@@ -129,9 +129,10 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
                 
                 Requirements:
                 1. Authenticity: Provide ${amount} real-world questions that are actually used in competitive exams or aptitude tests.
-                2. Diversity: Include a mix of difficulty levels and sub-topics related to "${topic}".
-                3. Accuracy: Ensure the correct answer and the explanation are technically precise and pedagogical.
-                4. Professionalism: Every question must include a thorough explanation (2-3 sentences) explaining the logic.
+                2. Difficulty Target: ${difficulty || 'Medium'}. ${difficulty === 'Hard' ? 'STRICT REQUIREMENT: Focus on senior/expert level questions. Skip basic definitions. Use complex problem statements.' : ''}
+                3. Diversity: Include a mix of difficulty levels and sub-topics related to "${topic}".
+                4. Accuracy: Ensure the correct answer and the explanation are technically precise and pedagogical.
+                5. Professionalism: Every question must include a thorough explanation (2-3 sentences) explaining the logic.
                 
                 Return ONLY a raw JSON array (no markdown code blocks, no 'json' prefix) with this specific schema:
                 [
@@ -152,14 +153,22 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
             // Generation Mode
             prompt = `
                 You are a high-level academic content creator specializing in competitive examinations (like GMAT, SAT, UPSC, and technical interviews).
-                Generate ${amount} ADVANCED, non-trivial multiple-choice questions (MCQs) about "${topic}".
+                Generate ${amount} ${difficulty === 'Hard' ? 'EXPERT-LEVEL, CONCEPTUALLY DEPTH' : 'ADVANCED, non-trivial'} multiple-choice questions (MCQs) about "${topic}".
                 
                 Target Difficulty: ${difficulty || 'Medium'}. 
                 
+                ${difficulty === 'Hard' ? `
+                STRICT QUALITY STANDARDS FOR HARD/EXPERT LEVEL:
+                - LOGIC: Questions must require multi-step reasoning or applying concepts to complex, non-standard scenarios.
+                - DEPTH: Avoid surface-level "What is X" questions. Focus on "How does X behave under Y conditions" or "Compare X and Z in context P".
+                - QUANTITATIVE: If applicable, include mathematical or logical derivations.
+                - NO TRIVIA: Exclude any questions that can be answered by simple memorization.
+                ` : `
                 Quality Standards:
                 1. Complexity: Questions must test deep conceptual understanding, analytical thinking, or practical problem-solving. Avoid surface-level recall or "True/False" style simplicity.
                 2. Professionalism: Use clear, technical, and precise language.
                 3. Plausible Distractors: All 4 options must be plausible to someone with only a partial understanding of the topic. Avoid "unrelated" or obviously wrong options.
+                `}
                 4. Explanations: Provide a thorough, pedagogical explanation (2-3 sentences) describing the logic behind the correct answer and clarifying common misconceptions.
                 
                 Return ONLY a raw JSON array (no markdown code blocks, no preamble, no 'json' prefix) with this specific schema:
