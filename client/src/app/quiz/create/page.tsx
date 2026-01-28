@@ -299,7 +299,7 @@ Reason: Explanation here...`}
                                                 {q.text}
                                             </CardTitle>
                                             <div className="ml-2 flex items-center gap-2">
-                                                {(q.isCustom || (q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
+                                                {(q.isCustom || (q.timeLimit && ![0, 10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
                                                     <div className="flex items-center gap-1 bg-gray-800/80 rounded-md border border-gray-700 p-0.5 h-8">
                                                         <Input
                                                             type="number"
@@ -370,6 +370,7 @@ Reason: Explanation here...`}
                                                         <option value="120">2m</option>
                                                         <option value="180">3m</option>
                                                         <option value="300">5m</option>
+                                                        <option value="0">No Timer</option>
                                                         <option value="custom">Custom...</option>
                                                     </select>
                                                 )}

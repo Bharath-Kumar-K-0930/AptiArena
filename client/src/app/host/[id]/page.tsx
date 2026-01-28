@@ -119,7 +119,9 @@ export default function HostGamePage() {
             setRespondedPlayers(new Set());
 
             // Start Timer
-            if (question.timeLimit) {
+            if (question.timeLimit === 0) {
+                setTimeLeft(null); // No timer
+            } else if (question.timeLimit) {
                 setTimeLeft(question.timeLimit);
             } else {
                 setTimeLeft(30); // Default 30s
@@ -188,7 +190,7 @@ export default function HostGamePage() {
 
     // Auto-reveal when timer hits zero
     useEffect(() => {
-        if (timeLeft === 0 && !showAnswer && status === 'live') {
+        if (timeLeft !== null && timeLeft === 0 && !showAnswer && status === 'live') {
             setShowAnswer(true);
             // We might want to notify players that time is up, 
             // but the server's 'reveal_answer' is usually triggered by host.
@@ -265,6 +267,11 @@ export default function HostGamePage() {
                                 {timeLeft !== null && !showAnswer && (
                                     <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold transition-colors ${timeLeft <= 10 ? 'bg-red-500/20 border-red-500/30 text-red-400 animate-pulse' : 'bg-orange-500/20 border-orange-500/30 text-orange-400'}`}>
                                         <Zap className={`w-3 h-3 ${timeLeft <= 10 ? 'fill-red-400' : ''}`} /> {timeLeft}s
+                                    </div>
+                                )}
+                                {timeLeft === null && status === 'live' && !showAnswer && (
+                                    <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-blue-500/20 border-blue-500/30 text-blue-400 text-[10px] font-bold">
+                                        <Star className="w-3 h-3 fill-blue-400" /> Untimed
                                     </div>
                                 )}
                             </div>

@@ -50,6 +50,7 @@ export default function Navbar() {
 
                 {/* Desktop Nav */}
                 <div className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+                    <Link href="/" className="hover:text-white transition">Home</Link>
                     <Link href="/quizzes" className="hover:text-white transition">Explore Quizzes</Link>
                     <Link href="/features" className="hover:text-white transition">Features</Link>
                     <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
@@ -109,6 +110,7 @@ export default function Navbar() {
                                     <span className="text-sm font-medium text-teal-300">{user.username}</span>
                                 </div>
                             )}
+                            <Link href="/" className="text-muted-foreground hover:text-white py-2 block border-b border-border/50">Home</Link>
                             <Link href="/quizzes" className="text-muted-foreground hover:text-white py-2 block">Explore Quizzes</Link>
                             <Link href="/features" className="text-muted-foreground hover:text-white py-2 block">Features</Link>
                             <Link href="/pricing" className="text-muted-foreground hover:text-white py-2 block">Pricing</Link>

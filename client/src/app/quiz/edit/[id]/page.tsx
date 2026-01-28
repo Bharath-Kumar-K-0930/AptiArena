@@ -253,7 +253,7 @@ export default function EditQuizPage() {
                                                 placeholder="Question text..."
                                             />
                                             <div className="flex-shrink-0 pt-2 flex items-center gap-2">
-                                                {(q.isCustom || (q.timeLimit && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
+                                                {(q.isCustom || (q.timeLimit && ![0, 10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
                                                     <div className="flex items-center gap-1 bg-gray-800/80 rounded-md border border-gray-700 p-0.5 h-9">
                                                         <Input
                                                             type="number"
@@ -313,6 +313,7 @@ export default function EditQuizPage() {
                                                         <option value="120">2m</option>
                                                         <option value="180">3m</option>
                                                         <option value="300">5m</option>
+                                                        <option value="0">No Timer</option>
                                                         <option value="custom">Custom...</option>
                                                     </select>
                                                 )}
