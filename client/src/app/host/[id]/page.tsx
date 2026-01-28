@@ -34,6 +34,11 @@ export default function HostGamePage() {
     const [showLeaderboard, setShowLeaderboard] = useState(false); // Toggle intermediate leaderboard
     const [cheerMessage, setCheerMessage] = useState("");
 
+    // Timer & Response Tracking
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const [respondedPlayers, setRespondedPlayers] = useState<Set<string>>(new Set());
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
     // ... (useEffect for quiz details same as before)
     useEffect(() => {
         const fetchQuizDetails = async () => {
@@ -108,11 +113,20 @@ export default function HostGamePage() {
             setLastAnsweredPlayer(null);
             setShowAnswer(false);
             setShowLeaderboard(false);
+            setRespondedPlayers(new Set());
+
+            // Start Timer
+            if (question.timeLimit) {
+                setTimeLeft(question.timeLimit);
+            } else {
+                setTimeLeft(30); // Default 30s
+            }
         });
 
         newSocket.on("player_answered", ({ name, count, total }) => {
             setAnsweredCount(count);
             setLastAnsweredPlayer(name);
+            setRespondedPlayers((prev) => new Set(prev).add(name));
         });
 
         newSocket.on("leaderboard_update", ({ leaderboard }) => {
@@ -142,6 +156,34 @@ export default function HostGamePage() {
             socket.emit("next_question", { pin });
         }
     };
+
+    // Countdown Effect
+    useEffect(() => {
+        if (status === 'live' && timeLeft !== null && timeLeft > 0 && !showAnswer && !showLeaderboard) {
+            timerRef.current = setInterval(() => {
+                setTimeLeft((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+            }, 1000);
+        } else {
+            if (timerRef.current) clearInterval(timerRef.current);
+        }
+
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, [status, timeLeft, showAnswer, showLeaderboard]);
+
+    // Auto-reveal when timer hits zero
+    useEffect(() => {
+        if (timeLeft === 0 && !showAnswer && status === 'live') {
+            setShowAnswer(true);
+            // We might want to notify players that time is up, 
+            // but the server's 'reveal_answer' is usually triggered by host.
+            // Let's call the socket reveal if we're the host.
+            if (socket && pin) {
+                socket.emit("reveal_answer", { pin });
+            }
+        }
+    }, [timeLeft, showAnswer, status, socket, pin]);
 
     // UI Helpers
     const getCheerMessage = (leaderName: string) => {
@@ -307,13 +349,43 @@ export default function HostGamePage() {
                     >
                         {/* Live Stats Bar - Hide in Slide Show */}
                         {gameMode !== 'slideshow' && (
-                            <div className="absolute top-0 right-0 p-4 bg-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg z-20">
-                                <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-bold">Responded</div>
-                                <div className="text-3xl font-black text-white flex items-baseline gap-1">
-                                    <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">{answeredCount}</span>
-                                    <span className="text-gray-600 text-lg">/</span>
-                                    <span className="text-gray-400 text-lg">{players.length}</span>
+                            <div className="absolute top-0 right-0 m-4 flex flex-col items-end gap-3 z-20">
+                                <div className="p-4 bg-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-md shadow-lg min-w-[120px]">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Responded</div>
+                                        {timeLeft !== null && !showAnswer && (
+                                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/30 text-orange-400 text-[10px] font-bold">
+                                                <Zap className="w-3 h-3 animate-pulse" /> {timeLeft}s
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="text-3xl font-black text-white flex items-baseline gap-1">
+                                        <span className="text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">{answeredCount}</span>
+                                        <span className="text-gray-600 text-lg">/</span>
+                                        <span className="text-gray-400 text-lg">{players.length}</span>
+                                    </div>
                                 </div>
+
+                                {/* Waiting For List */}
+                                <AnimatePresence>
+                                    {!showAnswer && players.length > respondedPlayers.size && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 20 }}
+                                            className="bg-black/40 backdrop-blur-sm p-3 rounded-xl border border-white/5 max-w-[200px] text-right"
+                                        >
+                                            <div className="text-[9px] text-gray-500 uppercase tracking-widest font-bold mb-1">Waiting for</div>
+                                            <div className="flex flex-wrap justify-end gap-1.5">
+                                                {players.filter(p => !respondedPlayers.has(p)).map((name, i) => (
+                                                    <span key={i} className="text-[10px] text-gray-300 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                                                        {name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
                         )}
 

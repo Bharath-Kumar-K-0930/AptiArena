@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, ArrowRight, Play, Trophy, AlertCircle, BarChart3 } from "lucide-react";
+import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, ArrowRight, Play, Trophy, AlertCircle, BarChart3, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { io, Socket } from "socket.io-client";
@@ -29,6 +29,11 @@ function PlayContent() {
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [error, setError] = useState("");
     const [isJoining, setIsJoining] = useState(false);
+
+    // Timer Logic
+    const [timeLeft, setTimeLeft] = useState<number | null>(null);
+    const timerRef = setInterval(() => { }, 1000); // Dummy for type
+    const activeTimerRef = typeof window !== 'undefined' ? (null as any) : null;
 
     useEffect(() => {
         const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
@@ -58,6 +63,13 @@ function PlayContent() {
             setQuestionIndex(index);
             setHasAnswered(false);
             setResult(null); // Reset result
+
+            // Set Timer
+            if (question.timeLimit) {
+                setTimeLeft(question.timeLimit);
+            } else {
+                setTimeLeft(30); // Default
+            }
         });
 
         // Acknowledgement only - do NOT show result yet
@@ -101,6 +113,17 @@ function PlayContent() {
         };
     }, []);
 
+    // Participant Countdown Effect
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (gameState === 'playing' && timeLeft !== null && timeLeft > 0) {
+            timer = setInterval(() => {
+                setTimeLeft((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+            }, 1000);
+        }
+        return () => clearInterval(timer);
+    }, [gameState, timeLeft]);
+
     const handleJoin = (e: React.FormEvent) => {
         e.preventDefault();
         setIsJoining(true);
@@ -110,7 +133,7 @@ function PlayContent() {
     };
 
     const handleAnswer = (index: number) => {
-        if (hasAnswered || gameState !== "playing") return;
+        if (hasAnswered || gameState !== "playing" || (timeLeft !== null && timeLeft <= 0)) return;
         setHasAnswered(true);
         if (socket) {
             socket.emit("submit_answer", { pin, answerIndex: index, questionIndex });
@@ -225,9 +248,20 @@ function PlayContent() {
                         className="space-y-6 md:space-y-8"
                     >
                         <div className="text-white text-center space-y-4">
-                            <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-200 text-xs font-bold uppercase tracking-wider border border-white/10 backdrop-blur-md">
-                                Question {questionIndex + 1}
-                            </span>
+                            <div className="flex justify-center items-center gap-4">
+                                <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-cyan-200 text-xs font-bold uppercase tracking-wider border border-white/10 backdrop-blur-md">
+                                    Question {questionIndex + 1}
+                                </span>
+                                {timeLeft !== null && (
+                                    <div className={`
+                                        flex items-center gap-2 px-4 py-1.5 rounded-full border backdrop-blur-md font-mono font-bold text-sm transition-colors
+                                        ${timeLeft <= 10 ? 'bg-red-500/20 border-red-500/50 text-red-400 animate-pulse' : 'bg-white/10 border-white/10 text-white'}
+                                    `}>
+                                        <Zap className={`w-3.5 h-3.5 ${timeLeft <= 10 ? 'fill-red-400' : ''}`} />
+                                        {timeLeft}s
+                                    </div>
+                                )}
+                            </div>
                             <h2 className="text-2xl md:text-4xl font-black leading-tight px-2 drop-shadow-lg">
                                 {currentQuestion.text}
                             </h2>

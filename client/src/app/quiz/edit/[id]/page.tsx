@@ -242,7 +242,18 @@ export default function EditQuizPage() {
                                                 className="bg-gray-800 border-gray-700 text-lg font-medium min-h-[80px] flex-1"
                                                 placeholder="Question text..."
                                             />
-                                            <div className="flex-shrink-0 pt-2">
+                                            <div className="flex-shrink-0 pt-2 flex items-center gap-2">
+                                                <select
+                                                    className="bg-gray-800 border border-gray-700 text-xs text-gray-400 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal h-9"
+                                                    value={q.timeLimit || 30}
+                                                    onChange={(e) => handleQuestionChange(qIndex, 'timeLimit', parseInt(e.target.value))}
+                                                >
+                                                    <option value="10">10s</option>
+                                                    <option value="20">20s</option>
+                                                    <option value="30">30s</option>
+                                                    <option value="60">60s</option>
+                                                    <option value="120">2m</option>
+                                                </select>
                                                 <input
                                                     type="file"
                                                     accept="image/*"
@@ -251,7 +262,7 @@ export default function EditQuizPage() {
                                                     onChange={(e) => handleImageUpload(e, qIndex)}
                                                 />
                                                 <label htmlFor={`q-img-${qIndex}`} className="cursor-pointer text-gray-400 hover:text-teal transition-colors flex flex-col items-center gap-1" title="Add Image">
-                                                    <div className="p-2 bg-gray-800 rounded-md border border-gray-700 hover:border-teal">
+                                                    <div className="p-2 bg-gray-800 rounded-md border border-gray-700 hover:border-teal h-9 flex items-center">
                                                         <Upload className="w-5 h-5" />
                                                     </div>
                                                 </label>

@@ -298,7 +298,22 @@ Reason: Explanation here...`}
                                                 <span className="text-teal mr-2">Q{i + 1}.</span>
                                                 {q.text}
                                             </CardTitle>
-                                            <div className="ml-2">
+                                            <div className="ml-2 flex items-center gap-3">
+                                                <select
+                                                    className="bg-gray-800 border border-gray-700 text-xs text-gray-400 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal"
+                                                    value={q.timeLimit || 30}
+                                                    onChange={(e) => {
+                                                        const updated = [...questions];
+                                                        updated[i].timeLimit = parseInt(e.target.value);
+                                                        setQuestions(updated);
+                                                    }}
+                                                >
+                                                    <option value="10">10s</option>
+                                                    <option value="20">20s</option>
+                                                    <option value="30">30s</option>
+                                                    <option value="60">60s</option>
+                                                    <option value="120">2m</option>
+                                                </select>
                                                 <input
                                                     type="file"
                                                     accept="image/*"
