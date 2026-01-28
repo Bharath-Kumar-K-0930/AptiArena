@@ -299,7 +299,7 @@ Reason: Explanation here...`}
                                                 {q.text}
                                             </CardTitle>
                                             <div className="ml-2 flex items-center gap-2">
-                                                {(q.isCustom || (q.timeLimit && ![0, 10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
+                                                {(q.isCustom || (q.timeLimit !== undefined && q.timeLimit !== null && q.timeLimit !== 0 && ![10, 20, 30, 60, 120, 180, 300].includes(q.timeLimit))) ? (
                                                     <div className="flex items-center gap-1 bg-gray-800/80 rounded-md border border-gray-700 p-0.5 h-8">
                                                         <Input
                                                             type="number"
@@ -347,7 +347,7 @@ Reason: Explanation here...`}
                                                 ) : (
                                                     <select
                                                         className="bg-gray-800 border border-gray-700 text-xs text-gray-400 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal h-8"
-                                                        value={q.timeLimit || 30}
+                                                        value={q.timeLimit !== undefined ? q.timeLimit : 30}
                                                         onChange={(e) => {
                                                             const val = e.target.value;
                                                             const updated = [...questions];
