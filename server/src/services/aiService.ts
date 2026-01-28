@@ -93,51 +93,58 @@ export const generateQuizFromText = async (topic: string, text?: string, difficu
         if (text && text.length > 50) {
             // Extraction Mode
             prompt = `
-                You are an expert educational AI. 
-                Analyze the following text which contains quiz questions (and possibly answers/reasoning).
+                You are a specialized content extraction AI. 
+                Analyze the provided text to identify and extract multiple-choice questions (MCQs), their options, the correct answers, and any associated explanations. 
                 
-                Your task is to EXTRACT the questions exactly as they appear, along with their options, correct answer, and explanation (if provided).
-                If the text contains ${amount} questions, extract all of them. If it contains more, extract the first ${amount}.
+                Task:
+                1. Extract exactly ${amount} questions if possible. If the text has fewer, extract all of them.
+                2. Maintain the original question text and option details.
+                3. Explanation: If the source provides a reason, use it. If not, generate a concise, accurate explanation for the correct answer.
                 
-                Input Text:
+                Input Text Content:
                 """
                 ${text.substring(0, 15000)}
                 """
 
-                Output Requirements:
-                - Return ONLY a raw JSON array.
-                - No markdown, no code blocks, no 'json' prefix.
-                - Structure:
+                Output Format (Raw JSON Array ONLY):
                 [
                     {
-                        "text": "The exact question text",
+                        "text": "The extracted question text",
                         "options": [
-                            { "text": "Option A text", "isCorrect": false },
-                            { "text": "Option B text", "isCorrect": true }
+                            { "text": "Option A", "isCorrect": false },
+                            { "text": "Option B", "isCorrect": true }
                         ],
-                        "explanation": "The reason/explanation provided in the text (or generate a brief one if missing)",
-                        "timeLimit": 30
+                        "explanation": "High-quality explanation of the answer.",
+                        "timeLimit": 60
                     }
                 ]
             `;
         } else {
             // Generation Mode
             prompt = `
-                Generate ${amount} multiple-choice questions (MCQ) about "${topic}".
-                Difficulty: ${difficulty || 'Medium'}.
+                You are a high-level academic content creator specializing in competitive examinations (like GMAT, SAT, UPSC, and technical interviews).
+                Generate ${amount} ADVANCED, non-trivial multiple-choice questions (MCQs) about "${topic}".
                 
-                Return ONLY a raw JSON array (no markdown code blocks, no 'json' prefix) with this structure:
+                Target Difficulty: ${difficulty || 'Medium'}. 
+                
+                Quality Standards:
+                1. Complexity: Questions must test deep conceptual understanding, analytical thinking, or practical problem-solving. Avoid surface-level recall or "True/False" style simplicity.
+                2. Professionalism: Use clear, technical, and precise language.
+                3. Plausible Distractors: All 4 options must be plausible to someone with only a partial understanding of the topic. Avoid "unrelated" or obviously wrong options.
+                4. Explanations: Provide a thorough, pedagogical explanation (2-3 sentences) describing the logic behind the correct answer and clarifying common misconceptions.
+                
+                Return ONLY a raw JSON array (no markdown code blocks, no preamble, no 'json' prefix) with this specific schema:
                 [
                     {
-                        "text": "Question text",
+                        "text": "The sophisticated question content",
                         "options": [
-                            { "text": "Option 1", "isCorrect": false },
-                            { "text": "Option 2", "isCorrect": true },
-                            { "text": "Option 3", "isCorrect": false },
-                            { "text": "Option 4", "isCorrect": false }
+                            { "text": "Plausible but incorrect option", "isCorrect": false },
+                            { "text": "The objectively correct option", "isCorrect": true },
+                            { "text": "Plausible but incorrect option", "isCorrect": false },
+                            { "text": "Plausible but incorrect option", "isCorrect": false }
                         ],
-                        "explanation": "Brief explanation of the correct answer",
-                        "timeLimit": 30
+                        "explanation": "A detailed explanation of the concept and reasoning.",
+                        "timeLimit": 60
                     }
                 ]
             `;

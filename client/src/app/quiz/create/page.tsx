@@ -26,6 +26,7 @@ export default function CreateQuizPage() {
     const [rawText, setRawText] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [qCount, setQCount] = useState(5);
+    const [isCustomQCount, setIsCustomQCount] = useState(false);
 
     const handleGenerate = async () => {
         if (mode === "topic" && !topic) return toast.error("Please enter a topic");
@@ -184,16 +185,48 @@ export default function CreateQuizPage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <label className="text-sm font-medium text-gray-400">Question Count</label>
-                                                <select
-                                                    className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                                    value={qCount}
-                                                    onChange={(e) => setQCount(parseInt(e.target.value))}
-                                                >
-                                                    <option value="5">5 Questions</option>
-                                                    <option value="10">10 Questions</option>
-                                                    <option value="15">15 Questions</option>
-                                                    <option value="20">20 Questions</option>
-                                                </select>
+                                                <div className="flex gap-2">
+                                                    {!isCustomQCount ? (
+                                                        <select
+                                                            className="flex h-10 w-full rounded-md border border-gray-700 bg-gray-800 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                            value={qCount}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                if (val === "custom") {
+                                                                    setIsCustomQCount(true);
+                                                                    setQCount(10); // Default custom value
+                                                                } else {
+                                                                    setQCount(parseInt(val));
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="5">5 Questions</option>
+                                                            <option value="10">10 Questions</option>
+                                                            <option value="15">15 Questions</option>
+                                                            <option value="20">20 Questions</option>
+                                                            <option value="custom">Custom...</option>
+                                                        </select>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 w-full">
+                                                            <Input
+                                                                type="number"
+                                                                min={1}
+                                                                max={50}
+                                                                value={qCount}
+                                                                onChange={(e) => setQCount(parseInt(e.target.value) || 1)}
+                                                                className="bg-gray-800 border-gray-700 h-10"
+                                                            />
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => setIsCustomQCount(false)}
+                                                                className="h-10 text-xs text-gray-500 hover:text-white"
+                                                            >
+                                                                Reset
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
