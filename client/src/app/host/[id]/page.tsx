@@ -455,7 +455,7 @@ export default function HostGamePage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 className="w-full max-w-5xl mx-auto flex-1 flex flex-col"
                             >
-                                <div className="flex justify-between items-center mb-6 bg-slate-900/60 p-4 rounded-2xl border border-white/10 backdrop-blur-md">
+                                <div className="flex justify-between items-center mb-6 bg-slate-900/60 p-4 md:pr-32 rounded-2xl border border-white/10 backdrop-blur-md">
                                     <h2 className="text-3xl font-black text-white flex items-center gap-4">
                                         <Trophy className="text-yellow-500 h-8 w-8 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]" />
                                         Top Players
