@@ -60,7 +60,7 @@ function PlayContent() {
             if (name) sessionStorage.setItem('quiz_name', name);
         });
 
-        newSocket.on("new_question", ({ question, index }) => {
+        newSocket.on("new_question", ({ question, index, startTime }) => {
             setGameState("playing");
             setCurrentQuestion(question);
             setQuestionIndex(index);
@@ -68,13 +68,13 @@ function PlayContent() {
             setSelectedAnswerIndex(null);
             setResult(null); // Reset result
 
-            // Set Timer
-            if (question.timeLimit === 0) {
-                setTimeLeft(null);
-            } else if (question.timeLimit) {
-                setTimeLeft(question.timeLimit);
+            // Set Timer and Sync with startTime
+            const limit = question.timeLimit || 30;
+            if (startTime) {
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                setTimeLeft(Math.max(0, limit - elapsed));
             } else {
-                setTimeLeft(30); // Default
+                setTimeLeft(limit);
             }
         });
 

@@ -133,8 +133,9 @@ export const setupSocket = (io: Server) => {
                 // Send first question
                 const question = quiz.questions[0];
 
+                const startTime = Date.now();
                 // 1. Send full question to Host (Sender)
-                socket.emit('new_question', { question, index: 0, total: quiz.questions.length });
+                socket.emit('new_question', { question, index: 0, total: quiz.questions.length, startTime });
 
                 // 2. Send sanitized question to Players (Everyone else in room)
                 const sanitizedQuestion = {
@@ -143,7 +144,7 @@ export const setupSocket = (io: Server) => {
                     timeLimit: question.timeLimit,
                     image: question.image
                 };
-                socket.to(pin).emit('new_question', { question: sanitizedQuestion, index: 0, total: quiz.questions.length });
+                socket.to(pin).emit('new_question', { question: sanitizedQuestion, index: 0, total: quiz.questions.length, startTime });
 
                 console.log(`Game started: ${pin}`);
             } catch (error) {
@@ -332,8 +333,9 @@ export const setupSocket = (io: Server) => {
 
                     const question = quiz.questions[nextIndex];
 
+                    const startTime = Date.now();
                     // 1. Send full question to Host
-                    socket.emit('new_question', { question, index: nextIndex, total: quiz.questions.length });
+                    socket.emit('new_question', { question, index: nextIndex, total: quiz.questions.length, startTime });
 
                     // 2. Send sanitized question to Players
                     const sanitizedQuestion = {
@@ -342,7 +344,7 @@ export const setupSocket = (io: Server) => {
                         timeLimit: question.timeLimit,
                         image: question.image
                     };
-                    socket.to(pin).emit('new_question', { question: sanitizedQuestion, index: nextIndex, total: quiz.questions.length });
+                    socket.to(pin).emit('new_question', { question: sanitizedQuestion, index: nextIndex, total: quiz.questions.length, startTime });
                 } else {
                     session.status = 'finished';
                     await session.save();

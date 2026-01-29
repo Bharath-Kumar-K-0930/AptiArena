@@ -59,6 +59,15 @@ function LobbyContent() {
             });
         });
 
+        socket.on("cheat_alert", (data: any) => {
+            toast.warning(`Security Alert: ${data.name}`, {
+                description: data.type === 'MULTIPLE_DEVICES'
+                    ? "Multiple device/tab join detected!"
+                    : `${data.type} detected!`,
+                duration: 6000
+            });
+        });
+
         socket.on("error", (msg: string) => {
             toast.error(msg);
             setIsLoading(false);

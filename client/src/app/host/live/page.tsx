@@ -49,7 +49,15 @@ function HostLiveContent() {
             setTotalQ(data.total);
             setAnswerCount(0);
             setPhase("question");
-            setTimer(data.question.timeLimit || 30);
+
+            // Sync timer with server startTime
+            const timeLimit = data.question.timeLimit || 30;
+            if (data.startTime) {
+                const elapsed = Math.floor((Date.now() - data.startTime) / 1000);
+                setTimer(Math.max(0, timeLimit - elapsed));
+            } else {
+                setTimer(timeLimit);
+            }
         });
 
         socket.on("player_answered", (data: any) => {
@@ -76,9 +84,23 @@ function HostLiveContent() {
         });
 
         socket.on("cheat_alert", (data: any) => {
+            const types: Record<string, string> = {
+                'TAB_SWITCH': 'Tab Switched',
+                'COPY_ATTEMPT': 'Copy Attempt',
+                'TOO_FAST': 'Unusually Fast Answer',
+                'MULTIPLE_DEVICES': 'Multiple Devices Join',
+                'AUTO_KICK_TAB_SWITCH': 'Auto-Kicked for Tab Switching'
+            };
+
+            const typeLabel = types[data.type] || data.type;
+
             toast.error(`Cheat Alert: ${data.name}`, {
-                description: `${data.type} detected! Score: ${data.cheatScore}`,
-                duration: 5000
+                description: `${typeLabel} ${data.type === 'AUTO_KICK_TAB_SWITCH' ? '' : 'detected!'}`,
+                duration: 5000,
+                action: data.type === 'AUTO_KICK_TAB_SWITCH' ? undefined : {
+                    label: "Kick",
+                    onClick: () => kickPlayer(data.participantId, data.name)
+                }
             });
             // Update leaderboard if the user is in it
             setLeaderboard(prev => prev.map(p =>
