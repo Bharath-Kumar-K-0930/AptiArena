@@ -49,9 +49,30 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             newSocket.emit("join_game", { pin: savedPin, name: savedName, userId: user.id || user._id, fingerprint });
         }
 
+        newSocket.on("connect", () => {
+            console.log("Socket connected:", newSocket.id);
+            // Attempt auto-rejoin on reconnection to ensure room membership
+            const currentPin = pin || sessionStorage.getItem('quiz_pin');
+            const currentName = name || sessionStorage.getItem('quiz_name');
+
+            if (currentPin && currentName && !isSimulation) {
+                console.log("Restoring session for:", currentName);
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const fingerprint = `${navigator.userAgent}-${window.screen.width}x${window.screen.height}-${navigator.platform}`;
+                newSocket.emit("join_game", {
+                    pin: currentPin,
+                    name: currentName,
+                    userId: user.id || user._id,
+                    fingerprint
+                });
+            }
+        });
+
         newSocket.on("joined_game", ({ pin: joinedPin }) => {
             setIsJoining(false);
-            setGameState("waiting");
+            if (gameState === 'join') setGameState("waiting");
+            // Don't reset state if we were already playing/submitted
+
             if (!isSimulation) {
                 sessionStorage.setItem('quiz_pin', joinedPin);
                 sessionStorage.setItem('quiz_name', nameRef.current || "");
