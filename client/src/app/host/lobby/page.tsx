@@ -63,12 +63,7 @@ function LobbyContent() {
                 reason: data.reason || "Participant left the lobby.",
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
             };
-            setKickNotifications(prev => [newNotify, ...prev].slice(0, 5));
-
-            // Auto-remove notification after 8 seconds
-            setTimeout(() => {
-                setKickNotifications(prev => prev.filter(n => n.id !== newNotify.id));
-            }, 8000);
+            setKickNotifications(prev => [newNotify, ...prev].slice(0, 10));
 
             toast.error(`${data.name} removed`, {
                 description: data.reason || "Participant left the lobby.",
@@ -259,6 +254,17 @@ function LobbyContent() {
             {/* Bottom Left Kick Notifications Overlay */}
             <div className="fixed bottom-6 left-6 z-[9999] flex flex-col-reverse gap-3 pointer-events-none">
                 <AnimatePresence mode="popLayout">
+                    {kickNotifications.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-slate-900/90 backdrop-blur-2xl border border-red-500/40 p-3 rounded-t-2xl border-b-0 -mb-3 pointer-events-auto"
+                        >
+                            <h3 className="text-[10px] text-red-400 uppercase tracking-[0.3em] font-black flex items-center gap-2">
+                                <Ban className="h-3 w-3" /> Removed Participants ({kickNotifications.length})
+                            </h3>
+                        </motion.div>
+                    )}
                     {kickNotifications.map((notif) => (
                         <motion.div
                             key={notif.id}
@@ -268,25 +274,18 @@ function LobbyContent() {
                             layout
                             className="group pointer-events-auto"
                         >
-                            <div className="bg-slate-900/80 backdrop-blur-2xl border border-red-500/30 p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center gap-4 min-w-[320px] max-w-[400px] hover:border-red-500/60 transition-colors">
-                                <div className="relative">
-                                    <div className="absolute inset-0 bg-red-500/20 blur-xl rounded-full" />
-                                    <div className="relative bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-2.5 shadow-lg shadow-red-500/20">
-                                        <Ban className="h-5 w-5 text-white" />
-                                    </div>
+                            <div className="bg-slate-900/80 backdrop-blur-2xl border border-red-500/20 p-3 rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.4)] flex items-center gap-3 min-w-[280px] max-w-[350px] hover:border-red-500/40 transition-colors">
+                                <div className="bg-gradient-to-br from-red-500 to-rose-600 rounded-lg p-1.5 shadow-lg shadow-red-500/10 shrink-0">
+                                    <Ban className="h-4 w-4 text-white" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex justify-between items-baseline gap-2 mb-1">
-                                        <h3 className="font-bold text-white text-lg truncate leading-tight group-hover:text-red-400 transition-colors">{notif.name}</h3>
-                                        <span className="text-[10px] font-mono text-slate-500 shrink-0 font-bold bg-slate-950/50 px-1.5 py-0.5 rounded border border-white/5">{notif.timestamp}</span>
+                                    <div className="flex justify-between items-baseline gap-2">
+                                        <h3 className="font-bold text-white text-base truncate leading-tight group-hover:text-red-400 transition-colors">{notif.name}</h3>
+                                        <span className="text-[9px] font-mono text-slate-500 shrink-0 font-bold">{notif.timestamp}</span>
                                     </div>
-                                    <p className="text-sm text-slate-300 font-medium line-clamp-2 leading-relaxed italic">
+                                    <p className="text-xs text-slate-400 line-clamp-1 italic mt-0.5">
                                         &quot;{notif.reason}&quot;
                                     </p>
-                                    <div className="mt-3 flex items-center gap-2">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                                        <span className="text-[10px] text-red-400/90 uppercase tracking-[0.2em] font-black">Participant Removed</span>
-                                    </div>
                                 </div>
                             </div>
                         </motion.div>
