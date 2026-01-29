@@ -69,7 +69,10 @@ function HostLiveContent() {
         socket.on("player_left", (data: any) => {
             setLeaderboard(prev => prev.filter(p => p.socketId !== data.participantId));
             setAnswerCount(prev => Math.max(0, prev - 1));
-            toast.info(`Player removed from session.`);
+            toast.error(`${data.name} removed`, {
+                description: data.reason || "Participant left the session.",
+                duration: 5000
+            });
         });
 
         socket.on("cheat_alert", (data: any) => {

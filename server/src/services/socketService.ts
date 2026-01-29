@@ -429,7 +429,8 @@ export const setupSocket = (io: Server) => {
                         io.to(pin).emit('player_left', {
                             name: participantName,
                             total: session.participants.length,
-                            participantId: participantId
+                            participantId: participantId,
+                            reason: 'Auto-kicked for tab switching'
                         });
 
                         console.log(`Player ${participantName} auto-kicked for tab switch from ${pin}`);
@@ -491,7 +492,8 @@ export const setupSocket = (io: Server) => {
                     io.to(pin).emit('player_left', {
                         name: participantName,
                         total: session.participants.length,
-                        participantId: participantId
+                        participantId: participantId,
+                        reason: 'Removed by host'
                     });
 
                     console.log(`Player ${participantName} kicked from game ${pin}`);

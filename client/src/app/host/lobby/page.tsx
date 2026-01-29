@@ -53,7 +53,10 @@ function LobbyContent() {
 
         socket.on("player_left", (data: any) => {
             setPlayers(prev => prev.filter(p => p.socketId !== data.participantId && p.name !== data.name));
-            toast.info(`${data.name} removed.`);
+            toast.error(`${data.name} removed`, {
+                description: data.reason || "Participant left the lobby.",
+                duration: 5000
+            });
         });
 
         socket.on("error", (msg: string) => {
