@@ -400,17 +400,49 @@ export const setupSocket = (io: Server) => {
 
                 const pIndex = session.participants.findIndex(p => p.socketId === socket.id);
                 if (pIndex !== -1) {
+                    const participantName = session.participants[pIndex].name;
+                    const participantId = socket.id;
+
                     session.participants[pIndex].tabSwitchCount += 1;
                     session.participants[pIndex].cheatScore += 1;
-                    await session.save();
 
-                    io.to(pin).emit('cheat_alert', {
-                        participantId: socket.id,
-                        name: session.participants[pIndex].name,
-                        type: 'TAB_SWITCH',
-                        count: session.participants[pIndex].tabSwitchCount,
-                        cheatScore: session.participants[pIndex].cheatScore
-                    });
+                    // Auto-kick on first tab switch
+                    if (session.participants[pIndex].tabSwitchCount >= 1) {
+                        session.participants.splice(pIndex, 1);
+                        await session.save();
+
+                        // Notify host
+                        io.to(pin).emit('cheat_alert', {
+                            participantId: participantId,
+                            name: participantName,
+                            type: 'AUTO_KICK_TAB_SWITCH',
+                            count: 1,
+                            cheatScore: 1
+                        });
+
+                        // Notify participant
+                        io.to(participantId).emit('KICKED', {
+                            message: 'You have been automatically removed for switching tabs/minimizing the browser.'
+                        });
+
+                        // Update room
+                        io.to(pin).emit('player_left', {
+                            name: participantName,
+                            total: session.participants.length,
+                            participantId: participantId
+                        });
+
+                        console.log(`Player ${participantName} auto-kicked for tab switch from ${pin}`);
+                    } else {
+                        await session.save();
+                        io.to(pin).emit('cheat_alert', {
+                            participantId: socket.id,
+                            name: session.participants[pIndex].name,
+                            type: 'TAB_SWITCH',
+                            count: session.participants[pIndex].tabSwitchCount,
+                            cheatScore: session.participants[pIndex].cheatScore
+                        });
+                    }
                 }
             } catch (error) {
                 console.error(error);
