@@ -23,6 +23,7 @@ function PlayContent() {
     const [questionIndex, setQuestionIndex] = useState(0);
     const [currentQuestion, setCurrentQuestion] = useState<any>(null);
     const [hasAnswered, setHasAnswered] = useState(false);
+    const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
 
     // Result holds { isCorrect, score, correctIndex }
     const [result, setResult] = useState<any>(null);
@@ -64,6 +65,7 @@ function PlayContent() {
             setCurrentQuestion(question);
             setQuestionIndex(index);
             setHasAnswered(false);
+            setSelectedAnswerIndex(null);
             setResult(null); // Reset result
 
             // Set Timer
@@ -197,6 +199,7 @@ function PlayContent() {
     const handleAnswer = (index: number) => {
         if (hasAnswered || gameState !== "playing" || (timeLeft !== null && timeLeft <= 0)) return;
         setHasAnswered(true);
+        setSelectedAnswerIndex(index);
         if (socket) {
             socket.emit("submit_answer", { pin, answerIndex: index, questionIndex });
         }
@@ -399,19 +402,37 @@ function PlayContent() {
                             </div>
                         </div>
 
-                        {/* Show Correct Answer */}
-                        <div className="bg-slate-900/60 p-6 rounded-2xl border border-white/10 max-w-md mx-auto shadow-xl backdrop-blur-md text-left">
-                            <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/5 pb-2">The Correct Answer Was</div>
-                            <div className="flex items-center gap-4">
-                                <div className={`
-                                    w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-black text-white shrink-0 shadow-lg
-                                    ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-yellow-500' : 'bg-green-500'}
-                                `}>
-                                    {String.fromCharCode(65 + (result.correctIndex || 0))}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto w-full">
+                            {/* Your Answer */}
+                            <div className={`p-6 rounded-2xl border backdrop-blur-md text-left shadow-xl ${result.isCorrect ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                                <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/5 pb-2">Your Answer</div>
+                                <div className="flex items-center gap-4">
+                                    <div className={`
+                                        w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-black text-white shrink-0 shadow-lg
+                                        ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-yellow-500' : selectedAnswerIndex === 3 ? 'bg-green-500' : 'bg-gray-600'}
+                                    `}>
+                                        {selectedAnswerIndex !== null ? String.fromCharCode(65 + (selectedAnswerIndex || 0)) : '?'}
+                                    </div>
+                                    <span className="text-xl font-bold text-white leading-snug">
+                                        {selectedAnswerIndex !== null ? currentQuestion?.options[selectedAnswerIndex]?.text : "No answer"}
+                                    </span>
                                 </div>
-                                <span className="text-xl font-bold text-white leading-snug">
-                                    {result.answerText || currentQuestion?.options[result.correctIndex || 0]?.text}
-                                </span>
+                            </div>
+
+                            {/* Correct Answer */}
+                            <div className="bg-slate-900/60 p-6 rounded-2xl border border-white/10 shadow-xl backdrop-blur-md text-left">
+                                <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/5 pb-2">The Correct Answer Was</div>
+                                <div className="flex items-center gap-4">
+                                    <div className={`
+                                        w-12 h-12 rounded-xl flex items-center justify-center text-2xl font-black text-white shrink-0 shadow-lg
+                                        ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-yellow-500' : 'bg-green-500'}
+                                    `}>
+                                        {String.fromCharCode(65 + (result.correctIndex || 0))}
+                                    </div>
+                                    <span className="text-xl font-bold text-white leading-snug">
+                                        {result.answerText || currentQuestion?.options[result.correctIndex || 0]?.text}
+                                    </span>
+                                </div>
                             </div>
                         </div>
 
