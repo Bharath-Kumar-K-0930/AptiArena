@@ -69,8 +69,9 @@ export const setupSocket = (io: Server) => {
 
                             // Recover answer state
                             if (existingParticipant.lastAnsweredQuestionIndex === session.currentQuestionIndex) {
+                                const hasAnswered = typeof existingParticipant.lastAnswerIndex === 'number' && existingParticipant.lastAnswerIndex !== -1;
                                 socket.emit('answer_result', {
-                                    isCorrect: existingParticipant.lastAnswerIndex !== -1 && question.options[existingParticipant.lastAnswerIndex]?.isCorrect,
+                                    isCorrect: hasAnswered && question.options[existingParticipant.lastAnswerIndex as number]?.isCorrect,
                                     score: existingParticipant.score,
                                     lastAnswerIndex: existingParticipant.lastAnswerIndex
                                 });
@@ -155,6 +156,7 @@ export const setupSocket = (io: Server) => {
 
                 session.status = 'live';
                 session.currentQuestionIndex = 0;
+                session.isRevealed = false;
                 session.currentQuestionSentAt = new Date();
                 await session.save();
 
@@ -309,6 +311,9 @@ export const setupSocket = (io: Server) => {
                 const session = await GameSession.findOne({ pin });
                 if (!session) return;
 
+                session.isRevealed = true;
+                await session.save();
+
                 const quiz = await Quiz.findById(session.quizId);
                 if (!quiz) return;
 
@@ -377,6 +382,7 @@ export const setupSocket = (io: Server) => {
 
                 if (nextIndex < quiz.questions.length) {
                     session.currentQuestionIndex = nextIndex;
+                    session.isRevealed = false;
                     session.currentQuestionSentAt = new Date();
                     await session.save();
 

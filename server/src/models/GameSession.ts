@@ -23,6 +23,7 @@ export interface IGameSession extends Document {
     currentQuestionSentAt?: Date;
     pin: string;
     gameMode: 'live' | 'practice' | 'slideshow';
+    isRevealed: boolean;
 }
 
 const GameSessionSchema = new Schema({
@@ -47,6 +48,7 @@ const GameSessionSchema = new Schema({
     }],
     status: { type: String, enum: ['waiting', 'live', 'finished'], default: 'waiting' },
     gameMode: { type: String, enum: ['live', 'practice', 'slideshow'], default: 'live' },
+    isRevealed: { type: Boolean, default: false },
     currentQuestionIndex: { type: Number, default: 0 },
     currentQuestionSentAt: { type: Date }, // To detect unusually fast answers
     pin: { type: String, required: true }
