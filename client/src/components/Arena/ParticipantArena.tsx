@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -37,12 +37,24 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
         setSocket(newSocket);
 
+        // Auto-rejoin if session exists (only in non-simulation mode)
+        const savedPin = sessionStorage.getItem('quiz_pin');
+        const savedName = sessionStorage.getItem('quiz_name');
+
+        if (!isSimulation && savedPin && savedName && !initialPin) {
+            setPin(savedPin);
+            setName(savedName);
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const fingerprint = `${navigator.userAgent}-${window.screen.width}x${window.screen.height}-${navigator.platform}`;
+            newSocket.emit("join_game", { pin: savedPin, name: savedName, userId: user.id || user._id, fingerprint });
+        }
+
         newSocket.on("joined_game", ({ pin: joinedPin }) => {
             setIsJoining(false);
             setGameState("waiting");
             if (!isSimulation) {
                 sessionStorage.setItem('quiz_pin', joinedPin);
-                if (name) sessionStorage.setItem('quiz_name', name);
+                sessionStorage.setItem('quiz_name', nameRef.current || "");
             }
         });
 
@@ -146,12 +158,26 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         return () => clearInterval(timer);
     }, [gameState, timeLeft]);
 
+    const nameRef = useRef(name);
+    useEffect(() => {
+        nameRef.current = name;
+    }, [name]);
+
     const handleJoin = (e: React.FormEvent) => {
         e.preventDefault();
         setIsJoining(true);
         if (socket && pin && name) {
-            const fingerprint = `sim-${Date.now()}`;
-            socket.emit("join_game", { pin, name, fingerprint });
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const fingerprint = isSimulation
+                ? `sim-${Date.now()}`
+                : `${navigator.userAgent}-${window.screen.width}x${window.screen.height}-${navigator.platform}`;
+
+            socket.emit("join_game", {
+                pin,
+                name,
+                userId: user.id || user._id,
+                fingerprint
+            });
         }
     };
 
