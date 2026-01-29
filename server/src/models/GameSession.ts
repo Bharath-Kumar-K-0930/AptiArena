@@ -10,9 +10,16 @@ export interface IGameSession extends Document {
         score: number;
         streak: number;
         lastAnsweredQuestionIndex: number;
+        fingerprint?: string;
+        tabSwitchCount: number;
+        copyAttemptCount: number;
+        tooFastCount: number;
+        cheatScore: number;
+        isFlagged: boolean;
     }[];
     status: 'waiting' | 'live' | 'finished';
     currentQuestionIndex: number;
+    currentQuestionSentAt?: Date;
     pin: string;
     gameMode: 'live' | 'practice' | 'slideshow';
 }
@@ -26,11 +33,20 @@ const GameSessionSchema = new Schema({
         userId: { type: Schema.Types.ObjectId, ref: 'User' },
         score: { type: Number, default: 0 },
         streak: { type: Number, default: 0 },
-        lastAnsweredQuestionIndex: { type: Number, default: -1 } // Track if they answered the current question
+        lastAnsweredQuestionIndex: { type: Number, default: -1 }, // Track if they answered the current question
+
+        // Anti-Cheat Fields
+        fingerprint: { type: String },
+        tabSwitchCount: { type: Number, default: 0 },
+        copyAttemptCount: { type: Number, default: 0 },
+        tooFastCount: { type: Number, default: 0 },
+        cheatScore: { type: Number, default: 0 },
+        isFlagged: { type: Boolean, default: false }
     }],
     status: { type: String, enum: ['waiting', 'live', 'finished'], default: 'waiting' },
     gameMode: { type: String, enum: ['live', 'practice', 'slideshow'], default: 'live' },
     currentQuestionIndex: { type: Number, default: 0 },
+    currentQuestionSentAt: { type: Date }, // To detect unusually fast answers
     pin: { type: String, required: true }
 }, { timestamps: true });
 

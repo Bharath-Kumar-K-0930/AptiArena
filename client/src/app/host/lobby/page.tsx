@@ -6,7 +6,7 @@ import { socket } from "@/lib/socket";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Play, MonitorPlay, Zap, Trophy, ArrowRight, Loader2, Copy } from "lucide-react";
+import { Users, Play, MonitorPlay, Zap, Trophy, ArrowRight, Loader2, Copy, Ban, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
 
@@ -51,6 +51,11 @@ function LobbyContent() {
             toast.success(`${data.name} joined!`);
         });
 
+        socket.on("player_left", (data: any) => {
+            setPlayers(prev => prev.filter(p => p.socketId !== data.participantId && p.name !== data.name));
+            toast.info(`${data.name} removed.`);
+        });
+
         socket.on("error", (msg: string) => {
             toast.error(msg);
             setIsLoading(false);
@@ -73,6 +78,12 @@ function LobbyContent() {
         const url = `${window.location.origin}/play?pin=${pin}`;
         navigator.clipboard.writeText(url);
         toast.success("Join link copied!");
+    };
+
+    const kickPlayer = (participantId: string, name: string) => {
+        if (confirm(`Remove ${name} from the lobby?`)) {
+            socket.emit("KICK_PARTICIPANT", { pin, participantId });
+        }
     };
 
     if (isLoading) {
@@ -179,11 +190,24 @@ function LobbyContent() {
                                 ) : (
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         {players.map((p, i) => (
-                                            <div key={i} className="bg-gray-800 p-3 rounded-lg border border-gray-700 flex items-center gap-2 animate-in fade-in zoom-in duration-300">
-                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold text-xs uppercase">
+                                            <div key={i} className={`bg-gray-800 p-3 rounded-lg border flex items-center gap-2 animate-in fade-in zoom-in duration-300 ${p.isFlagged ? 'border-red-500/50' : 'border-gray-700'}`}>
+                                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center font-bold text-xs uppercase relative">
                                                     {p.name.substring(0, 2)}
+                                                    {p.isFlagged && <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-800" />}
                                                 </div>
                                                 <span className="font-medium truncate">{p.name}</span>
+                                                {p.isFlagged && <Ban className="h-4 w-4 text-red-500 ml-auto" />}
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6 ml-auto opacity-0 group-hover:opacity-100 hover:text-red-500"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        kickPlayer(p.socketId, p.name);
+                                                    }}
+                                                >
+                                                    <XCircle className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         ))}
                                     </div>

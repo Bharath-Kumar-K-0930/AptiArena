@@ -30,7 +30,7 @@ export const setupSocket = (io: Server) => {
             }
         });
 
-        socket.on('join_game', async ({ pin, name, userId }) => {
+        socket.on('join_game', async ({ pin, name, userId, fingerprint }) => {
             try {
                 const session = await GameSession.findOne({ pin });
                 if (!session) {
@@ -71,19 +71,44 @@ export const setupSocket = (io: Server) => {
                         return;
                     }
 
+                    // Check for multiple devices (same userId or name but different fingerprint)
+                    const otherSessionWithSameIdentity = session.participants.find(p =>
+                        (userId && p.userId?.toString() === userId.toString()) || p.name === name
+                    );
+
+                    let isFlagged = false;
+                    if (otherSessionWithSameIdentity && otherSessionWithSameIdentity.fingerprint !== fingerprint) {
+                        isFlagged = true;
+                    }
+
                     session.participants.push({
                         socketId: socket.id,
                         name,
                         userId: userId || undefined,
                         score: 0,
                         streak: 0,
-                        lastAnsweredQuestionIndex: -1
+                        lastAnsweredQuestionIndex: -1,
+                        fingerprint,
+                        tabSwitchCount: 0,
+                        copyAttemptCount: 0,
+                        tooFastCount: 0,
+                        cheatScore: isFlagged ? 5 : 0, // Initial flag penalty
+                        isFlagged: isFlagged
                     });
                     await session.save();
 
                     socket.join(pin);
-                    io.to(pin).emit('player_joined', { name, total: session.participants.length });
+                    io.to(pin).emit('player_joined', { name, total: session.participants.length, isFlagged });
                     socket.emit('joined_game', { pin, mode: session.gameMode });
+
+                    if (isFlagged) {
+                        io.to(pin).emit('cheat_alert', {
+                            participantId: socket.id,
+                            name,
+                            type: 'MULTIPLE_DEVICES',
+                            cheatScore: 5
+                        });
+                    }
                     console.log(`Player ${name} joined game ${pin}`);
                 }
             } catch (error) {
@@ -99,6 +124,7 @@ export const setupSocket = (io: Server) => {
 
                 session.status = 'live';
                 session.currentQuestionIndex = 0;
+                session.currentQuestionSentAt = new Date();
                 await session.save();
 
                 const quiz = await Quiz.findById(session.quizId);
@@ -144,7 +170,17 @@ export const setupSocket = (io: Server) => {
                     socket.emit('new_question', { question: sanitizedQuestion, index, total: quiz.questions.length });
                 } else {
                     const participant = session.participants.find(p => p.socketId === socket.id);
-                    const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
+                    const leaderboard = session.participants
+                        .sort((a, b) => b.score - a.score)
+                        .slice(0, 5)
+                        .map(p => ({
+                            name: p.name,
+                            score: p.score,
+                            streak: p.streak,
+                            socketId: p.socketId,
+                            cheatScore: p.cheatScore,
+                            isFlagged: p.isFlagged
+                        }));
                     socket.emit('game_over', { leaderboard, playerScore: participant?.score });
                 }
             } catch (error) {
@@ -172,9 +208,27 @@ export const setupSocket = (io: Server) => {
                 const isCorrect = currentQ.options[answerIndex].isCorrect;
                 const score = isCorrect ? 100 : 0;
 
+                // Check for unusually fast answers
+                const responseTime = Date.now() - (session.currentQuestionSentAt?.getTime() || Date.now());
+                let isTooFast = false;
+                if (responseTime < 1000 && session.gameMode === 'live') {
+                    isTooFast = true;
+                }
+
                 const pIndex = session.participants.findIndex(p => p.socketId === socket.id);
                 if (pIndex !== -1) {
                     session.participants[pIndex].score += score;
+
+                    if (isTooFast) {
+                        session.participants[pIndex].tooFastCount += 1;
+                        session.participants[pIndex].cheatScore += 1;
+                        io.to(pin).emit('cheat_alert', {
+                            participantId: socket.id,
+                            name: session.participants[pIndex].name,
+                            type: 'TOO_FAST',
+                            cheatScore: session.participants[pIndex].cheatScore
+                        });
+                    }
 
                     if (isCorrect) {
                         session.participants[pIndex].streak = (session.participants[pIndex].streak || 0) + 1;
@@ -220,7 +274,9 @@ export const setupSocket = (io: Server) => {
                         name: p.name,
                         score: p.score,
                         streak: p.streak,
-                        socketId: p.socketId
+                        socketId: p.socketId,
+                        cheatScore: p.cheatScore,
+                        isFlagged: p.isFlagged
                     }));
 
                 io.to(pin).emit('answer_revealed', {
@@ -241,7 +297,17 @@ export const setupSocket = (io: Server) => {
                 if (!session) return;
 
                 // Send top 5
-                const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
+                const leaderboard = session.participants
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 5)
+                    .map(p => ({
+                        name: p.name,
+                        score: p.score,
+                        streak: p.streak,
+                        socketId: p.socketId,
+                        cheatScore: p.cheatScore,
+                        isFlagged: p.isFlagged
+                    }));
                 io.to(pin).emit('leaderboard_update', { leaderboard });
 
             } catch (error) {
@@ -261,6 +327,7 @@ export const setupSocket = (io: Server) => {
 
                 if (nextIndex < quiz.questions.length) {
                     session.currentQuestionIndex = nextIndex;
+                    session.currentQuestionSentAt = new Date();
                     await session.save();
 
                     const question = quiz.questions[nextIndex];
@@ -281,7 +348,17 @@ export const setupSocket = (io: Server) => {
                     await session.save();
 
                     // Send final leaderboard
-                    const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
+                    const leaderboard = session.participants
+                        .sort((a, b) => b.score - a.score)
+                        .slice(0, 5)
+                        .map(p => ({
+                            name: p.name,
+                            score: p.score,
+                            streak: p.streak,
+                            socketId: p.socketId,
+                            cheatScore: p.cheatScore,
+                            isFlagged: p.isFlagged
+                        }));
                     io.to(pin).emit('game_over', { leaderboard });
                 }
             } catch (error) {
@@ -298,9 +375,95 @@ export const setupSocket = (io: Server) => {
                 await session.save();
 
                 // Send final leaderboard
-                const leaderboard = session.participants.sort((a, b) => b.score - a.score).slice(0, 5);
+                const leaderboard = session.participants
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 5)
+                    .map(p => ({
+                        name: p.name,
+                        score: p.score,
+                        streak: p.streak,
+                        socketId: p.socketId,
+                        cheatScore: p.cheatScore,
+                        isFlagged: p.isFlagged
+                    }));
                 io.to(pin).emit('game_over', { leaderboard });
                 console.log(`Game ended early by host: ${pin}`);
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        socket.on('TAB_SWITCH', async ({ pin }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session) return;
+
+                const pIndex = session.participants.findIndex(p => p.socketId === socket.id);
+                if (pIndex !== -1) {
+                    session.participants[pIndex].tabSwitchCount += 1;
+                    session.participants[pIndex].cheatScore += 1;
+                    await session.save();
+
+                    io.to(pin).emit('cheat_alert', {
+                        participantId: socket.id,
+                        name: session.participants[pIndex].name,
+                        type: 'TAB_SWITCH',
+                        count: session.participants[pIndex].tabSwitchCount,
+                        cheatScore: session.participants[pIndex].cheatScore
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        socket.on('COPY_ATTEMPT', async ({ pin }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session) return;
+
+                const pIndex = session.participants.findIndex(p => p.socketId === socket.id);
+                if (pIndex !== -1) {
+                    session.participants[pIndex].copyAttemptCount += 1;
+                    session.participants[pIndex].cheatScore += 2;
+                    await session.save();
+
+                    io.to(pin).emit('cheat_alert', {
+                        participantId: socket.id,
+                        name: session.participants[pIndex].name,
+                        type: 'COPY_ATTEMPT',
+                        count: session.participants[pIndex].copyAttemptCount,
+                        cheatScore: session.participants[pIndex].cheatScore
+                    });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
+        socket.on('KICK_PARTICIPANT', async ({ pin, participantId }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session) return;
+
+                const pIndex = session.participants.findIndex(p => p.socketId === participantId);
+                if (pIndex !== -1) {
+                    const participantName = session.participants[pIndex].name;
+                    session.participants.splice(pIndex, 1);
+                    await session.save();
+
+                    // Notify the specific participant they've been kicked
+                    io.to(participantId).emit('KICKED', { message: 'You have been removed from the session by the host.' });
+
+                    // Update room about player leaving
+                    io.to(pin).emit('player_left', {
+                        name: participantName,
+                        total: session.participants.length,
+                        participantId: participantId
+                    });
+
+                    console.log(`Player ${participantName} kicked from game ${pin}`);
+                }
             } catch (error) {
                 console.error(error);
             }

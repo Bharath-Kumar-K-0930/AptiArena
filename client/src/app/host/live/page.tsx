@@ -6,7 +6,7 @@ import { socket } from "@/lib/socket";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { ChevronRight, StopCircle, BarChart3, Users, Zap, Trophy, Loader2 } from "lucide-react";
+import { ChevronRight, StopCircle, BarChart3, Users, Zap, Trophy, Loader2, AlertTriangle, ShieldAlert, Ban, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -66,13 +66,40 @@ function HostLiveContent() {
             setLeaderboard(data.leaderboard);
         });
 
+        socket.on("player_left", (data: any) => {
+            setLeaderboard(prev => prev.filter(p => p.socketId !== data.participantId));
+            setAnswerCount(prev => Math.max(0, prev - 1));
+            toast.info(`Player removed from session.`);
+        });
+
+        socket.on("cheat_alert", (data: any) => {
+            toast.error(`Cheat Alert: ${data.name}`, {
+                description: `${data.type} detected! Score: ${data.cheatScore}`,
+                duration: 5000
+            });
+            // Update leaderboard if the user is in it
+            setLeaderboard(prev => prev.map(p =>
+                p.socketId === data.participantId
+                    ? { ...p, cheatScore: data.cheatScore, isFlagged: p.isFlagged || data.type === 'MULTIPLE_DEVICES' }
+                    : p
+            ));
+        });
+
         return () => {
             socket.off("new_question");
             socket.off("player_answered");
             socket.off("leaderboard_update");
             socket.off("game_over");
+            socket.off("cheat_alert");
+            socket.off("player_left");
         };
     }, []);
+
+    const kickPlayer = (participantId: string, name: string) => {
+        if (confirm(`Remove ${name} from the quiz?`)) {
+            socket.emit("KICK_PARTICIPANT", { pin, participantId });
+        }
+    };
 
     // Timer effect
     useEffect(() => {
@@ -186,8 +213,32 @@ function HostLiveContent() {
                                         <div className="flex items-center gap-4">
                                             <span className={`font-mono font-bold w-6 ${i < 3 ? 'text-yellow-400' : 'text-gray-500'}`}>#{i + 1}</span>
                                             <span>{p.name}</span>
+                                            {p.cheatScore > 0 && (
+                                                <div className="flex items-center gap-1 ml-2">
+                                                    {p.cheatScore >= 5 || p.isFlagged ? (
+                                                        <span title={`Flagged: Cheat score ${p.cheatScore}`}><Ban className="h-4 w-4 text-red-500" /></span>
+                                                    ) : p.cheatScore >= 3 ? (
+                                                        <span title={`Warning: Cheat score ${p.cheatScore}`}><ShieldAlert className="h-4 w-4 text-orange-500" /></span>
+                                                    ) : (
+                                                        <span title={`Suspicious: Cheat score ${p.cheatScore}`}><AlertTriangle className="h-4 w-4 text-yellow-500" /></span>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="font-mono text-teal-400">{p.score}</span>
+                                        <div className="flex items-center gap-4">
+                                            <span className="font-mono text-teal-400">{p.score}</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-8 w-8 text-gray-500 hover:text-red-500"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    kickPlayer(p.socketId, p.name);
+                                                }}
+                                            >
+                                                <XCircle className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -293,7 +344,31 @@ function HostLiveContent() {
                                             </div>
 
                                             <div className="flex flex-col">
-                                                <span className={`text-xl font-bold ${i === 0 ? 'text-yellow-400' : 'text-white'}`}>{p.name}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-xl font-bold ${i === 0 ? 'text-yellow-400' : 'text-white'}`}>{p.name}</span>
+                                                    {p.cheatScore > 0 && (
+                                                        <div className="flex items-center gap-1">
+                                                            {p.cheatScore >= 5 || p.isFlagged ? (
+                                                                <span title={`Flagged: Cheat score ${p.cheatScore}`}><Ban className="h-5 w-5 text-red-500 animate-pulse" /></span>
+                                                            ) : p.cheatScore >= 3 ? (
+                                                                <span title={`Warning: Cheat score ${p.cheatScore}`}><ShieldAlert className="h-5 w-5 text-orange-500" /></span>
+                                                            ) : (
+                                                                <span title={`Suspicious: Cheat score ${p.cheatScore}`}><AlertTriangle className="h-5 w-5 text-yellow-500" /></span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-8 w-8 ml-2 text-gray-500 hover:text-red-500"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            kickPlayer(p.socketId, p.name);
+                                                        }}
+                                                    >
+                                                        <XCircle className="h-5 w-5" />
+                                                    </Button>
+                                                </div>
                                                 {/* Streak Badge */}
                                                 {p.streak > 2 && (
                                                     <div className="flex items-center gap-1 text-xs font-bold text-orange-400 animate-pulse">

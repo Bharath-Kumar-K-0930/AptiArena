@@ -47,7 +47,8 @@ function PlayContent() {
             setPin(savedPin);
             setName(savedName);
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            newSocket.emit("join_game", { pin: savedPin, name: savedName, userId: user.id || user._id });
+            const fingerprint = `${navigator.userAgent}-${window.screen.width}x${window.screen.height}-${navigator.platform}`;
+            newSocket.emit("join_game", { pin: savedPin, name: savedName, userId: user.id || user._id, fingerprint });
         }
 
         newSocket.on("joined_game", ({ pin, mode }) => {
@@ -100,6 +101,13 @@ function PlayContent() {
             sessionStorage.removeItem('quiz_name');
         });
 
+        newSocket.on("KICKED", ({ message }) => {
+            toast.error(message || "You have been removed from the session.");
+            sessionStorage.removeItem('quiz_pin');
+            sessionStorage.removeItem('quiz_name');
+            router.push("/");
+        });
+
         newSocket.on("error", (msg) => {
             setIsJoining(false);
             setError(msg);
@@ -114,7 +122,56 @@ function PlayContent() {
         return () => {
             newSocket.disconnect();
         };
-    }, []);
+    }, [pin, name]); // Added pin, name to dependencies for correct fingerprinting access
+
+    // Anti-Cheat: Visibility and Blur Detection
+    useEffect(() => {
+        if (!socket || gameState !== 'playing') return;
+
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                socket.emit("TAB_SWITCH", { pin });
+                toast.warning("Tab switching is monitored!", {
+                    description: "Your activity has been flagged to the host.",
+                    duration: 3000
+                });
+            }
+        };
+
+        const handleBlur = () => {
+            socket.emit("TAB_SWITCH", { pin });
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        window.addEventListener("blur", handleBlur);
+
+        return () => {
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+            window.removeEventListener("blur", handleBlur);
+        };
+    }, [socket, gameState, pin]);
+
+    // Anti-Cheat: Copy/Paste and Right-Click blocking
+    useEffect(() => {
+        if (!socket || gameState !== 'playing') return;
+
+        const blockAction = (e: any) => {
+            e.preventDefault();
+            socket.emit("COPY_ATTEMPT", { pin });
+            toast.error("Action Blocked", {
+                description: "Copying is disabled during the quiz.",
+                duration: 2000
+            });
+        };
+
+        document.addEventListener("copy", blockAction);
+        document.addEventListener("contextmenu", blockAction);
+
+        return () => {
+            document.removeEventListener("copy", blockAction);
+            document.removeEventListener("contextmenu", blockAction);
+        };
+    }, [socket, gameState, pin]);
 
     // Participant Countdown Effect
     useEffect(() => {
@@ -132,7 +189,8 @@ function PlayContent() {
         setIsJoining(true);
         if (socket && pin && name) {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
-            socket.emit("join_game", { pin, name, userId: user.id || user._id });
+            const fingerprint = `${navigator.userAgent}-${window.screen.width}x${window.screen.height}-${navigator.platform}`;
+            socket.emit("join_game", { pin, name, userId: user.id || user._id, fingerprint });
         }
     };
 
