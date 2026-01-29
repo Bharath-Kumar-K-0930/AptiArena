@@ -82,7 +82,7 @@ function PlayContent() {
         newSocket.on("answer_result", ({ isCorrect, score }) => {
             setGameState("submitted");
             // Store result silently, wait for reveal
-            setResult({ isCorrect, score });
+            setResult((prev: any) => ({ ...prev, isCorrect, score }));
         });
 
         newSocket.on("answer_revealed", ({ correctIndex, explanation, leaderboard, answerText }) => {
@@ -133,10 +133,6 @@ function PlayContent() {
         const handleVisibilityChange = () => {
             if (document.hidden) {
                 socket.emit("TAB_SWITCH", { pin });
-                toast.warning("Tab switching is monitored!", {
-                    description: "Your activity has been flagged to the host.",
-                    duration: 3000
-                });
             }
         };
 
@@ -384,10 +380,10 @@ function PlayContent() {
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center space-y-6 text-white"
                     >
-                        <div className={`w-36 h-36 rounded-full flex items-center justify-center mx-auto mb-4 border-8 shadow-2xl ${result.isCorrect ? 'bg-green-500 border-green-400 shadow-green-500/30' : 'bg-red-500 border-red-400 shadow-red-500/30'}`}>
-                            {result.isCorrect ? <CheckCircle className="w-20 h-20" /> : <XCircle className="w-20 h-20" />}
+                        <div className={`w-36 h-36 rounded-full flex items-center justify-center mx-auto mb-4 border-8 shadow-2xl ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/30' : 'bg-red-500 border-red-400 shadow-red-500/30'}`}>
+                            {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? <CheckCircle className="w-20 h-20" /> : <XCircle className="w-20 h-20" />}
                         </div>
-                        <h2 className="text-5xl font-black drop-shadow-md">{result.isCorrect ? "Correct!" : "Incorrect"}</h2>
+                        <h2 className="text-5xl font-black drop-shadow-md">{(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? "Correct!" : (selectedAnswerIndex === null ? "Time's Up!" : "Incorrect")}</h2>
 
                         <div className="flex justify-center gap-4">
                             <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl inline-block min-w-[120px] border border-white/5">
@@ -404,7 +400,7 @@ function PlayContent() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto w-full">
                             {/* Your Answer */}
-                            <div className={`p-6 rounded-2xl border backdrop-blur-md text-left shadow-xl ${result.isCorrect ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                            <div className={`p-6 rounded-2xl border backdrop-blur-md text-left shadow-xl ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
                                 <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-3 border-b border-white/5 pb-2">Your Answer</div>
                                 <div className="flex items-center gap-4">
                                     <div className={`
@@ -414,7 +410,7 @@ function PlayContent() {
                                         {selectedAnswerIndex !== null ? String.fromCharCode(65 + (selectedAnswerIndex || 0)) : '?'}
                                     </div>
                                     <span className="text-xl font-bold text-white leading-snug">
-                                        {selectedAnswerIndex !== null ? currentQuestion?.options[selectedAnswerIndex]?.text : "No answer"}
+                                        {selectedAnswerIndex !== null ? currentQuestion?.options[selectedAnswerIndex]?.text : "No answer submitted"}
                                     </span>
                                 </div>
                             </div>
