@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Play, MonitorPlay, Zap, Trophy, ArrowRight, Loader2, Copy, Ban, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import QRCode from "react-qr-code";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { Suspense } from "react";
 
@@ -21,6 +22,7 @@ function LobbyContent() {
     const [players, setPlayers] = useState<any[]>([]);
     const [gameMode, setGameMode] = useState("live");
     const [isLoading, setIsLoading] = useState(true);
+    const [kickNotifications, setKickNotifications] = useState<any[]>([]);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -53,6 +55,21 @@ function LobbyContent() {
 
         socket.on("player_left", (data: any) => {
             setPlayers(prev => prev.filter(p => p.socketId !== data.participantId && p.name !== data.name));
+
+            // Add to custom bottom-left notifications
+            const newNotify = {
+                id: Date.now(),
+                name: data.name,
+                reason: data.reason || "Participant left the lobby.",
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+            };
+            setKickNotifications(prev => [newNotify, ...prev].slice(0, 5));
+
+            // Auto-remove notification after 8 seconds
+            setTimeout(() => {
+                setKickNotifications(prev => prev.filter(n => n.id !== newNotify.id));
+            }, 8000);
+
             toast.error(`${data.name} removed`, {
                 description: data.reason || "Participant left the lobby.",
                 duration: 5000
@@ -237,6 +254,44 @@ function LobbyContent() {
                         </Button>
                     </div>
                 )}
+            </div>
+
+            {/* Bottom Left Kick Notifications Overlay */}
+            <div className="fixed bottom-6 left-6 z-[9999] flex flex-col-reverse gap-3 pointer-events-none">
+                <AnimatePresence mode="popLayout">
+                    {kickNotifications.map((notif) => (
+                        <motion.div
+                            key={notif.id}
+                            initial={{ opacity: 0, x: -50, scale: 0.9, filter: 'blur(10px)' }}
+                            animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
+                            exit={{ opacity: 0, x: -20, scale: 0.95, filter: 'blur(10px)', transition: { duration: 0.2 } }}
+                            layout
+                            className="group pointer-events-auto"
+                        >
+                            <div className="bg-slate-900/80 backdrop-blur-2xl border border-red-500/30 p-4 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] flex items-center gap-4 min-w-[320px] max-w-[400px] hover:border-red-500/60 transition-colors">
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-red-500/20 blur-xl rounded-full" />
+                                    <div className="relative bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-2.5 shadow-lg shadow-red-500/20">
+                                        <Ban className="h-5 w-5 text-white" />
+                                    </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-baseline gap-2 mb-1">
+                                        <h3 className="font-bold text-white text-lg truncate leading-tight group-hover:text-red-400 transition-colors">{notif.name}</h3>
+                                        <span className="text-[10px] font-mono text-slate-500 shrink-0 font-bold bg-slate-950/50 px-1.5 py-0.5 rounded border border-white/5">{notif.timestamp}</span>
+                                    </div>
+                                    <p className="text-sm text-slate-300 font-medium line-clamp-2 leading-relaxed italic">
+                                        &quot;{notif.reason}&quot;
+                                    </p>
+                                    <div className="mt-3 flex items-center gap-2">
+                                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                                        <span className="text-[10px] text-red-400/90 uppercase tracking-[0.2em] font-black">Participant Removed</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
             </div>
         </div>
     );
