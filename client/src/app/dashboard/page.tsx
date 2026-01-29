@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Play, Edit, Trash, Users, Trophy, BookOpen, Clock } from "lucide-react";
+import { Plus, Play, Edit, Trash, Users, Trophy, BookOpen, Clock, Monitor } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import { motion } from "framer-motion";
 
@@ -360,11 +360,18 @@ export default function DashboardPage() {
                                             </div>
                                         </CardContent>
                                         <CardFooter>
-                                            <Link href={`/host/${quiz._id}`} className="w-full">
-                                                <Button className="w-full bg-teal/10 text-teal hover:bg-teal hover:text-white border border-teal/20 hover:border-teal transition-all">
-                                                    <Play className="mr-2 h-4 w-4" /> Host Live
-                                                </Button>
-                                            </Link>
+                                            <div className="flex gap-2 w-full">
+                                                <Link href={`/host/${quiz._id}`} className="flex-1">
+                                                    <Button className="w-full bg-teal/10 text-teal hover:bg-teal hover:text-white border border-teal/20 hover:border-teal transition-all">
+                                                        <Play className="mr-2 h-4 w-4" /> Host Live
+                                                    </Button>
+                                                </Link>
+                                                <Link href={`/host/practice/simulate/${quiz._id}`} title="Preview and test quiz logic in a split-view simulation">
+                                                    <Button variant="outline" className="border-purple-500/30 text-purple-400 hover:bg-purple-500 hover:text-white">
+                                                        <Monitor className="h-4 w-4" />
+                                                    </Button>
+                                                </Link>
+                                            </div>
                                         </CardFooter>
                                     </div>
                                 </Card>

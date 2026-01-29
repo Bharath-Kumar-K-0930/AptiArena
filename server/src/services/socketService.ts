@@ -238,16 +238,34 @@ export const setupSocket = (io: Server) => {
                     }
 
                     session.participants[pIndex].lastAnsweredQuestionIndex = qIndex;
+                    session.participants[pIndex].lastAnswerIndex = answerIndex; // Store answer for stats
                     await session.save();
 
-                    socket.emit('answer_result', { isCorrect, score });
+                    const resultData: any = { isCorrect, score };
+                    if (session.gameMode === 'practice') {
+                        const correctIndex = currentQ.options.findIndex((o: any) => o.isCorrect);
+                        resultData.correctIndex = correctIndex;
+                        resultData.explanation = currentQ.explanation;
+                        resultData.answerText = currentQ.options[correctIndex]?.text;
+                    }
+                    socket.emit('answer_result', resultData);
 
-                    // Notify host about progress
-                    const answeredCount = session.participants.filter(p => p.lastAnsweredQuestionIndex === qIndex).length;
+                    // Notify host about progress & stats
+                    const participantsOnThisQ = session.participants.filter(p => p.lastAnsweredQuestionIndex === qIndex);
+
+                    // Calculate option distribution for host
+                    const distribution = [0, 0, 0, 0];
+                    participantsOnThisQ.forEach(p => {
+                        if (typeof p.lastAnswerIndex === 'number') {
+                            distribution[p.lastAnswerIndex]++;
+                        }
+                    });
+
                     io.to(pin).emit('player_answered', {
                         name: session.participants[pIndex].name,
-                        count: answeredCount,
-                        total: session.participants.length
+                        count: participantsOnThisQ.length,
+                        total: session.participants.length,
+                        distribution // A, B, C, D counts
                     });
                 }
             } catch (error) {

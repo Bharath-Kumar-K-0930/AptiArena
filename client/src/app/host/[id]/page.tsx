@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { io, Socket } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap, Lightbulb, PowerOff } from "lucide-react";
+import { Users, Play, Trophy, ArrowRight, Award, Star, PartyPopper, Zap, Lightbulb, PowerOff, Layout } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 // Assuming we don't have react-confetti installed, I'll use a simple embedded component or just CSS animations for now.
@@ -229,6 +229,10 @@ export default function HostGamePage() {
                     <Card className="bg-gray-900 border-gray-800 hover:border-purple-500 cursor-pointer transition-all hover:scale-105" onClick={() => setGameMode('slideshow')}>
                         <CardHeader><CardTitle className="flex flex-col items-center gap-4 text-2xl text-white"><Play className="h-12 w-12 text-purple-500" /> Slide Show</CardTitle></CardHeader>
                         <CardContent className="text-gray-400">Presenter mode. Participants only see what you show on screen.</CardContent>
+                    </Card>
+                    <Card className="bg-slate-900 border-teal-500/30 hover:border-teal-400 cursor-pointer transition-all hover:scale-105 shadow-[0_0_30px_rgba(20,184,166,0.1)]" onClick={() => window.location.href = `/host/practice/simulate/${id}`}>
+                        <CardHeader><CardTitle className="flex flex-col items-center gap-4 text-2xl text-white"><Layout className="h-12 w-12 text-teal-400" /> Simulation Mode</CardTitle></CardHeader>
+                        <CardContent className="text-gray-400">Dual-view testing. Simulate host and student perspectives side-by-side.</CardContent>
                     </Card>
                 </div>
             </div>

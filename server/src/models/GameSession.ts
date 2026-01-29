@@ -10,6 +10,7 @@ export interface IGameSession extends Document {
         score: number;
         streak: number;
         lastAnsweredQuestionIndex: number;
+        lastAnswerIndex?: number;
         fingerprint?: string;
         tabSwitchCount: number;
         copyAttemptCount: number;
@@ -34,6 +35,7 @@ const GameSessionSchema = new Schema({
         score: { type: Number, default: 0 },
         streak: { type: Number, default: 0 },
         lastAnsweredQuestionIndex: { type: Number, default: -1 }, // Track if they answered the current question
+        lastAnswerIndex: { type: Number }, // For stats tracking
 
         // Anti-Cheat Fields
         fingerprint: { type: String },
