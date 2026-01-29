@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, ArrowRight, Play, Trophy, AlertCircle, BarChart3, Zap, Star } from "lucide-react";
+import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, ArrowRight, Play, Trophy, AlertCircle, BarChart3, Zap, Star, ShieldAlert, Clipboard, Eye, AlertTriangle, MousePointer2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { io, Socket } from "socket.io-client";
@@ -245,20 +245,82 @@ function PlayContent() {
 
     if (gameState === "waiting") {
         return (
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 text-center space-y-8">
-                <div className="relative">
-                    <div className="absolute inset-0 bg-teal-500 blur-3xl opacity-20 animate-pulse" />
-                    <img src="/logo.png" className="w-32 h-32 relative z-10" alt="Logo" onError={(e) => e.currentTarget.style.display = 'none'} />
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 text-center space-y-8 relative overflow-hidden">
+                <div className="absolute inset-0 z-0">
+                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-500/20 blur-[120px] rounded-full animate-pulse" />
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 blur-[120px] rounded-full animate-pulse" />
                 </div>
-                <div>
-                    <h2 className="text-4xl font-black text-white mb-2">You're In!</h2>
-                    <p className="text-xl text-teal-400 font-medium">See your name on screen?</p>
-                </div>
-                <div className="flex gap-2">
-                    <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
-                    <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
-                    <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
-                </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="relative z-10 max-w-lg w-full"
+                >
+                    <div className="mb-8">
+                        <div className="relative inline-block mb-4">
+                            <div className="absolute inset-0 bg-teal-500 blur-2xl opacity-40 animate-pulse" />
+                            <img src="/logo.png" className="w-24 h-24 relative z-10 mx-auto" alt="Logo" onError={(e) => e.currentTarget.style.display = 'none'} />
+                        </div>
+                        <h2 className="text-4xl font-black text-white mb-2">You&apos;re In, {name}!</h2>
+                        <p className="text-xl text-teal-400 font-medium tracking-tight">Waiting for the Host to start...</p>
+                    </div>
+
+                    <Card className="bg-slate-900/50 backdrop-blur-xl border-white/10 text-left overflow-hidden shadow-2xl">
+                        <div className="bg-gradient-to-r from-teal-500/20 to-blue-500/20 p-4 border-b border-white/5">
+                            <h3 className="text-white font-bold flex items-center gap-2">
+                                <ShieldAlert className="w-5 h-5 text-teal-400" />
+                                Rules of the Arena
+                            </h3>
+                        </div>
+                        <CardContent className="p-6 space-y-4">
+                            <div className="flex items-start gap-4">
+                                <div className="bg-red-500/20 p-2 rounded-lg shrink-0">
+                                    <Zap className="w-5 h-5 text-red-500" />
+                                </div>
+                                <div>
+                                    <h4 className="text-red-400 font-bold text-sm uppercase tracking-wider">No Tab Switching</h4>
+                                    <p className="text-gray-400 text-sm">Switching tabs or minimizing the browser will result in an <strong>immediate kick</strong>.</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="bg-yellow-500/20 p-2 rounded-lg shrink-0">
+                                    <Clipboard className="w-5 h-5 text-yellow-500" />
+                                </div>
+                                <div>
+                                    <h4 className="text-yellow-400 font-bold text-sm uppercase tracking-wider">No Copy/Paste</h4>
+                                    <p className="text-gray-400 text-sm">Attempting to copy questions or paste answers is blocked and flagged.</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="bg-blue-500/20 p-2 rounded-lg shrink-0">
+                                    <MousePointer2 className="w-5 h-5 text-blue-500" />
+                                </div>
+                                <div>
+                                    <h4 className="text-blue-400 font-bold text-sm uppercase tracking-wider">Right-Click Disabled</h4>
+                                    <p className="text-gray-400 text-sm">Standard browser context menus are disabled for quiz integrity.</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="bg-teal-500/20 p-2 rounded-lg shrink-0">
+                                    <Eye className="w-5 h-5 text-teal-400" />
+                                </div>
+                                <div>
+                                    <h4 className="text-teal-400 font-bold text-sm uppercase tracking-wider">Stay Focused</h4>
+                                    <p className="text-gray-400 text-sm">The timer is synced with the host. Every second counts!</p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <div className="mt-8 flex justify-center gap-2">
+                        <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0s' }} />
+                        <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }} />
+                    </div>
+                </motion.div>
             </div>
         );
     }
