@@ -53,14 +53,45 @@ export const setupSocket = (io: Server) => {
                         const quiz = await Quiz.findById(session.quizId);
                         if (quiz && quiz.questions[session.currentQuestionIndex]) {
                             const question = quiz.questions[session.currentQuestionIndex];
-                            // Sanitize question (remove isCorrect)
+
+                            // Send question
                             const sanitizedQuestion = {
                                 text: question.text,
                                 options: question.options.map((o: any) => ({ text: o.text })),
                                 timeLimit: question.timeLimit,
                                 image: question.image
                             };
-                            socket.emit('new_question', { question: sanitizedQuestion, index: session.currentQuestionIndex, total: quiz.questions.length });
+                            socket.emit('new_question', {
+                                question: sanitizedQuestion,
+                                index: session.currentQuestionIndex,
+                                total: quiz.questions.length
+                            });
+
+                            // Recover answer state
+                            if (existingParticipant.lastAnsweredQuestionIndex === session.currentQuestionIndex) {
+                                socket.emit('answer_result', {
+                                    isCorrect: existingParticipant.lastAnswerIndex !== -1 && question.options[existingParticipant.lastAnswerIndex]?.isCorrect,
+                                    score: existingParticipant.score,
+                                    lastAnswerIndex: existingParticipant.lastAnswerIndex
+                                });
+                            }
+
+                            // Recover result state if already revealed
+                            if (session.isRevealed) {
+                                const correctIndex = question.options.findIndex(o => o.isCorrect);
+                                socket.emit('answer_revealed', {
+                                    correctIndex,
+                                    answerText: question.options[correctIndex]?.text,
+                                    explanation: question.explanation,
+                                    leaderboard: session.participants
+                                        .sort((a, b) => b.score - a.score)
+                                        .map(p => ({
+                                            name: p.name,
+                                            score: p.score,
+                                            streak: p.streak
+                                        }))
+                                });
+                            }
                         }
                     }
                     console.log(`Player ${name} reconnected to game ${pin}`);

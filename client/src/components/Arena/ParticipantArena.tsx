@@ -78,6 +78,10 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         newSocket.on("answer_result", (data) => {
             setGameState("submitted");
             setResult((prev: any) => ({ ...(prev || {}), ...data }));
+            if (data.lastAnswerIndex !== undefined) {
+                setSelectedAnswerIndex(data.lastAnswerIndex);
+                setHasAnswered(true);
+            }
         });
 
         newSocket.on("answer_revealed", (data) => {
@@ -354,70 +358,84 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="text-center space-y-4 text-white"
+                        className="text-center space-y-6 text-white pb-8"
                     >
-                        <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-2 border-4 shadow-2xl ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/30' : 'bg-red-500 border-red-400 shadow-red-500/30'}`}>
-                            {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? <CheckCircle className="w-12 h-12" /> : <XCircle className="w-12 h-12" />}
+                        {/* Result Icon */}
+                        <div className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-2 border-8 shadow-2xl transition-all duration-500 ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/30' : 'bg-red-500 border-red-400 shadow-red-500/30'}`}>
+                            {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ?
+                                <CheckCircle className="w-16 h-16" /> :
+                                <XCircle className="w-16 h-16" />
+                            }
                         </div>
-                        <h2 className="text-3xl font-black drop-shadow-md">{(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? "Correct!" : (selectedAnswerIndex === null ? "Time's Up!" : "Incorrect")}</h2>
 
-                        <div className="flex justify-center gap-3">
-                            <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl inline-block min-w-[100px] border border-white/5">
-                                <span className="text-[9px] text-gray-400 uppercase tracking-widest block mb-0.5 font-bold">Total Score</span>
-                                <span className="text-2xl font-mono font-bold text-cyan-300">{result.score || (leaderboard.find(p => p.name === name)?.score) || 0}</span>
+                        <h2 className="text-5xl font-black drop-shadow-md tracking-tight">
+                            {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? "Correct" : (selectedAnswerIndex === null ? "Time's Up" : "Incorrect")}
+                        </h2>
+
+                        {/* Stats Row */}
+                        <div className="flex justify-center gap-4">
+                            <div className="bg-slate-900/60 backdrop-blur-xl p-5 rounded-2xl flex-1 max-w-[140px] border border-white/10 shadow-lg">
+                                <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] block mb-1 font-black">Total Score</span>
+                                <span className="text-4xl font-mono font-bold text-teal-400">
+                                    {result.score || (leaderboard.find(p => p.name === name)?.score) || 0}
+                                </span>
                             </div>
-                            <div className="bg-white/10 backdrop-blur-md p-3 rounded-xl inline-block min-w-[100px] border border-white/5">
-                                <span className="text-[9px] text-gray-400 uppercase tracking-widest block mb-0.5 font-bold">Rank</span>
-                                <span className="text-2xl font-mono font-bold text-yellow-400">
+                            <div className="bg-slate-900/60 backdrop-blur-xl p-5 rounded-2xl flex-1 max-w-[140px] border border-white/10 shadow-lg">
+                                <span className="text-[10px] text-slate-500 uppercase tracking-[0.2em] block mb-1 font-black">Rank</span>
+                                <span className="text-4xl font-mono font-bold text-yellow-400">
                                     #{leaderboard.findIndex(p => p.name === name) !== -1 ? leaderboard.findIndex(p => p.name === name) + 1 : '-'}
                                 </span>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-3 w-full max-w-sm mx-auto">
+                        {/* Answer Comparison */}
+                        <div className="space-y-3 w-full max-w-sm mx-auto">
                             {/* Your Answer */}
-                            <div className={`p-4 rounded-xl border backdrop-blur-md text-left shadow-xl ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-                                <div className="text-gray-400 text-[9px] font-bold uppercase tracking-widest mb-2 border-b border-white/5 pb-1">Your Answer</div>
-                                <div className="flex items-center gap-3">
+                            <div className={`p-5 rounded-2xl border backdrop-blur-md text-left shadow-xl transition-all ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                                <div className="text-slate-400 text-[10px] font-black uppercase tracking-[0.1em] mb-3 border-b border-white/5 pb-2">Your Answer</div>
+                                <div className="flex items-center gap-4">
                                     <div className={`
-                                        w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0 shadow-lg
-                                        ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-yellow-500' : selectedAnswerIndex === 3 ? 'bg-green-500' : 'bg-gray-600'}
+                                        w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black text-white shrink-0 shadow-lg
+                                        ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-yellow-500' : selectedAnswerIndex === 3 ? 'bg-green-500' : 'bg-slate-600'}
                                     `}>
                                         {selectedAnswerIndex !== null ? String.fromCharCode(65 + (selectedAnswerIndex || 0)) : '?'}
                                     </div>
-                                    <span className="text-sm font-bold text-white truncate leading-tight">
+                                    <span className="text-xl font-bold text-white leading-tight">
                                         {selectedAnswerIndex !== null ? currentQuestion?.options[selectedAnswerIndex]?.text : "No answer submitted"}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Correct Answer */}
-                            <div className="bg-slate-900/60 p-4 rounded-xl border border-white/10 shadow-xl backdrop-blur-md text-left">
-                                <div className="text-gray-400 text-[9px] font-bold uppercase tracking-widest mb-2 border-b border-white/5 pb-1">The Correct Answer Was</div>
-                                <div className="flex items-center gap-3">
+                            <div className="bg-slate-900/80 p-5 rounded-2xl border border-white/10 shadow-xl backdrop-blur-md text-left">
+                                <div className="text-slate-400 text-[10px] font-black uppercase tracking-[0.1em] mb-3 border-b border-white/5 pb-2">The Correct Answer Was</div>
+                                <div className="flex items-center gap-4">
                                     <div className={`
-                                        w-8 h-8 rounded-lg flex items-center justify-center text-sm font-black text-white shrink-0 shadow-lg
-                                        ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-yellow-500' : 'bg-green-500'}
+                                        w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black text-white shrink-0 shadow-lg
+                                        ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-yellow-500' : result.correctIndex === 3 ? 'bg-green-500' : 'bg-slate-600'}
                                     `}>
                                         {String.fromCharCode(65 + (result.correctIndex || 0))}
                                     </div>
-                                    <span className="text-sm font-bold text-white truncate leading-tight">
+                                    <span className="text-xl font-bold text-white leading-tight">
                                         {result.answerText || currentQuestion?.options[result.correctIndex || 0]?.text}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
+                        {/* Explanation */}
                         {result.explanation && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-blue-900/40 p-4 rounded-xl border border-blue-500/30 max-w-sm mx-auto backdrop-blur-sm"
+                                className="bg-indigo-950/40 p-5 rounded-2xl border border-indigo-500/30 max-w-sm mx-auto backdrop-blur-sm text-left shadow-2xl"
                             >
-                                <div className="text-blue-300 text-[9px] font-bold uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
-                                    <Zap className="w-3 h-3" /> Explanation
+                                <div className="text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] mb-2 flex items-center gap-2">
+                                    <Zap className="w-4 h-4 text-indigo-400 fill-indigo-400" /> Explanation
                                 </div>
-                                <p className="text-blue-100 text-[10px] leading-relaxed line-clamp-3">{result.explanation}</p>
+                                <p className="text-indigo-100 text-xs leading-relaxed font-medium">
+                                    {result.explanation}
+                                </p>
                             </motion.div>
                         )}
                     </motion.div>
