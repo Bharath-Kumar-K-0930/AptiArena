@@ -82,12 +82,12 @@ function PlayContent() {
         newSocket.on("answer_result", ({ isCorrect, score }) => {
             setGameState("submitted");
             // Store result silently, wait for reveal
-            setResult((prev: any) => ({ ...prev, isCorrect, score }));
+            setResult((prev: any) => ({ ...(prev || {}), isCorrect, score }));
         });
 
         newSocket.on("answer_revealed", ({ correctIndex, explanation, leaderboard, answerText }) => {
             setGameState("result");
-            setResult((prev: any) => ({ ...prev, correctIndex, explanation, answerText }));
+            setResult((prev: any) => ({ ...(prev || {}), correctIndex, explanation, answerText }));
             if (leaderboard) setLeaderboard(leaderboard);
         });
 
@@ -128,7 +128,7 @@ function PlayContent() {
 
     // Anti-Cheat: Visibility and Blur Detection
     useEffect(() => {
-        if (!socket || gameState !== 'playing') return;
+        if (!socket || (gameState !== 'playing' && gameState !== 'submitted')) return;
 
         const handleVisibilityChange = () => {
             if (document.hidden) {
@@ -151,7 +151,7 @@ function PlayContent() {
 
     // Anti-Cheat: Copy/Paste and Right-Click blocking
     useEffect(() => {
-        if (!socket || gameState !== 'playing') return;
+        if (!socket || (gameState !== 'playing' && gameState !== 'submitted')) return;
 
         const blockAction = (e: any) => {
             e.preventDefault();
