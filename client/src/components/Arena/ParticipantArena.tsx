@@ -118,6 +118,12 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                 setGameState("result");
                 setResult((prev: any) => ({ ...(prev || {}), ...data }));
                 if (data.leaderboard) setLeaderboard(data.leaderboard);
+
+                // Ensure specific user stats are synced
+                if (data.lastAnswerIndex !== undefined) {
+                    setSelectedAnswerIndex(data.lastAnswerIndex);
+                    setHasAnswered(true);
+                }
             }
         });
 

@@ -368,12 +368,25 @@ export const setupSocket = (io: Server) => {
                         streak: p.streak
                     }));
 
+                // Add participant-specific stats to ensuring rendering
+                const participant = session.participants.find(p => p.socketId === socket.id);
+                const extraStats: any = {};
+
+                if (participant) {
+                    extraStats.score = participant.score;
+                    if (typeof participant.lastAnswerIndex === 'number' && participant.lastAnswerIndex !== -1) {
+                        extraStats.lastAnswerIndex = participant.lastAnswerIndex;
+                        extraStats.isCorrect = currentQ.options[participant.lastAnswerIndex]?.isCorrect;
+                    }
+                }
+
                 socket.emit('reveal_status', {
                     isRevealed: true,
                     correctIndex,
                     answerText: currentQ.options[correctIndex]?.text,
                     explanation: currentQ.explanation,
-                    leaderboard
+                    leaderboard,
+                    ...extraStats
                 });
             } catch (error) {
                 console.error(error);
