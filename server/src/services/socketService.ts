@@ -346,6 +346,40 @@ export const setupSocket = (io: Server) => {
             }
         });
 
+        socket.on('check_reveal_status', async ({ pin }) => {
+            try {
+                const session = await GameSession.findOne({ pin });
+                if (!session || !session.isRevealed) {
+                    socket.emit('reveal_status', { isRevealed: false });
+                    return;
+                }
+
+                const quiz = await Quiz.findById(session.quizId);
+                if (!quiz) return;
+
+                const currentQ = quiz.questions[session.currentQuestionIndex];
+                const correctIndex = currentQ.options.findIndex(o => o.isCorrect);
+
+                const leaderboard = session.participants
+                    .sort((a, b) => b.score - a.score)
+                    .map(p => ({
+                        name: p.name,
+                        score: p.score,
+                        streak: p.streak
+                    }));
+
+                socket.emit('reveal_status', {
+                    isRevealed: true,
+                    correctIndex,
+                    answerText: currentQ.options[correctIndex]?.text,
+                    explanation: currentQ.explanation,
+                    leaderboard
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        });
+
         socket.on('show_leaderboard', async ({ pin }) => {
             try {
                 const session = await GameSession.findOne({ pin });

@@ -111,6 +111,16 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             if (data.leaderboard) setLeaderboard(data.leaderboard);
         });
 
+        // Polling response handler
+        newSocket.on("reveal_status", (data) => {
+            if (data.isRevealed) {
+                console.log("Safety poll confirmed reveal!");
+                setGameState("result");
+                setResult((prev: any) => ({ ...(prev || {}), ...data }));
+                if (data.leaderboard) setLeaderboard(data.leaderboard);
+            }
+        });
+
         newSocket.on("leaderboard_update", ({ leaderboard }) => {
             setGameState("leaderboard");
             if (leaderboard) setLeaderboard(leaderboard);
@@ -205,6 +215,20 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             });
         }
     };
+
+    // Safety Poll: Check for reveal status if stuck on "Locked" screen
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        if (gameState === "submitted" && !isSimulation) {
+            interval = setInterval(() => {
+                const currentPin = pin || sessionStorage.getItem('quiz_pin');
+                if (currentPin && socket && socket.connected) {
+                    socket.emit('check_reveal_status', { pin: currentPin });
+                }
+            }, 3000);
+        }
+        return () => clearInterval(interval);
+    }, [gameState, pin, isSimulation]);
 
     const handleAnswer = (index: number) => {
         if (hasAnswered || gameState !== "playing" || (timeLeft !== null && timeLeft <= 0)) return;
