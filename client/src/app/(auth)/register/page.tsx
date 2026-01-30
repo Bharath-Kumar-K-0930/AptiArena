@@ -14,6 +14,8 @@ export default function RegisterPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const [success, setSuccess] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -32,16 +34,34 @@ export default function RegisterPage() {
                 throw new Error(data.message || "Registration failed");
             }
 
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("user", JSON.stringify(data.user));
-            router.push("/");
-            router.refresh();
+            setSuccess(true);
         } catch (err: any) {
             setError(err.message);
         } finally {
             setLoading(false);
         }
     };
+
+    if (success) {
+        return (
+            <Card className="w-full bg-card/50 backdrop-blur border-border">
+                <CardHeader className="space-y-1">
+                    <CardTitle className="text-2xl text-center text-teal-500">Registration Successful!</CardTitle>
+                    <CardDescription className="text-center">
+                        Please check your email to verify your account.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center pb-8">
+                    <Mail className="h-16 w-16 text-teal-500 animate-bounce" />
+                </CardContent>
+                <CardFooter className="flex justify-center">
+                    <p className="text-sm text-center text-muted-foreground">
+                        Once verified, you can <Link href="/login" className="text-teal hover:underline">Sign In</Link>
+                    </p>
+                </CardFooter>
+            </Card>
+        );
+    }
 
     return (
         <Card className="w-full bg-card/50 backdrop-blur border-border">

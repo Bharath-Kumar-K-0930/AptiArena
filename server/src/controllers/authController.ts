@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../models/User';
+import { sendVerificationEmail } from '../services/emailService';
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -12,20 +14,26 @@ export const register = async (req: Request, res: Response) => {
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+        const verificationToken = crypto.randomBytes(32).toString('hex');
 
         const newUser = new User({
             username,
             email,
             password: hashedPassword,
-            role: role || 'participant'
+            role: role || 'participant',
+            isVerified: false,
+            verificationToken
         });
 
         await newUser.save();
+        await sendVerificationEmail(email, verificationToken);
 
-        const token = jwt.sign({ id: newUser._id, role: newUser.role }, process.env.JWT_SECRET as string, { expiresIn: '1d' });
-
-        res.status(201).json({ token, user: { id: newUser._id, username, email, role: newUser.role } });
+        res.status(201).json({
+            message: 'Registration successful. Please verify your email to login.',
+            user: { id: newUser._id, username, email, role: newUser.role }
+        });
     } catch (error) {
+        console.error("REGISTER ERROR:", error);
         res.status(500).json({ message: 'Server error', error });
     }
 };
@@ -39,6 +47,8 @@ export const login = async (req: Request, res: Response) => {
 
         if (!user.password) return res.status(400).json({ message: 'Invalid credentials' }); // Google auth user trying to login with password
 
+        if (!user.isVerified) return res.status(403).json({ message: 'Please verify your email first' });
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
@@ -50,6 +60,24 @@ export const login = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error', error });
     }
 };
+
+export const verifyEmail = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.body;
+        const user = await User.findOne({ verificationToken: token });
+
+        if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
+
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        await user.save();
+
+        res.json({ message: 'Email verified successfully. You can now login.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Email verification failed', error });
+    }
+};
+
 export const getMe = async (req: Request, res: Response) => {
     try {
         // @ts-ignore

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { BrainCircuit, Github, Instagram, Mail, Linkedin } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { a } from "framer-motion/client";
 
 export default function Footer() {
     const pathname = usePathname();
@@ -108,7 +109,7 @@ export default function Footer() {
                         <span>Developed with</span>
                         <span className="text-red-500 animate-pulse">❤️</span>
                         <span>by</span>
-                        <span className="text-teal-500 font-black" >Bharath Kumar K</span>
+                        <Link href="https://www.linkedin.com/in/bharath-kumar-k-b35ba0304" target="_blank" className="text-teal-500 font-black hover:text-teal-400 transition-colors">Bharath Kumar K</Link>
                     </div>
                 </div>
             </div>
