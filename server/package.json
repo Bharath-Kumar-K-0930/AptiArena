@@ -28,6 +28,7 @@
     "office-text-extractor": "^3.0.3",
     "openai": "^6.14.0",
     "pdf-parse": "^2.4.5",
+    "resend": "^6.9.1",
     "socket.io": "^4.8.1"
   },
   "devDependencies": {
