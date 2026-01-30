@@ -15,16 +15,23 @@ dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
+const allowedOrigins = ["http://localhost:3000", "https://apti-arena.vercel.app"];
+
 const io = new Server(server, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
+        origin: allowedOrigins,
+        methods: ["GET", "POST", "PUT", "DELETE"],
+        credentials: true
     }
 });
 
 setupSocket(io);
 
-app.use(cors());
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
