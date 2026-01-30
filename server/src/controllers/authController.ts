@@ -26,7 +26,8 @@ export const register = async (req: Request, res: Response) => {
         });
 
         await newUser.save();
-        await sendVerificationEmail(email, verificationToken);
+        // Send email asynchronously to allow immediate response
+        sendVerificationEmail(email, verificationToken).catch(err => console.error("Background Email Error:", err));
 
         res.status(201).json({
             message: 'Registration successful. Please verify your email to login.',
