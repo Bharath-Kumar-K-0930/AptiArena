@@ -108,7 +108,7 @@ export default function Footer() {
                         <span>Developed with</span>
                         <span className="text-red-500 animate-pulse">❤️</span>
                         <span>by</span>
-                        <span className="text-teal-500 font-black">Bharath Kumar K</span>
+                        <span className="text-teal-500 font-black" >Bharath Kumar K</span>
                     </div>
                 </div>
             </div>

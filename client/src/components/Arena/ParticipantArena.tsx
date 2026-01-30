@@ -354,7 +354,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
     }
 
     return (
-        <div className={`min-h-full ${isSimulation ? 'bg-slate-950 rounded-[3rem]' : 'min-h-screen bg-slate-950'} relative overflow-hidden flex flex-col`}>
+        <div className={`min-h-full ${isSimulation ? 'bg-slate-950 rounded-[3rem]' : 'min-h-screen bg-slate-950'} relative flex flex-col`}>
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 to-slate-900" />
             </div>
