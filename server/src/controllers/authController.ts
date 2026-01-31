@@ -81,7 +81,7 @@ export const verifyEmail = async (req: Request, res: Response) => {
 
 export const getMe = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const user = await User.findById(req.user.id).select('-password');
         res.json(user);
     } catch (error) {
@@ -91,7 +91,7 @@ export const getMe = async (req: Request, res: Response) => {
 
 export const updateProfile = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const userId = req.user.id;
         const { username, name, bio, organization, jobTitle } = req.body;
 
@@ -109,7 +109,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
 export const updatePassword = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const userId = req.user.id;
         const { currentPassword, newPassword } = req.body;
 

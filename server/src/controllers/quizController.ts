@@ -3,7 +3,7 @@ import Quiz from '../models/Quiz';
 
 export const createQuiz = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const hostId = req.user.id;
         const quiz = new Quiz({ ...req.body, hostId });
         await quiz.save();
@@ -24,7 +24,7 @@ export const getQuizzes = async (req: Request, res: Response) => {
 
 export const getMyQuizzes = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const quizzes = await Quiz.find({ hostId: req.user.id }).sort({ createdAt: -1 });
         res.json(quizzes);
     } catch (error) {
@@ -50,12 +50,9 @@ export const generateQuiz = async (req: Request, res: Response) => {
         let { topic, text, difficulty, amount, mode } = req.body;
 
         // If file is uploaded, extract text
-        // @ts-ignore
         if (req.file) {
-            // @ts-ignore
             const extractedText = await extractTextFromFile(req.file);
             text = extractedText;
-            // @ts-ignore
             if (!topic) topic = req.file.originalname; // Use filename as topic if not provided
         }
 
@@ -73,7 +70,7 @@ export const generateQuiz = async (req: Request, res: Response) => {
 
 export const updateQuiz = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const hostId = req.user.id;
         const quiz = await Quiz.findOneAndUpdate(
             { _id: req.params.id, hostId },
@@ -89,7 +86,7 @@ export const updateQuiz = async (req: Request, res: Response) => {
 
 export const deleteQuiz = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const quiz = await Quiz.findOneAndDelete({ _id: req.params.id, hostId: req.user.id });
         if (!quiz) return res.status(404).json({ message: 'Quiz not found or unauthorized' });
         res.json({ message: 'Quiz deleted successfully' });
@@ -103,7 +100,7 @@ import mongoose from 'mongoose';
 
 export const getHostStats = async (req: Request, res: Response) => {
     try {
-        // @ts-ignore
+        if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const hostId = req.user.id;
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

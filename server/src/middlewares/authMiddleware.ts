@@ -7,8 +7,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
     if (!token) return res.status(401).json({ message: 'No token, authorization denied' });
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-        // @ts-ignore
+        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string, role: string };
         req.user = decoded;
         next();
     } catch (error) {
@@ -18,8 +17,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
 
 export const restrictTo = (...roles: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
-        // @ts-ignore
-        if (!roles.includes(req.user.role)) {
+        if (!req.user || !roles.includes(req.user.role)) {
             return res.status(403).json({ message: 'You do not have permission to perform this action' });
         }
         next();
