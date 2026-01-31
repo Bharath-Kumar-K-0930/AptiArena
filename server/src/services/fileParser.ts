@@ -1,9 +1,10 @@
 import fs from 'fs';
-const pdf = require('pdf-parse');
-const { getTextExtractor } = require('office-text-extractor');
-const extractor = getTextExtractor();
 
 export const extractTextFromFile = async (file: any): Promise<string> => {
+    const pdf = require('pdf-parse');
+    const { getTextExtractor } = require('office-text-extractor');
+    const extractor = getTextExtractor();
+
     const filePath = file.path;
     const mimeType = file.mimetype;
 

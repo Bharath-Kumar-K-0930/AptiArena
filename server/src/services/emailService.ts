@@ -8,6 +8,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const sendVerificationEmail = async (to: string, token: string) => {
     const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:3000'}/verify-email?token=${token}`;
 
+    if (process.env.NODE_ENV === 'test') {
+        console.log('Skipping email send in test environment');
+        return;
+    }
+
     try {
         const { data, error } = await resend.emails.send({
             from: 'AptiArena <onboarding@resend.dev>', // Use 'onboarding@resend.dev' for testing if no custom domain

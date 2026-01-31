@@ -15,3 +15,14 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
         res.status(401).json({ message: 'Token is not valid' });
     }
 };
+
+export const restrictTo = (...roles: string[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        // @ts-ignore
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'You do not have permission to perform this action' });
+        }
+        next();
+    };
+};
+
