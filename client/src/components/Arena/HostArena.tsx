@@ -75,6 +75,12 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
             }
         });
 
+        socket.on("answer_revealed", (data: any) => {
+            console.log("[HOST] Received answer_revealed confirmation");
+            setPhase("reveal");
+            // If data contains stats, update them here (optional, currently derived from local state/listeners)
+        });
+
         socket.on("leaderboard_update", (data: any) => {
             setLeaderboard(data.leaderboard);
             setPhase("leaderboard");
@@ -103,6 +109,7 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
             socket.off("leaderboard_update");
             socket.off("game_over");
             socket.off("player_left");
+            socket.off("answer_revealed");
         };
     }, []);
 
@@ -117,7 +124,8 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
 
     const handleStart = () => socket.emit("start_game", { pin });
     const handleReveal = () => {
-        setPhase("reveal");
+        // Do NOT set phase locally. Wait for server event.
+        console.log("[HOST] Sending reveal_answer request");
         socket.emit("reveal_answer", { pin });
     };
 
