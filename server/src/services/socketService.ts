@@ -38,6 +38,9 @@ export const setupSocket = (io: Server) => {
                     return;
                 }
 
+                const quiz = await Quiz.findById(session.quizId);
+                const totalQuestions = quiz?.questions.length || 0;
+
                 const existingParticipant = session.participants.find(p => p.name === name);
 
                 if (existingParticipant) {
@@ -46,11 +49,10 @@ export const setupSocket = (io: Server) => {
                     await session.save();
 
                     socket.join(pin);
-                    socket.emit('joined_game', { pin, mode: session.gameMode });
+                    socket.emit('joined_game', { pin, mode: session.gameMode, total: totalQuestions });
 
                     // Recover game state for reconnected user
                     if (session.status === 'live') {
-                        const quiz = await Quiz.findById(session.quizId);
                         if (quiz && quiz.questions[session.currentQuestionIndex]) {
                             const question = quiz.questions[session.currentQuestionIndex];
 
@@ -139,7 +141,7 @@ export const setupSocket = (io: Server) => {
 
                     socket.join(pin);
                     io.to(pin).emit('player_joined', { name, total: session.participants.length, isFlagged, participantId: socket.id });
-                    socket.emit('joined_game', { pin, mode: session.gameMode });
+                    socket.emit('joined_game', { pin, mode: session.gameMode, total: totalQuestions });
 
                     if (isFlagged) {
                         io.to(pin).emit('cheat_alert', {

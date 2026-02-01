@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, Zap, Star, ShieldAlert, Clipboard, Eye, MousePointer2, Trophy } from "lucide-react";
+import { Gamepad2, CheckCircle, XCircle, Loader2, MonitorPlay, Zap, Star, ShieldAlert, Clipboard, Eye, MousePointer2, Trophy, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { io, Socket } from "socket.io-client";
@@ -23,6 +23,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
 
     const [gameState, setGameState] = useState<"join" | "waiting" | "playing" | "submitted" | "result" | "leaderboard" | "finished">("join");
     const [questionIndex, setQuestionIndex] = useState(0);
+    const [totalQuestions, setTotalQuestions] = useState<number | null>(null);
     const [currentQuestion, setCurrentQuestion] = useState<any>(null);
     const [hasAnswered, setHasAnswered] = useState(false);
     const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
@@ -90,10 +91,10 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             }
         });
 
-        newSocket.on("joined_game", ({ pin: joinedPin }) => {
+        newSocket.on("joined_game", ({ pin: joinedPin, total }) => {
             setIsJoining(false);
             if (gameState === 'join') setGameState("waiting");
-            // Don't reset state if we were already playing/submitted
+            if (total) setTotalQuestions(total);
 
             if (!isSimulation) {
                 sessionStorage.setItem('quiz_pin', joinedPin);
@@ -103,7 +104,9 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
 
         newSocket.on("new_question", ({ question, index, total, startTime }) => {
             setGameState("playing");
-            setCurrentQuestion({ ...question, total });
+            const qTotal = total || question.total;
+            if (qTotal) setTotalQuestions(qTotal);
+            setCurrentQuestion({ ...question, total: qTotal });
             setQuestionIndex(index);
             setHasAnswered(false);
             setSelectedAnswerIndex(null);
@@ -453,7 +456,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                 <div className="flex justify-between items-center mb-4 md:mb-8 shrink-0">
                     <div className="flex flex-col">
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Question</span>
-                        <span className="text-base md:text-lg font-black text-white">{questionIndex + 1}<span className="text-slate-600 ml-1">/ {currentQuestion?.total || '?'}</span></span>
+                        <span className="text-base md:text-lg font-black text-white">{questionIndex + 1}<span className="text-slate-600 ml-1">/ {totalQuestions || currentQuestion?.total || '?'}</span></span>
                     </div>
 
                     <div className="flex flex-col items-end">
@@ -517,7 +520,16 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                             </div>
                             <div>
                                 <h3 className="text-3xl font-black text-white mb-2">Answer Locked</h3>
-                                <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic">Waiting for other gladiators or host reveal...</p>
+                                <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic mb-4">Waiting for other gladiators or host reveal...</p>
+                                <button
+                                    onClick={() => {
+                                        const currentPin = pinRef.current || sessionStorage.getItem('quiz_pin');
+                                        if (currentPin && socket) socket.emit('check_reveal_status', { pin: currentPin });
+                                    }}
+                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-bold text-teal-400 border border-teal-500/20 transition-colors flex items-center justify-center gap-2 mx-auto"
+                                >
+                                    <RefreshCcw className="w-3 h-3" /> Sync Status
+                                </button>
                             </div>
                         </motion.div>
                     )}
