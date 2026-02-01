@@ -317,34 +317,45 @@ export const setupSocket = (io: Server) => {
         });
 
         socket.on('reveal_answer', async ({ pin }) => {
+            console.log(`[SOCKET] Host requested reveal_answer for PIN: ${pin}`);
             try {
                 const session = await GameSession.findOne({ pin });
-                if (!session) return;
+                if (!session) {
+                    console.error(`[SOCKET] Reveal failed: Session not found for PIN ${pin}`);
+                    return;
+                }
 
-                session.isRevealed = true;
-                await session.save();
+                if (!session.isRevealed) {
+                    session.isRevealed = true;
+                    await session.save();
+                    console.log(`[SOCKET] Session marked as revealed for PIN: ${pin}`);
+                } else {
+                    console.log(`[SOCKET] Session was already revealed for PIN: ${pin}`);
+                }
 
                 const quiz = await Quiz.findById(session.quizId);
-                if (!quiz) return;
+                if (!quiz) {
+                    console.error(`[SOCKET] Reveal failed: Quiz not found for ID ${session.quizId}`);
+                    return;
+                }
 
                 const currentQ = quiz.questions[session.currentQuestionIndex];
+                const correctIndex = currentQ.options.findIndex((o: any) => o.isCorrect);
+                const answerText = currentQ.options[correctIndex]?.text; // Ensure we get the text
 
-                const correctIndex = currentQ.options.findIndex(o => o.isCorrect);
-                const answerText = currentQ.options[correctIndex]?.text;
-
-                // Calculate leaderboard
                 const leaderboard = session.participants
                     .sort((a, b) => b.score - a.score)
                     .map(p => ({
                         name: p.name,
                         score: p.score,
                         streak: p.streak,
-                        socketId: p.socketId,
+                        socketId: p.socketId, // Include socketId for filtering
                         cheatScore: p.cheatScore,
                         isFlagged: p.isFlagged
                     }));
 
-                // 1. First, broadcast general data to the whole room (Reliable Fallback)
+                // 1. Broadcast GENERAL results to EVERYONE first (Reliability Layer)
+                console.log(`[SOCKET] Broadcasting generic answer_revealed to room ${pin}`);
                 io.to(pin).emit('answer_revealed', {
                     correctIndex,
                     answerText,
@@ -353,9 +364,11 @@ export const setupSocket = (io: Server) => {
                 });
 
                 // 2. Then, emit personalized results to each participant
+                let participantCount = 0;
                 session.participants.forEach((participant) => {
                     try {
                         if (participant.socketId) {
+                            participantCount++;
                             const rank = leaderboard.findIndex(p => p.socketId === participant.socketId) + 1;
                             const isCorrect = typeof participant.lastAnswerIndex === 'number' && currentQ.options[participant.lastAnswerIndex]?.isCorrect;
 
@@ -374,19 +387,23 @@ export const setupSocket = (io: Server) => {
                         console.error(`Error emitting to participant ${participant.name}:`, err);
                     }
                 });
+                console.log(`[SOCKET] Sent personalized results to ${participantCount} participants`);
 
             } catch (error) {
-                console.error(error);
+                console.error("[SOCKET] Error in reveal_answer:", error);
             }
         });
 
         socket.on('check_reveal_status', async ({ pin }) => {
+            console.log(`[SOCKET] check_reveal_status requested for PIN: ${pin} by ${socket.id}`);
             try {
                 const session = await GameSession.findOne({ pin });
                 if (!session || !session.isRevealed) {
+                    console.log(`[SOCKET] check_reveal_status: Not revealed yet (or invalid session) for ${pin}`);
                     socket.emit('reveal_status', { isRevealed: false });
                     return;
                 }
+                console.log(`[SOCKET] check_reveal_status: Confirmed revealed for ${pin}`);
 
                 const quiz = await Quiz.findById(session.quizId);
                 if (!quiz) return;
