@@ -403,8 +403,8 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                     animate={{ scale: 1, opacity: 1 }}
                     className={`relative z-10 flex flex-col items-center ${isSimulation ? 'w-full px-4' : ''}`}
                 >
-                    <div className={`relative ${isSimulation ? 'mb-4' : 'mb-8'}`}>
-                        <Trophy className={`${isSimulation ? 'w-16 h-16' : 'w-24 h-24'} text-yellow-500 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]`} />
+                    <div className="relative mb-6">
+                        <Trophy className="w-20 h-20 text-yellow-500 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
                         <motion.div
                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
                             transition={{ duration: 2, repeat: Infinity }}
@@ -412,23 +412,23 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                         />
                     </div>
 
-                    <h1 className={`${isSimulation ? 'text-2xl' : 'text-4xl'} font-black mb-2 tracking-tight`}>Arena Finished!</h1>
-                    <p className={`text-gray-400 font-medium ${isSimulation ? 'mb-6 text-sm' : 'mb-10 text-base'}`}>You've completed the challenge.</p>
+                    <h1 className="text-3xl font-black mb-2 tracking-tight">Arena Finished!</h1>
+                    <p className="text-gray-400 font-medium mb-8 text-sm md:text-base">You've completed the challenge.</p>
 
-                    <div className={`grid grid-cols-2 gap-3 w-full max-w-sm ${isSimulation ? 'mb-6' : 'mb-12'}`}>
-                        <div className={`bg-white/5 backdrop-blur-md border border-white/10 ${isSimulation ? 'p-3 rounded-2xl' : 'p-6 rounded-3xl'}`}>
+                    <div className="grid grid-cols-2 gap-3 w-full max-w-sm mb-8">
+                        <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl">
                             <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Final Score</div>
-                            <div className={`${isSimulation ? 'text-xl' : 'text-3xl'} font-mono font-bold text-teal-400`}>{myScore}</div>
+                            <div className="text-2xl font-mono font-bold text-teal-400">{myScore}</div>
                         </div>
-                        <div className={`bg-white/5 backdrop-blur-md border border-white/10 ${isSimulation ? 'p-3 rounded-2xl' : 'p-6 rounded-3xl'}`}>
+                        <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl">
                             <div className="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Final Rank</div>
-                            <div className={`${isSimulation ? 'text-xl' : 'text-3xl'} font-mono font-bold text-yellow-400`}>#{myRank || '-'}</div>
+                            <div className="text-2xl font-mono font-bold text-yellow-400">#{myRank || '-'}</div>
                         </div>
                     </div>
 
                     <Button
                         onClick={() => window.location.href = '/'}
-                        className={`bg-white text-black hover:bg-gray-200 font-black px-10 rounded-2xl transition-all shadow-xl shadow-white/10 uppercase tracking-widest text-[10px] ${isSimulation ? 'h-11' : 'h-14'}`}
+                        className="bg-white text-black hover:bg-gray-200 font-black px-10 h-12 rounded-2xl transition-all shadow-xl shadow-white/10 uppercase tracking-widest text-[10px]"
                     >
                         Return to Lobby
                     </Button>
@@ -445,17 +445,17 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full" />
             </div>
 
-            <div className={`relative z-10 flex-1 flex flex-col container mx-auto max-w-2xl ${isSimulation ? 'p-4' : 'p-6'}`}>
+            <div className="relative z-10 flex-1 flex flex-col container mx-auto max-w-2xl p-4 md:p-6">
                 {/* Header Stats */}
-                <div className={`flex justify-between items-center ${isSimulation ? 'mb-4' : 'mb-8'} shrink-0`}>
+                <div className="flex justify-between items-center mb-4 md:mb-8 shrink-0">
                     <div className="flex flex-col">
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Question</span>
-                        <span className={`${isSimulation ? 'text-base' : 'text-lg'} font-black text-white`}>{questionIndex + 1}<span className="text-slate-600 ml-1">/ {currentQuestion?.total || '?'}</span></span>
+                        <span className="text-base md:text-lg font-black text-white">{questionIndex + 1}<span className="text-slate-600 ml-1">/ {currentQuestion?.total || '?'}</span></span>
                     </div>
 
                     <div className="flex flex-col items-end">
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Time Remaining</span>
-                        <div className={`rounded-full border text-xs font-black font-mono transition-colors ${isSimulation ? 'px-3 py-1' : 'px-4 py-1.5 border-2'} ${timeLeft && timeLeft <= 5 ? 'bg-red-500/20 border-red-500/50 text-red-500 animate-pulse' : 'bg-white/5 border-white/10 text-white'}`}>
+                        <div className={`px-3 py-1 rounded-full border text-xs font-black font-mono transition-colors ${timeLeft && timeLeft <= 5 ? 'bg-red-500/20 border-red-500/50 text-red-500 animate-pulse' : 'bg-white/5 border-white/10 text-white'}`}>
                             {timeLeft}s
                         </div>
                     </div>
@@ -466,29 +466,28 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                         <motion.div
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className={isSimulation ? 'space-y-4' : 'space-y-8'}
+                            className="space-y-4 md:space-y-6"
                         >
-                            <h2 className={`${isSimulation ? 'text-lg' : 'text-2xl md:text-3xl'} font-black text-white text-center leading-tight tracking-tight px-2`}>
+                            <h2 className="text-lg md:text-2xl font-black text-white text-center leading-tight tracking-tight px-2">
                                 {currentQuestion.text}
                             </h2>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto w-full">
                                 {currentQuestion.options.map((option: any, i: number) => (
                                     <button
                                         key={i}
                                         onClick={() => handleAnswer(i)}
                                         disabled={hasAnswered}
                                         className={`
-                                            group relative rounded-2xl flex items-center gap-3 text-left transition-all active:scale-95 border-b-4 border-black/30 overflow-hidden
-                                            ${isSimulation ? 'p-3' : 'p-5'}
+                                            group relative p-3 md:p-4 rounded-2xl flex items-center gap-3 text-left transition-all active:scale-95 border-b-4 border-black/30 overflow-hidden
                                             ${hasAnswered ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-1'}
                                             ${i === 0 ? 'bg-red-500 hover:bg-red-400' : i === 1 ? 'bg-blue-500 hover:bg-blue-400' : i === 2 ? 'bg-amber-500 hover:bg-amber-400' : 'bg-green-500 hover:bg-green-400'}
                                         `}
                                     >
-                                        <div className={`${isSimulation ? 'w-8 h-8 text-sm' : 'w-10 h-10 text-lg'} bg-black/20 rounded-xl flex items-center justify-center font-black text-white shrink-0 shadow-inner group-hover:bg-black/30 transition-colors`}>
+                                        <div className="w-8 h-8 text-sm bg-black/20 rounded-xl flex items-center justify-center font-black text-white shrink-0 shadow-inner group-hover:bg-black/30 transition-colors">
                                             {String.fromCharCode(65 + i)}
                                         </div>
-                                        <span className={`${isSimulation ? 'text-xs' : 'text-base'} font-black text-white leading-tight`}>
+                                        <span className="text-xs md:text-sm font-black text-white leading-tight">
                                             {option.text}
                                         </span>
                                     </button>
@@ -524,66 +523,66 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className={`text-center ${isSimulation ? 'space-y-4' : 'space-y-8'}`}
+                            className="text-center space-y-4 md:space-y-6"
                         >
-                            <div className={isSimulation ? 'space-y-2' : 'space-y-4'}>
-                                <div className={`${isSimulation ? 'w-16 h-16 border-4' : 'w-28 h-28 border-8'} rounded-full flex items-center justify-center mx-auto shadow-2xl transition-all duration-500 ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/40' : 'bg-red-500 border-red-400 shadow-red-500/40'}`}>
+                            <div className="space-y-2 md:space-y-3">
+                                <div className={`w-16 h-16 md:w-20 md:h-20 border-4 rounded-full flex items-center justify-center mx-auto shadow-2xl transition-all duration-500 ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/40' : 'bg-red-500 border-red-400 shadow-red-500/40'}`}>
                                     {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ?
-                                        <CheckCircle className={`${isSimulation ? 'w-8 h-8' : 'w-14 h-14'} text-white`} /> :
-                                        <XCircle className={`${isSimulation ? 'w-8 h-8' : 'w-14 h-14'} text-white`} />
+                                        <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-white" /> :
+                                        <XCircle className="w-8 h-8 md:w-10 md:h-10 text-white" />
                                     }
                                 </div>
 
-                                <h2 className={`${isSimulation ? 'text-2xl' : 'text-5xl'} font-black drop-shadow-lg tracking-tighter uppercase ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'text-green-400' : 'text-red-400'}`}>
+                                <h2 className={`text-2xl md:text-4xl font-black drop-shadow-lg tracking-tighter uppercase ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'text-green-400' : 'text-red-400'}`}>
                                     {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? "Genius!" : (selectedAnswerIndex === null ? "Too Slow" : "Incorrect")}
                                 </h2>
                             </div>
 
                             <div className="flex justify-center gap-3 w-full max-w-sm mx-auto">
-                                <div className={`bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 ${isSimulation ? 'p-2' : 'p-4'}`}>
+                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 p-2 md:p-3">
                                     <span className="text-[9px] text-slate-500 uppercase tracking-widest block mb-1 font-black">Score</span>
-                                    <span className={`${isSimulation ? 'text-lg' : 'text-2xl'} font-mono font-bold text-teal-400`}>
+                                    <span className="text-lg md:text-xl font-mono font-bold text-teal-400">
                                         {result.score || (leaderboard.find(p => p.name === name)?.score) || 0}
                                     </span>
                                 </div>
-                                <div className={`bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 ${isSimulation ? 'p-2' : 'p-4'}`}>
+                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 p-2 md:p-3">
                                     <span className="text-[9px] text-slate-500 uppercase tracking-widest block mb-1 font-black">Rank</span>
-                                    <span className={`${isSimulation ? 'text-lg' : 'text-2xl'} font-mono font-bold text-yellow-400`}>
+                                    <span className="text-lg md:text-xl font-mono font-bold text-yellow-400">
                                         #{leaderboard.findIndex(p => p.name === name) !== -1 ? leaderboard.findIndex(p => p.name === name) + 1 : '-'}
                                     </span>
                                 </div>
                             </div>
 
-                            <div className={`w-full max-w-sm mx-auto ${isSimulation ? 'space-y-2' : 'space-y-3'}`}>
+                            <div className="w-full max-w-sm mx-auto space-y-2 md:space-y-3">
                                 {/* Compare Answers */}
                                 {selectedAnswerIndex !== result.correctIndex && selectedAnswerIndex !== null && (
-                                    <div className={`rounded-xl bg-red-500/5 border border-red-500/20 text-left ${isSimulation ? 'p-2.5' : 'p-4'}`}>
+                                    <div className="rounded-xl bg-red-500/5 border border-red-500/20 text-left p-2.5 md:p-3">
                                         <div className="text-red-500/50 text-[9px] font-black uppercase tracking-widest mb-1">Your Answer</div>
                                         <div className="flex items-center gap-3">
-                                            <div className={`rounded-lg flex items-center justify-center font-black text-white shrink-0 ${isSimulation ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
+                                            <div className={`w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-xs ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
                                                 {String.fromCharCode(65 + selectedAnswerIndex)}
                                             </div>
-                                            <span className={`${isSimulation ? 'text-xs' : 'text-sm'} font-bold text-red-100`}>{currentQuestion?.options[selectedAnswerIndex]?.text}</span>
+                                            <span className="text-xs md:text-sm font-bold text-red-100">{currentQuestion?.options[selectedAnswerIndex]?.text}</span>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className={`rounded-xl bg-green-500/5 border border-green-500/20 text-left ${isSimulation ? 'p-2.5' : 'p-4'}`}>
+                                <div className="rounded-xl bg-green-500/5 border border-green-500/20 text-left p-2.5 md:p-3">
                                     <div className="text-green-500/50 text-[9px] font-black uppercase tracking-widest mb-1">Correct Answer</div>
                                     <div className="flex items-center gap-3">
-                                        <div className={`rounded-lg flex items-center justify-center font-black text-white shrink-0 ${isSimulation ? 'w-6 h-6 text-xs' : 'w-8 h-8 text-sm'} ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
+                                        <div className={`w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-xs ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
                                             {String.fromCharCode(65 + result.correctIndex)}
                                         </div>
-                                        <span className={`${isSimulation ? 'text-xs' : 'text-sm'} font-bold text-green-100`}>{result.answerText || currentQuestion?.options[result.correctIndex]?.text}</span>
+                                        <span className="text-xs md:text-sm font-bold text-green-100">{result.answerText || currentQuestion?.options[result.correctIndex]?.text}</span>
                                     </div>
                                 </div>
 
                                 {result.explanation && (
-                                    <div className={`rounded-2xl bg-teal-500/5 border border-teal-500/10 text-left ${isSimulation ? 'p-3' : 'p-5'}`}>
+                                    <div className="rounded-2xl bg-teal-500/5 border border-teal-500/10 text-left p-3 md:p-4">
                                         <div className="flex items-center gap-2 text-teal-400 text-[9px] font-black uppercase tracking-widest mb-1">
                                             <Zap className="w-3 h-3 fill-teal-400" /> Explanation
                                         </div>
-                                        <p className={`${isSimulation ? 'text-[10px]' : 'text-xs'} text-slate-300 leading-relaxed font-medium`}>{result.explanation}</p>
+                                        <p className="text-[10px] md:text-xs text-slate-300 leading-relaxed font-medium">{result.explanation}</p>
                                     </div>
                                 )}
                             </div>

@@ -80,17 +80,25 @@ export const setupSocket = (io: Server) => {
                             // Recover result state if already revealed
                             if (session.isRevealed) {
                                 const correctIndex = question.options.findIndex(o => o.isCorrect);
+                                const leaderboard = session.participants
+                                    .sort((a, b) => b.score - a.score);
+
+                                const rank = leaderboard.findIndex(p => p.socketId === socket.id) + 1;
+                                const isCorrect = typeof existingParticipant.lastAnswerIndex === 'number' && question.options[existingParticipant.lastAnswerIndex]?.isCorrect;
+
                                 socket.emit('answer_revealed', {
                                     correctIndex,
                                     answerText: question.options[correctIndex]?.text,
                                     explanation: question.explanation,
-                                    leaderboard: session.participants
-                                        .sort((a, b) => b.score - a.score)
-                                        .map(p => ({
-                                            name: p.name,
-                                            score: p.score,
-                                            streak: p.streak
-                                        }))
+                                    leaderboard: leaderboard.map(p => ({
+                                        name: p.name,
+                                        score: p.score,
+                                        streak: p.streak
+                                    })),
+                                    lastAnswerIndex: existingParticipant.lastAnswerIndex,
+                                    isCorrect,
+                                    score: existingParticipant.score,
+                                    rank
                                 });
                             }
                         }
