@@ -167,8 +167,6 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                     setHasAnswered(true);
                 }
                 toast.success("Sync Complete: Results Loaded");
-            } else {
-                toast.info("Still waiting for Host to reveal...");
             }
             setIsSyncing(false);
         });
