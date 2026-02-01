@@ -33,6 +33,15 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
     const [isJoining, setIsJoining] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
+    // Refs for stale-proof event listeners
+    const pinRef = useRef(pin);
+    const nameRef = useRef(name);
+    const gameStateRef = useRef(gameState);
+
+    useEffect(() => { pinRef.current = pin; }, [pin]);
+    useEffect(() => { nameRef.current = name; }, [name]);
+    useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+
     // Sync state with props for simulation mode
     useEffect(() => {
         if (isSimulation) {
@@ -45,11 +54,11 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
         setSocket(newSocket);
 
-        // Auto-rejoin if session exists (only in non-simulation mode)
+        // Auto-rejoin if session exists
         const savedPin = sessionStorage.getItem('quiz_pin');
         const savedName = sessionStorage.getItem('quiz_name');
 
-        if (!isSimulation && savedPin && savedName && !initialPin) {
+        if (!isSimulation && savedPin && savedName) {
             setPin(savedPin);
             setName(savedName);
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -62,8 +71,8 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             if (isSimulation) toast.success("Mock Device Connected to Engine");
 
             // Attempt auto-rejoin on reconnection to ensure room membership
-            const currentPin = pin || sessionStorage.getItem('quiz_pin');
-            const currentName = name || sessionStorage.getItem('quiz_name');
+            const currentPin = pinRef.current || sessionStorage.getItem('quiz_pin');
+            const currentName = nameRef.current || sessionStorage.getItem('quiz_name');
 
             if (currentPin && currentName && !isSimulation) {
                 console.log("Restoring session for:", currentName);
@@ -89,9 +98,9 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             }
         });
 
-        newSocket.on("new_question", ({ question, index, startTime }) => {
+        newSocket.on("new_question", ({ question, index, total, startTime }) => {
             setGameState("playing");
-            setCurrentQuestion(question);
+            setCurrentQuestion({ ...question, total });
             setQuestionIndex(index);
             setHasAnswered(false);
             setSelectedAnswerIndex(null);
@@ -221,10 +230,6 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         }
     }, [isSimulation, socket, pin, name, gameState, isJoining]);
 
-    const nameRef = useRef(name);
-    useEffect(() => {
-        nameRef.current = name;
-    }, [name]);
 
     const handleJoin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -252,14 +257,14 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         let interval: NodeJS.Timeout;
         if (gameState === "submitted" && !isSimulation) {
             interval = setInterval(() => {
-                const currentPin = pin || sessionStorage.getItem('quiz_pin');
+                const currentPin = pinRef.current || sessionStorage.getItem('quiz_pin');
                 if (currentPin && socket && socket.connected) {
                     socket.emit('check_reveal_status', { pin: currentPin });
                 }
             }, 3000);
         }
         return () => clearInterval(interval);
-    }, [gameState, pin, isSimulation]);
+    }, [gameState, socket, isSimulation]);
 
     const handleAnswer = (index: number) => {
         if (hasAnswered || gameState !== "playing" || (timeLeft !== null && timeLeft <= 0)) return;
