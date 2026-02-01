@@ -15,7 +15,13 @@ function PlayContent() {
 
 export default function PlayPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white">Loading Arena...</div>}>
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white p-6">
+                <div className="w-16 h-16 border-t-4 border-teal-500 border-solid rounded-full animate-spin mb-4" />
+                <h1 className="text-xl font-black uppercase tracking-[0.3em] animate-pulse">Initializing Arena</h1>
+                <p className="text-slate-500 text-xs font-medium mt-2">Syncing with combat servers...</p>
+            </div>
+        }>
             <PlayContent />
         </Suspense>
     )

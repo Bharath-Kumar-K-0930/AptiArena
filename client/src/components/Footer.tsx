@@ -14,6 +14,7 @@ export default function Footer() {
         "/dashboard/quizzes",   // My Quizzes
         "/dashboard/analytics", // Analytics
         "/quiz/create",         // Create Quiz
+        "/play",                // Participant Arena
     ];
 
     // Check if current path starts with /host (Hosting screens)

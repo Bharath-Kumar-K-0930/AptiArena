@@ -88,66 +88,89 @@ export default function DashboardPage() {
     }, [router]);
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)] bg-background/50">
+        <div className="flex min-h-[calc(100vh-4rem)] bg-background/50 relative">
             <Sidebar />
 
-            <main className="flex-1 p-8 space-y-8 overflow-y-auto h-[calc(100vh-4rem)]">
+            <main className="flex-1 p-4 sm:p-8 space-y-8 overflow-y-auto h-[calc(100vh-4rem)] scroll-smooth">
                 {/* Hero / Join Section */}
-                <div className="relative overflow-hidden rounded-2xl p-8 shadow-2xl group">
+                <div className="relative overflow-hidden rounded-3xl p-6 sm:p-10 shadow-2xl group border border-white/5">
                     <div className="absolute inset-0 z-0 overflow-hidden">
-                        <div className="absolute inset-0 bg-gradient-to-r from-violet-900/90 to-indigo-900/90 z-10 mix-blend-multiply" />
+                        <div className="absolute inset-0 bg-gradient-to-br from-violet-900/95 via-indigo-900/90 to-blue-900/95 z-10 mix-blend-multiply" />
                         <motion.img
                             src="/images/dashboard-join-bg.png"
                             alt="Join Game"
-                            className="w-full h-full object-cover opacity-60"
+                            className="w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-[20s] ease-linear"
                             initial={{ scale: 1 }}
                             animate={{ scale: 1.1 }}
-                            transition={{ duration: 15, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
                         />
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 blur-[100px] rounded-full -mr-32 -mt-32" />
                     </div>
 
-                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                        <div className="space-y-6 max-w-xl text-center md:text-left">
-                            <div className="space-y-2">
-                                <h1 className="text-3xl font-extrabold text-white sm:text-4xl">Ready to Compete?</h1>
-                                <p className="text-indigo-100 text-lg">
-                                    Enter a game code to join a live session instantly and test your knowledge against others!
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10">
+                        <div className="space-y-8 max-w-xl text-center lg:text-left flex-1">
+                            <div className="space-y-3">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="inline-block px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-[10px] font-black text-white uppercase tracking-[0.3em] mb-2"
+                                >
+                                    Combat Ready
+                                </motion.div>
+                                <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">Enter the <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-300">AptiArena</span></h1>
+                                <p className="text-indigo-100/80 text-base sm:text-lg font-medium leading-relaxed max-w-lg mx-auto lg:mx-0">
+                                    Got a battle code? Jump into a live session and showcase your skills against the world.
                                 </p>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-3">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const pinInput = (e.currentTarget.elements.namedItem('pin') as HTMLInputElement);
+                                    if (pinInput.value) router.push(`/play?code=${pinInput.value}`);
+                                }}
+                                className="flex flex-col sm:flex-row gap-4 p-2 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10"
+                            >
                                 <div className="relative flex-1">
                                     <input
+                                        name="pin"
                                         type="text"
-                                        placeholder="ENTER GAME PIN"
+                                        placeholder="GAME PIN"
                                         maxLength={6}
-                                        className="w-full h-12 rounded-lg border-2 border-white/20 bg-white/10 px-4 text-center font-mono text-xl font-bold text-white placeholder-white/50 focus:border-white focus:outline-none focus:ring-0 uppercase tracking-widest transition-all"
+                                        className="w-full h-14 rounded-xl bg-white/5 px-6 text-center font-mono text-2xl font-black text-white placeholder-white/20 focus:bg-white/10 focus:outline-none transition-all uppercase tracking-[0.4em]"
                                     />
                                 </div>
-                                <Button size="lg" className="h-12 px-8 bg-white text-indigo-600 hover:bg-indigo-50 font-bold shadow-lg transition-transform hover:scale-105" onClick={() => {
-                                    const pin = (document.querySelector('input[placeholder="ENTER GAME PIN"]') as HTMLInputElement)?.value;
-                                    if (pin) router.push(`/play?code=${pin}`);
-                                }}>
-                                    JOIN GAME <Play className="ml-2 h-5 w-5 fill-current" />
+                                <Button size="lg" type="submit" className="h-14 px-10 bg-white text-indigo-900 hover:bg-gray-100 font-black shadow-2xl transition-all hover:scale-[1.02] active:scale-95 uppercase tracking-widest text-xs">
+                                    Join Battle <Play className="ml-2 h-4 w-4 fill-current" />
                                 </Button>
-                            </div>
+                            </form>
                         </div>
 
                         {/* Visual / Image */}
-                        <div className="hidden md:flex items-center justify-center relative">
-                            <div className="relative w-48 h-48">
-                                <div className="absolute inset-0 bg-white/20 rounded-full animate-pulse"></div>
-                                <div className="absolute inset-4 bg-white/30 rounded-full blur-sm"></div>
+                        <div className="hidden lg:flex items-center justify-center relative shrink-0">
+                            <div className="relative w-64 h-64">
+                                <motion.div
+                                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
+                                    transition={{ duration: 6, repeat: Infinity }}
+                                    className="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-purple-500/20 rounded-full blur-2xl"
+                                />
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <Trophy className="h-24 w-24 text-white drop-shadow-lg transform -rotate-12" />
+                                    <Trophy className="h-32 w-32 text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] transform -rotate-12 group-hover:rotate-0 transition-transform duration-700" />
                                 </div>
-                                {/* Orbiting Elements */}
-                                <div className="absolute top-0 right-0 animate-bounce delay-700">
-                                    <div className="bg-yellow-400 p-2 rounded-lg shadow-lg rotate-12"><Users className="h-6 w-6 text-yellow-900" /></div>
-                                </div>
-                                <div className="absolute bottom-4 left-0 animate-bounce delay-1000">
-                                    <div className="bg-green-400 p-2 rounded-lg shadow-lg -rotate-12"><BookOpen className="h-6 w-6 text-green-900" /></div>
-                                </div>
+
+                                <motion.div
+                                    animate={{ y: [0, -10, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, delay: 0.5 }}
+                                    className="absolute top-4 right-4 bg-yellow-400 p-3 rounded-2xl shadow-2xl rotate-12"
+                                >
+                                    <Users className="h-6 w-6 text-yellow-900" />
+                                </motion.div>
+                                <motion.div
+                                    animate={{ y: [0, 10, 0] }}
+                                    transition={{ duration: 5, repeat: Infinity }}
+                                    className="absolute bottom-8 left-0 bg-teal-400 p-3 rounded-2xl shadow-2xl -rotate-12"
+                                >
+                                    <BookOpen className="h-6 w-6 text-teal-900" />
+                                </motion.div>
                             </div>
                         </div>
                     </div>

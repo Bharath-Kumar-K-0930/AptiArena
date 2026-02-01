@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -123,78 +124,96 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
 
     if (phase === "waiting") {
         return (
-            <div className="flex-1 bg-slate-950 flex flex-col items-center justify-center p-8 relative overflow-hidden rounded-xl border border-white/5">
+            <div className={`flex-1 bg-slate-950 flex flex-col items-center justify-center ${mode === 'practice' ? 'p-4' : 'p-8'} relative overflow-hidden rounded-xl border border-white/5`}>
                 <div className="absolute inset-0 z-0">
                     <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(17,24,39,1),rgba(0,0,0,1))]" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-teal-500/5 blur-[120px] rounded-full" />
                 </div>
 
                 <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="w-full max-w-2xl flex flex-col items-center space-y-6 text-center relative z-10"
+                    className={`w-full max-w-2xl flex flex-col items-center ${mode === 'practice' ? 'space-y-4' : 'space-y-8'} text-center relative z-10`}
                 >
-                    <div className="space-y-4 bg-slate-900/50 p-6 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl w-full">
-                        <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">Join Code</h1>
-                        <div className="text-5xl md:text-7xl font-mono font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 tracking-widest drop-shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                            {pin}
+                    <div className={`${mode === 'practice' ? 'space-y-3 p-6' : 'space-y-6 p-10'} bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl w-full border-t-teal-500/20`}>
+                        <div className="space-y-2">
+                            <h1 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] mb-2">Arena Join Code</h1>
+                            <motion.div
+                                animate={{ scale: [1, 1.02, 1] }}
+                                transition={{ duration: 3, repeat: Infinity }}
+                                className={`${mode === 'practice' ? 'text-5xl md:text-6xl' : 'text-6xl md:text-8xl'} font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-500 tracking-tighter drop-shadow-[0_0_30px_rgba(20,184,166,0.3)]`}
+                            >
+                                {pin}
+                            </motion.div>
                         </div>
-                        <p className="text-gray-300 text-sm">Join at <span className="font-bold text-white font-mono">aptiarena.com/play</span></p>
+                        <div className="h-px bg-white/5 w-1/2 mx-auto" />
+                        <p className={`${mode === 'practice' ? 'text-xs' : 'text-gray-400'} font-medium`}>Participants join at <span className="font-black text-white px-3 py-1 bg-white/5 rounded-lg border border-white/10 ml-1">aptiarena.com/play</span></p>
                     </div>
 
-                    <Card className="w-full bg-slate-900/60 border-white/10 backdrop-blur-sm">
-                        <CardHeader className="py-4">
-                            <CardTitle className="flex items-center justify-center gap-2 text-lg text-white">
-                                <Users className="text-cyan-400 w-5 h-5" />
-                                Players Connected ({players.length})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pb-6">
-                            {players.length === 0 ? (
-                                <div className="h-20 flex flex-col items-center justify-center text-gray-500 italic gap-2 text-sm">
-                                    <div className="w-2 h-2 bg-gray-600 rounded-full animate-ping" />
-                                    Waiting for gladiators...
+                    <div className={`w-full max-w-2xl bg-slate-900/40 backdrop-blur-xl ${mode === 'practice' ? 'p-4' : 'p-8'} rounded-[2.5rem] border border-white/10 shadow-2xl relative border-t-teal-500/20`}>
+                        <div className={`flex items-center justify-between ${mode === 'practice' ? 'mb-3' : 'mb-6'}`}>
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-teal-500/10 rounded-xl">
+                                    <Users className="h-5 w-5 text-teal-400" />
                                 </div>
-                            ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                    {players.map((p, i) => (
-                                        <motion.div
-                                            key={i}
-                                            initial={{ opacity: 0, scale: 0.5 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            className="bg-white/10 p-2 rounded-lg text-white font-medium text-center border border-white/5 text-sm"
-                                        >
-                                            {p}
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            )}
-                        </CardContent>
-                        {mode === 'practice' && (
-                            <div className="px-6 pb-4">
-                                <div className="bg-teal-500/10 border border-teal-500/20 rounded-xl p-3 flex items-center gap-3">
-                                    <Layout className="w-4 h-4 text-teal-400 shrink-0" />
-                                    <p className="text-[10px] text-teal-300 font-medium leading-tight text-left">
-                                        <span className="font-black border-b border-teal-400/30">PRO TIP:</span> For a side-by-side view of host and student screens, try the <span className="text-white font-bold underline cursor-pointer" onClick={() => window.location.href = `/host/practice/simulate/${quizId}`}>Interactive Simulator</span>.
-                                    </p>
-                                </div>
+                                <h3 className={`${mode === 'practice' ? 'text-sm' : 'text-lg'} font-black text-white uppercase tracking-wider`}>Battle Roster</h3>
                             </div>
-                        )}
-                    </Card>
+                            <div className="bg-teal-500/10 text-teal-400 px-3 py-1 rounded-full text-xs font-black ring-1 ring-teal-500/20">
+                                {players.length} READY
+                            </div>
+                        </div>
+
+                        <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 ${mode === 'practice' ? 'max-h-[120px]' : 'max-h-[200px]'} overflow-y-auto pr-2 custom-scrollbar`}>
+                            <AnimatePresence>
+                                {players.map((name, i) => (
+                                    <motion.div
+                                        key={i}
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 flex items-center justify-center text-center truncate hover:border-teal-500/30 transition-colors"
+                                    >
+                                        {name}
+                                    </motion.div>
+                                ))}
+                                {players.length === 0 && (
+                                    <div className={`col-span-full ${mode === 'practice' ? 'py-4' : 'py-8'} text-center text-slate-600 text-[10px] font-black uppercase tracking-[0.3em]`}>
+                                        Awaiting Gladiators...
+                                    </div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    </div>
+
+                    {mode === 'practice' && (
+                        <div className="text-left bg-teal-500/5 p-4 rounded-2xl border border-teal-500/10">
+                            <p className="text-[10px] text-teal-400 font-black uppercase tracking-widest mb-1 flex items-center gap-1.5">
+                                <Zap className="h-3 w-3" /> Tip: Advanced View
+                            </p>
+                            <p className="text-xs text-teal-100/60 font-medium leading-relaxed">
+                                Use the <span className="text-teal-400 font-bold">Interactive Simulator</span> for a side-by-side student/host experience.
+                            </p>
+                        </div>
+                    )}
 
                     <Button
-                        size="lg"
-                        className="text-xl px-12 py-7 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold rounded-2xl shadow-xl transition-all hover:scale-105"
+                        size={mode === 'practice' ? "default" : "lg"}
+                        className={`w-full sm:w-auto ${mode === 'practice' ? 'text-sm px-10 h-12' : 'text-lg px-16 h-16'} bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-black rounded-2xl shadow-2xl shadow-teal-500/20 transition-all hover:scale-105 uppercase tracking-widest`}
                         onClick={handleStart}
                         disabled={players.length === 0}
                     >
-                        <Play className="mr-3 h-6 w-6 fill-current" />
-                        Start Competition
+                        {players.length === 0 ? "Waiting for Players" : "Begin the Battle"}
+                        {players.length > 0 && <Play className={`${mode === 'practice' ? 'ml-2 h-4 w-4' : 'ml-3 h-5 w-5'} fill-current`} />}
                     </Button>
                 </motion.div>
 
-                <div className="absolute top-4 left-4 z-20">
-                    <Button variant="ghost" size="sm" className="text-red-400 hover:bg-red-500/10" onClick={onEnd}>
-                        <StopCircle className="h-4 w-4 mr-2" /> Stop Simulation
+                <div className={`absolute ${mode === 'practice' ? 'top-3 left-3' : 'top-6 left-6'} z-20`}>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:bg-red-500/10 hover:text-red-300 font-black text-[10px] uppercase tracking-widest px-4 h-10 border border-red-500/10 rounded-xl"
+                        onClick={onEnd}
+                    >
+                        <StopCircle className="h-4 w-4 mr-2" /> Stop Arena
                     </Button>
                 </div>
             </div>

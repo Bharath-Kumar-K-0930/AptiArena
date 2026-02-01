@@ -8,6 +8,7 @@ import { io } from "socket.io-client";
 import { toast } from "sonner";
 import { Monitor, Smartphone, Layout, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 export default function PracticeSimulatePage() {
     const { id } = useParams();
@@ -39,32 +40,58 @@ export default function PracticeSimulatePage() {
     }
 
     return (
-        <div className="h-screen bg-black flex flex-col overflow-hidden">
+        <div className="h-[calc(100vh-4rem)] bg-black flex flex-col overflow-hidden">
             {/* Simulation Header */}
-            <div className="h-12 bg-slate-900 border-b border-white/10 flex items-center justify-between px-6 shrink-0">
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" onClick={() => router.back()} className="text-slate-400 hover:text-white h-8 px-2">
-                        <ArrowLeft className="h-4 w-4 mr-2" /> Back
+            <div className="h-14 bg-slate-900/80 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-8 shrink-0 z-20">
+                <div className="flex items-center gap-6">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => router.back()}
+                        className="text-slate-400 hover:text-white hover:bg-white/5 h-9 px-3 rounded-xl transition-all"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Dashboard
                     </Button>
-                    <div className="h-4 w-px bg-white/10" />
-                    <h1 className="text-sm font-bold text-white flex items-center gap-2">
-                        <Layout className="h-4 w-4 text-teal-400" />
-                        Practice Simulation
-                    </h1>
+                    <div className="h-6 w-px bg-white/10" />
+                    <div className="flex flex-col">
+                        <h1 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-widest">
+                            <Layout className="h-3.5 w-3.5 text-teal-400" />
+                            Interactive Arena Simulation
+                        </h1>
+                        <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">System Status: Operative • Engine v2.4</span>
+                    </div>
                 </div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    AptiArena Engine v2.0
+
+                <div className="flex items-center gap-6">
+                    <div className="hidden md:flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Host Logic Online</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Sync Active</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden bg-slate-950">
                 {/* Host Column (Desktop) */}
-                <div className="flex-1 flex flex-col border-r border-white/10 bg-slate-950 p-6 overflow-hidden">
-                    <div className="flex items-center gap-2 mb-4 text-slate-500">
-                        <Monitor className="h-4 w-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Host Dashboard (Desktop)</span>
+                <div className="flex-[1.2] flex flex-col p-4 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 blur-[100px] rounded-full -mr-32 -mt-32" />
+
+                    <div className="flex items-center justify-between mb-3 px-1">
+                        <div className="flex items-center gap-2.5 text-slate-500">
+                            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+                                <Monitor className="h-3 w-3" />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">Primary Host Interface</span>
+                        </div>
+                        <div className="px-2 py-0.5 bg-teal-500/10 border border-teal-500/20 rounded-md text-[8px] font-bold text-teal-400 uppercase tracking-tighter">Desktop View</div>
                     </div>
-                    <div className="flex-1 bg-black rounded-2xl shadow-2xl border border-white/5 overflow-hidden flex flex-col">
+
+                    <div className="flex-1 bg-black rounded-[1.5rem] shadow-2xl border border-white/5 overflow-hidden flex flex-col relative z-10 group transition-all hover:border-white/10">
                         <HostArena
                             quizId={id as string}
                             hostId={user?.id || user?._id}
@@ -76,39 +103,53 @@ export default function PracticeSimulatePage() {
                 </div>
 
                 {/* Participant Column (Mobile) */}
-                <div className="w-[450px] bg-slate-900 flex flex-col p-6 items-center shrink-0 border-l border-white/5">
-                    <div className="flex items-center gap-2 mb-4 text-slate-500 self-start">
-                        <Smartphone className="h-4 w-4" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">Mock Device (Mobile)</span>
+                <div className="flex-1 bg-slate-900 flex flex-col p-4 items-center shrink-0 border-l border-white/10 relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(15,23,42,1),rgba(2,6,23,1))]" />
+
+                    <div className="w-full flex items-center justify-between mb-3 px-1 relative z-10">
+                        <div className="flex items-center gap-2.5 text-slate-500">
+                            <div className="p-1.5 bg-white/5 rounded-lg border border-white/10">
+                                <Smartphone className="h-3 w-3" />
+                            </div>
+                            <span className="text-[9px] font-black uppercase tracking-[0.2em]">Participant Mockup</span>
+                        </div>
+                        <div className="px-2 py-0.5 bg-blue-500/10 border border-blue-500/20 rounded-md text-[8px] font-bold text-blue-400 uppercase tracking-tighter">Mobile Dev</div>
                     </div>
 
-                    {/* Mobile Frame */}
-                    <div className="h-full max-h-[750px] w-full max-w-[340px] bg-slate-800 rounded-[3.5rem] p-3 border-4 border-slate-700 shadow-[0_0_100px_rgba(0,0,0,0.5)] relative flex flex-col">
-                        {/* Selfie Notch */}
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-800 rounded-b-2xl z-50 flex items-center justify-center">
-                            <div className="w-10 h-1 bg-slate-900 rounded-full" />
-                        </div>
+                    {/* Mobile Frame Container */}
+                    <div className="flex-1 w-full flex items-center justify-center relative z-10 py-4 scale-90 origin-top">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="h-[min(99%,900px)] w-[320px] bg-slate-800 rounded-[3.5rem] p-3 border-[6px] border-slate-700 shadow-[0_0_80px_rgba(0,0,0,0.7)] relative flex flex-col group transition-all hover:border-slate-600"
+                        >
+                            {/* Selfie Notch */}
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-slate-800 rounded-b-3xl z-50 flex items-center justify-center border-x border-b border-slate-700/50">
+                                <div className="w-12 h-1.5 bg-slate-900 rounded-full shadow-inner" />
+                            </div>
 
-                        <div className="flex-1 bg-slate-950 rounded-[2.8rem] overflow-hidden border border-white/5">
-                            {pin ? (
-                                <ParticipantArena initialPin={pin} initialName="Trainee" isSimulation={true} />
-                            ) : (
-                                <div className="h-full flex items-center justify-center text-slate-500 text-[10px] font-black uppercase tracking-widest bg-black">
-                                    Awaiting Host PIN...
-                                </div>
-                            )}
-                        </div>
+                            <div className="flex-1 bg-slate-950 rounded-[2.8rem] overflow-hidden border border-white/5 relative">
+                                {pin ? (
+                                    <ParticipantArena key={pin} initialPin={pin} initialName="Trainee" isSimulation={true} />
+                                ) : (
+                                    <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-4 bg-black">
+                                        <div className="w-6 h-6 border-2 border-slate-800 border-t-slate-500 rounded-full animate-spin" />
+                                        <span className="text-[8px] font-black uppercase tracking-widest opacity-50">Syncing...</span>
+                                    </div>
+                                )}
+                            </div>
 
-                        {/* Screen Indicator Bottom */}
-                        <div className="h-8 flex items-center justify-center">
-                            <div className="w-20 h-1 bg-slate-700 rounded-full" />
-                        </div>
+                            {/* Home Indicator */}
+                            <div className="h-8 flex items-center justify-center">
+                                <div className="w-20 h-1.5 bg-slate-700/50 rounded-full" />
+                            </div>
+                        </motion.div>
                     </div>
 
-                    <div className="mt-8 text-center px-4">
-                        <h4 className="text-white text-xs font-bold mb-1">Interactive Simulation</h4>
-                        <p className="text-[10px] text-slate-500 font-medium leading-relaxed">
-                            This side represents the student&apos;s mobile app. Submit answers here to see how stats update on the host screen.
+                    <div className="mt-2 text-center px-6 relative z-10 max-w-xs scale-90 origin-top">
+                        <p className="text-[10px] text-slate-400 font-bold leading-tight">
+                            Simulate the <span className="text-white">Gladiator Experience</span>.
+                            <span className="block mt-0.5 text-[9px] text-slate-500 font-medium">Synced with Host Dashboard.</span>
                         </p>
                     </div>
                 </div>
