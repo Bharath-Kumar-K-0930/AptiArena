@@ -51,7 +51,10 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
     }, [initialPin, initialName, isSimulation]);
 
     useEffect(() => {
-        const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000');
+        const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000', {
+            transports: ['websocket'],
+            upgrade: false
+        });
         setSocket(newSocket);
 
         // Auto-rejoin if session exists
