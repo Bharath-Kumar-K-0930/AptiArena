@@ -9,6 +9,7 @@ export const createQuiz = async (req: Request, res: Response) => {
         await quiz.save();
         res.status(201).json(quiz);
     } catch (error) {
+        console.error('Quiz creation error:', error);
         res.status(500).json({ message: 'Error creating quiz', error });
     }
 };
