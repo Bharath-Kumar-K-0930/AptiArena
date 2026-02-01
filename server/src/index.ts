@@ -7,8 +7,6 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/aptiarena'
 mongoose.connect(MONGO_URI)
     .then(() => {
         console.log('MongoDB connected');
-        console.log('Database:', MONGO_URI.replace(/:([^@]+)@/, ':****@'));
-
         server.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });

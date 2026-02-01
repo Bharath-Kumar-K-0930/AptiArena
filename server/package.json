@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon --exec ts-node src/index.ts",
+    "dev": "nodemon --exec ts-node --files src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "verify-user": "ts-node src/scripts/manual-verify.ts",
