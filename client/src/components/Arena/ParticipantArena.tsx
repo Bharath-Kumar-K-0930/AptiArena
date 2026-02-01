@@ -32,6 +32,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [error, setError] = useState("");
     const [isJoining, setIsJoining] = useState(false);
+    const [isSyncing, setIsSyncing] = useState(false);
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
     // Refs for stale-proof event listeners
@@ -141,9 +142,10 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         });
 
         // Polling response handler
+        // Polling response handler
         newSocket.on("reveal_status", (data) => {
+            console.log("Received reveal_status:", data);
             if (data.isRevealed) {
-                console.log("Safety poll confirmed reveal!");
                 setGameState("result");
                 setResult((prev: any) => ({ ...(prev || {}), ...data }));
                 if (data.leaderboard) setLeaderboard(data.leaderboard);
@@ -153,7 +155,11 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                     setSelectedAnswerIndex(data.lastAnswerIndex);
                     setHasAnswered(true);
                 }
+                toast.success("Sync Complete: Results Loaded");
+            } else {
+                toast.info("Still waiting for Host to reveal...");
             }
+            setIsSyncing(false);
         });
 
         newSocket.on("leaderboard_update", ({ leaderboard }) => {
@@ -270,7 +276,16 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             }, 3000);
         }
         return () => clearInterval(interval);
+        return () => clearInterval(interval);
     }, [gameState, socket, isSimulation]);
+
+    // Self-healing: If we have result data but are stuck in 'submitted', force transition
+    useEffect(() => {
+        if (gameState === 'submitted' && result && (result.correctIndex !== undefined || result.isRevealed)) {
+            console.log("Self-healing: Transitioning to result state based on data");
+            setGameState('result');
+        }
+    }, [gameState, result]);
 
     const handleAnswer = (index: number) => {
         if (hasAnswered || gameState !== "playing" || (timeLeft !== null && timeLeft <= 0)) return;
@@ -523,12 +538,20 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                                 <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic mb-4">Waiting for other gladiators or host reveal...</p>
                                 <button
                                     onClick={() => {
+                                        setIsSyncing(true);
                                         const currentPin = pinRef.current || sessionStorage.getItem('quiz_pin');
-                                        if (currentPin && socket) socket.emit('check_reveal_status', { pin: currentPin });
+                                        if (currentPin && socket) {
+                                            socket.emit('check_reveal_status', { pin: currentPin });
+                                            toast.info("Syncing with Arena...");
+                                        } else {
+                                            setIsSyncing(false);
+                                        }
                                     }}
-                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-bold text-teal-400 border border-teal-500/20 transition-colors flex items-center justify-center gap-2 mx-auto"
+                                    disabled={isSyncing}
+                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-bold text-teal-400 border border-teal-500/20 transition-colors flex items-center justify-center gap-2 mx-auto disabled:opacity-50"
                                 >
-                                    <RefreshCcw className="w-3 h-3" /> Sync Status
+                                    <RefreshCcw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
+                                    {isSyncing ? "Syncing..." : "Sync Status"}
                                 </button>
                             </div>
                         </motion.div>
