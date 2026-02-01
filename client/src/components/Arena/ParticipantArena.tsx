@@ -475,170 +475,170 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
     return (
         <div className="min-h-[100dvh] bg-slate-950 text-white font-sans selection:bg-teal-500/30 flex flex-col items-center relative overflow-hidden">
             <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,rgba(13,148,136,0.1),rgba(0,0,0,1))]" />
-            
-            {(gameState === "waiting" || gameState === "join") && (
-                <div className="absolute top-0 w-full p-4 flex justify-between items-center z-20">
-                    <div className="flex flex-col">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Question</span>
-                        <span className="text-base md:text-lg font-black text-white">{questionIndex + 1}<span className="text-slate-600 ml-1">/ {totalQuestions || currentQuestion?.total || '?'}</span></span>
-                    </div>
 
-                    <div className="flex flex-col items-end">
-                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Time Remaining</span>
-                        <div className={`px-3 py-1 rounded-full border text-xs font-black font-mono transition-colors ${timeLeft && timeLeft <= 5 ? 'bg-red-500/20 border-red-500/50 text-red-500 animate-pulse' : 'bg-white/5 border-white/10 text-white'}`}>
-                            {timeLeft}s
-                        </div>
-                    </div>
+            {/* Header / Top Bar - Only show when NOT in join/waiting to avoid overlap, or use conditional inside */}
+            <div className="absolute top-0 w-full p-4 flex justify-between items-center z-20 pointer-events-none">
+                <div className="flex flex-col pointer-events-auto">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Question</span>
+                    <span className="text-base md:text-lg font-black text-white">{questionIndex + 1}<span className="text-slate-600 ml-1">/ {totalQuestions || currentQuestion?.total || '?'}</span></span>
                 </div>
 
-                <div className="flex-1 flex flex-col justify-center">
-                    {gameState === "playing" && currentQuestion && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="space-y-4 md:space-y-6"
-                        >
-                            <h2 className="text-lg md:text-2xl font-black text-white text-center leading-tight tracking-tight px-2">
-                                {currentQuestion.text}
-                            </h2>
+                <div className="flex flex-col items-end pointer-events-auto">
+                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Time Remaining</span>
+                    <div className={`px-3 py-1 rounded-full border text-xs font-black font-mono transition-colors ${timeLeft && timeLeft <= 5 ? 'bg-red-500/20 border-red-500/50 text-red-500 animate-pulse' : 'bg-white/5 border-white/10 text-white'}`}>
+                        {timeLeft}s
+                    </div>
+                </div>
+            </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto w-full">
-                                {currentQuestion.options.map((option: any, i: number) => (
-                                    <button
-                                        key={i}
-                                        onClick={() => handleAnswer(i)}
-                                        disabled={hasAnswered}
-                                        className={`
+            {/* Main Game Content Area */}
+            <div className="flex-1 flex flex-col justify-center w-full max-w-2xl px-4 z-10">
+                {gameState === "playing" && currentQuestion && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="space-y-4 md:space-y-6"
+                    >
+                        <h2 className="text-lg md:text-2xl font-black text-white text-center leading-tight tracking-tight px-2">
+                            {currentQuestion.text}
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto w-full">
+                            {currentQuestion.options.map((option: any, i: number) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handleAnswer(i)}
+                                    disabled={hasAnswered}
+                                    className={`
                                             group relative p-3 md:p-4 rounded-2xl flex items-center gap-3 text-left transition-all active:scale-95 border-b-4 border-black/30 overflow-hidden
                                             ${hasAnswered ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-1'}
                                             ${i === 0 ? 'bg-red-500 hover:bg-red-400' : i === 1 ? 'bg-blue-500 hover:bg-blue-400' : i === 2 ? 'bg-amber-500 hover:bg-amber-400' : 'bg-green-500 hover:bg-green-400'}
                                         `}
-                                    >
-                                        <div className="w-8 h-8 text-sm bg-black/20 rounded-xl flex items-center justify-center font-black text-white shrink-0 shadow-inner group-hover:bg-black/30 transition-colors">
-                                            {String.fromCharCode(65 + i)}
-                                        </div>
-                                        <span className="text-xs md:text-sm font-black text-white leading-tight">
-                                            {option.text}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {gameState === "submitted" && !isValidResultState && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="flex flex-col items-center justify-center text-center space-y-6"
-                        >
-                            <div className="relative">
-                                <div className="w-24 h-24 bg-teal-500/10 rounded-full flex items-center justify-center border-4 border-teal-500/20">
-                                    <CheckCircle className="w-10 h-10 text-teal-400" />
-                                </div>
-                                <motion.div
-                                    animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                                    transition={{ duration: 1.5, repeat: Infinity }}
-                                    className="absolute inset-0 bg-teal-500/30 rounded-full"
-                                />
-                            </div>
-                            <div>
-                                <h3 className="text-3xl font-black text-white mb-2">Answer Locked</h3>
-                                <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic mb-4">Waiting for lead gladiator execution...</p>
-                                <div className="flex items-center justify-center gap-2">
-                                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
-                                    <span className="text-xs text-teal-500/50 font-mono tracking-widest uppercase">Live Sync Active</span>
-                                </div>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {(gameState === "result" || isValidResultState) && result && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="text-center space-y-4 md:space-y-6"
-                        >
-                            <div className="space-y-2 md:space-y-3">
-                                <div className={`w-16 h-16 md:w-20 md:h-20 border-4 rounded-full flex items-center justify-center mx-auto shadow-2xl transition-all duration-500 ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/40' : 'bg-red-500 border-red-400 shadow-red-500/40'}`}>
-                                    {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ?
-                                        <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-white" /> :
-                                        <XCircle className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                                    }
-                                </div>
-
-                                <h2 className={`text-2xl md:text-4xl font-black drop-shadow-lg tracking-tighter uppercase ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'text-green-400' : 'text-red-400'}`}>
-                                    {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? "Genius!" : (selectedAnswerIndex === null ? "Too Slow" : "Incorrect")}
-                                </h2>
-                            </div>
-
-                            <div className="flex justify-center gap-3 w-full max-w-sm mx-auto">
-                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 p-2 md:p-3">
-                                    <span className="text-[9px] text-slate-500 uppercase tracking-widest block mb-1 font-black">Score</span>
-                                    <span className="text-lg md:text-xl font-mono font-bold text-teal-400">
-                                        {result.score || (leaderboard.find(p => p.name === name)?.score) || 0}
-                                    </span>
-                                </div>
-                                <div className="bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 p-2 md:p-3">
-                                    <span className="text-[9px] text-slate-500 uppercase tracking-widest block mb-1 font-black">Rank</span>
-                                    <span className="text-lg md:text-xl font-mono font-bold text-yellow-400">
-                                        #{leaderboard.findIndex(p => p.name === name) !== -1 ? leaderboard.findIndex(p => p.name === name) + 1 : '-'}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <div className="w-full max-w-sm mx-auto space-y-2 md:space-y-3">
-                                {/* Compare Answers */}
-                                {selectedAnswerIndex !== result.correctIndex && selectedAnswerIndex !== null && (
-                                    <div className="rounded-xl bg-red-500/5 border border-red-500/20 text-left p-2.5 md:p-3">
-                                        <div className="text-red-500/50 text-[9px] font-black uppercase tracking-widest mb-1">Your Answer</div>
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-xs ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
-                                                {String.fromCharCode(65 + selectedAnswerIndex)}
-                                            </div>
-                                            <span className="text-xs md:text-sm font-bold text-red-100">{currentQuestion?.options[selectedAnswerIndex]?.text}</span>
-                                        </div>
+                                >
+                                    <div className="w-8 h-8 text-sm bg-black/20 rounded-xl flex items-center justify-center font-black text-white shrink-0 shadow-inner group-hover:bg-black/30 transition-colors">
+                                        {String.fromCharCode(65 + i)}
                                     </div>
-                                )}
+                                    <span className="text-xs md:text-sm font-black text-white leading-tight">
+                                        {option.text}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
-                                <div className="rounded-xl bg-green-500/5 border border-green-500/20 text-left p-2.5 md:p-3">
-                                    <div className="text-green-500/50 text-[9px] font-black uppercase tracking-widest mb-1">Correct Answer</div>
+                {gameState === "submitted" && !isValidResultState && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center text-center space-y-6"
+                    >
+                        <div className="relative">
+                            <div className="w-24 h-24 bg-teal-500/10 rounded-full flex items-center justify-center border-4 border-teal-500/20">
+                                <CheckCircle className="w-10 h-10 text-teal-400" />
+                            </div>
+                            <motion.div
+                                animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                                transition={{ duration: 1.5, repeat: Infinity }}
+                                className="absolute inset-0 bg-teal-500/30 rounded-full"
+                            />
+                        </div>
+                        <div>
+                            <h3 className="text-3xl font-black text-white mb-2">Answer Locked</h3>
+                            <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic mb-4">Waiting for lead gladiator execution...</p>
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
+                                <span className="text-xs text-teal-500/50 font-mono tracking-widest uppercase">Live Sync Active</span>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
+                {(gameState === "result" || isValidResultState) && result && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center space-y-4 md:space-y-6"
+                    >
+                        <div className="space-y-2 md:space-y-3">
+                            <div className={`w-16 h-16 md:w-20 md:h-20 border-4 rounded-full flex items-center justify-center mx-auto shadow-2xl transition-all duration-500 ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'bg-green-500 border-green-400 shadow-green-500/40' : 'bg-red-500 border-red-400 shadow-red-500/40'}`}>
+                                {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ?
+                                    <CheckCircle className="w-8 h-8 md:w-10 md:h-10 text-white" /> :
+                                    <XCircle className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                                }
+                            </div>
+
+                            <h2 className={`text-2xl md:text-4xl font-black drop-shadow-lg tracking-tighter uppercase ${(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? 'text-green-400' : 'text-red-400'}`}>
+                                {(result.isCorrect ?? (selectedAnswerIndex !== null && selectedAnswerIndex === result.correctIndex)) ? "Genius!" : (selectedAnswerIndex === null ? "Too Slow" : "Incorrect")}
+                            </h2>
+                        </div>
+
+                        <div className="flex justify-center gap-3 w-full max-w-sm mx-auto">
+                            <div className="bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 p-2 md:p-3">
+                                <span className="text-[9px] text-slate-500 uppercase tracking-widest block mb-1 font-black">Score</span>
+                                <span className="text-lg md:text-xl font-mono font-bold text-teal-400">
+                                    {result.score || (leaderboard.find(p => p.name === name)?.score) || 0}
+                                </span>
+                            </div>
+                            <div className="bg-white/5 backdrop-blur-xl rounded-2xl flex-1 border border-white/10 p-2 md:p-3">
+                                <span className="text-[9px] text-slate-500 uppercase tracking-widest block mb-1 font-black">Rank</span>
+                                <span className="text-lg md:text-xl font-mono font-bold text-yellow-400">
+                                    #{leaderboard.findIndex(p => p.name === name) !== -1 ? leaderboard.findIndex(p => p.name === name) + 1 : '-'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="w-full max-w-sm mx-auto space-y-2 md:space-y-3">
+                            {/* Compare Answers */}
+                            {selectedAnswerIndex !== result.correctIndex && selectedAnswerIndex !== null && (
+                                <div className="rounded-xl bg-red-500/5 border border-red-500/20 text-left p-2.5 md:p-3">
+                                    <div className="text-red-500/50 text-[9px] font-black uppercase tracking-widest mb-1">Your Answer</div>
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-xs ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
-                                            {String.fromCharCode(65 + result.correctIndex)}
+                                        <div className={`w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-xs ${selectedAnswerIndex === 0 ? 'bg-red-500' : selectedAnswerIndex === 1 ? 'bg-blue-500' : selectedAnswerIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
+                                            {String.fromCharCode(65 + selectedAnswerIndex)}
                                         </div>
-                                        <span className="text-xs md:text-sm font-bold text-green-100">{result.answerText || currentQuestion?.options[result.correctIndex]?.text}</span>
+                                        <span className="text-xs md:text-sm font-bold text-red-100">{currentQuestion?.options[selectedAnswerIndex]?.text}</span>
                                     </div>
                                 </div>
+                            )}
 
-                                {result.explanation && (
-                                    <div className="rounded-2xl bg-teal-500/5 border border-teal-500/10 text-left p-3 md:p-4">
-                                        <div className="flex items-center gap-2 text-teal-400 text-[9px] font-black uppercase tracking-widest mb-1">
-                                            <Zap className="w-3 h-3 fill-teal-400" /> Explanation
-                                        </div>
-                                        <p className="text-[10px] md:text-xs text-slate-300 leading-relaxed font-medium">{result.explanation}</p>
+                            <div className="rounded-xl bg-green-500/5 border border-green-500/20 text-left p-2.5 md:p-3">
+                                <div className="text-green-500/50 text-[9px] font-black uppercase tracking-widest mb-1">Correct Answer</div>
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-6 h-6 md:w-7 md:h-7 rounded-lg flex items-center justify-center font-black text-white shrink-0 text-xs ${result.correctIndex === 0 ? 'bg-red-500' : result.correctIndex === 1 ? 'bg-blue-500' : result.correctIndex === 2 ? 'bg-amber-500' : 'bg-green-500'}`}>
+                                        {String.fromCharCode(65 + result.correctIndex)}
                                     </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {gameState === "leaderboard" && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="flex flex-col items-center justify-center text-center space-y-6"
-                        >
-                            <Trophy className="w-16 h-16 text-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.3)]" />
-                            <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 w-full max-w-[280px] shadow-2xl">
-                                <div className="text-5xl font-black text-white mb-1">
-                                    #{leaderboard.findIndex(p => p.name === name) + 1}
+                                    <span className="text-xs md:text-sm font-bold text-green-100">{result.answerText || currentQuestion?.options[result.correctIndex]?.text}</span>
                                 </div>
-                                <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Current Rank</div>
                             </div>
-                        </motion.div>
-                    )}
-                </div>
+
+                            {result.explanation && (
+                                <div className="rounded-2xl bg-teal-500/5 border border-teal-500/10 text-left p-3 md:p-4">
+                                    <div className="flex items-center gap-2 text-teal-400 text-[9px] font-black uppercase tracking-widest mb-1">
+                                        <Zap className="w-3 h-3 fill-teal-400" /> Explanation
+                                    </div>
+                                    <p className="text-[10px] md:text-xs text-slate-300 leading-relaxed font-medium">{result.explanation}</p>
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+
+                {gameState === "leaderboard" && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center text-center space-y-6"
+                    >
+                        <Trophy className="w-16 h-16 text-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.3)]" />
+                        <div className="bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 w-full max-w-[280px] shadow-2xl">
+                            <div className="text-5xl font-black text-white mb-1">
+                                #{leaderboard.findIndex(p => p.name === name) + 1}
+                            </div>
+                            <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Current Rank</div>
+                        </div>
+                    </motion.div>
+                )}
             </div>
 
             <div className="h-12 flex items-center justify-between px-6 bg-black/60 backdrop-blur-md border-t border-white/5 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] shrink-0">
