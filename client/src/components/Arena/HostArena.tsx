@@ -28,10 +28,11 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
     const [players, setPlayers] = useState<any[]>([]); // { name, participantId }
     const [timer, setTimer] = useState(30);
+    const [kickingPlayer, setKickingPlayer] = useState<any>(null);
     const [kickNotifications, setKickNotifications] = useState<any[]>([]);
+    const [showRoster, setShowRoster] = useState(false);
     const [stats, setStats] = useState<number[]>([0, 0, 0, 0]);
     const [quizDetails, setQuizDetails] = useState<any>(null);
-    const [kickingPlayer, setKickingPlayer] = useState<any | null>(null);
 
     useEffect(() => {
         if (!socket.connected) socket.connect();
@@ -317,9 +318,10 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
                         <div className="text-[10px] font-black text-slate-500 uppercase">PIN</div>
                         <div className="text-xl font-black text-white tracking-widest">{pin}</div>
                     </div>
-                    <div className="flex items-center gap-2 bg-teal-500/10 px-3 py-1 rounded-lg">
+                    <div className="flex items-center gap-2 bg-teal-500/10 px-3 py-1 rounded-lg cursor-pointer hover:bg-teal-500/20 transition-colors" onClick={() => setShowRoster(true)}>
                         <Users className="h-4 w-4 text-teal-400" />
-                        <span className="font-bold text-white">{answerCount}</span>
+                        <span className="font-bold text-white">{players.length}</span>
+                        <span className="text-[10px] uppercase font-bold text-teal-500/50 ml-1">Manage</span>
                     </div>
                 </div>
 
@@ -394,6 +396,107 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
                 )}
             </main>
 
+            {/* Roster Modal */}
+            <AnimatePresence>
+                {showRoster && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                            onClick={() => setShowRoster(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative bg-slate-900 border border-white/10 w-full max-w-4xl max-h-[80vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden"
+                        >
+                            <div className="p-6 border-b border-white/5 flex items-center justify-between shrink-0 bg-slate-900/50">
+                                <h3 className="text-xl font-black text-white uppercase tracking-wider flex items-center gap-3">
+                                    <Users className="h-5 w-5 text-teal-400" />
+                                    Active Gladiators ({players.length})
+                                </h3>
+                                <button
+                                    onClick={() => setShowRoster(false)}
+                                    className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/20 hover:text-red-400 transition-colors"
+                                >
+                                    <XCircle className="h-5 w-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                    {players.map((player, i) => (
+                                        <div
+                                            key={player.participantId || i}
+                                            onClick={() => setKickingPlayer(player)}
+                                            className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 flex items-center justify-center text-center truncate hover:border-red-500/30 hover:bg-red-500/5 cursor-pointer transition-all relative group"
+                                        >
+                                            <span className="group-hover:opacity-20 transition-opacity">{player.name}</span>
+                                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-2 text-red-400">
+                                                <XCircle className="h-4 w-4" />
+                                                <span className="text-[10px] uppercase font-black">Kick</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {players.length === 0 && (
+                                        <div className="col-span-full py-12 text-center text-slate-500 text-sm font-medium italic">
+                                            The arena is empty...
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Kick Confirmation Modal (Live) */}
+            <AnimatePresence>
+                {kickingPlayer && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-slate-950/90 backdrop-blur-md"
+                            onClick={() => setKickingPlayer(null)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="relative bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center space-y-6"
+                        >
+                            <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto">
+                                <ShieldAlert className="h-8 w-8 text-red-500" />
+                            </div>
+                            <div className="space-y-2">
+                                <h3 className="text-xl font-black text-white uppercase tracking-tight">Kick Gladiator?</h3>
+                                <p className="text-slate-400 text-sm">Are you sure you want to remove <span className="text-white font-bold">{kickingPlayer.name}</span> from the Arena?</p>
+                            </div>
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="ghost"
+                                    className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-xs border border-white/5 hover:bg-white/5"
+                                    onClick={() => setKickingPlayer(null)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-xs bg-red-500 hover:bg-red-400 text-white"
+                                    onClick={handleKick}
+                                >
+                                    Kick Out
+                                </Button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
             <footer className="p-4 border-t border-white/5 bg-slate-900/50 flex justify-end gap-3 shrink-0">
                 {phase === 'question' && (
                     <Button onClick={handleReveal} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8">Reveal Answer</Button>
@@ -405,7 +508,7 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
                     <Button onClick={nextQuestion} className="bg-teal-600 hover:bg-teal-700 text-white font-bold px-8">Next Question <ChevronRight className="ml-2 h-4 w-4" /></Button>
                 )}
             </footer>
-        </div>
+        </div >
     );
 }
 
