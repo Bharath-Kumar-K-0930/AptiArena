@@ -268,14 +268,14 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (gameState === "submitted" && !isSimulation) {
+            // High-frequency polling (800ms) to ensure near-real-time sync if event is missed
             interval = setInterval(() => {
                 const currentPin = pinRef.current || sessionStorage.getItem('quiz_pin');
                 if (currentPin && socket && socket.connected) {
                     socket.emit('check_reveal_status', { pin: currentPin });
                 }
-            }, 3000);
+            }, 800);
         }
-        return () => clearInterval(interval);
         return () => clearInterval(interval);
     }, [gameState, socket, isSimulation]);
 
@@ -535,24 +535,11 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                             </div>
                             <div>
                                 <h3 className="text-3xl font-black text-white mb-2">Answer Locked</h3>
-                                <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic mb-4">Waiting for other gladiators or host reveal...</p>
-                                <button
-                                    onClick={() => {
-                                        setIsSyncing(true);
-                                        const currentPin = pinRef.current || sessionStorage.getItem('quiz_pin');
-                                        if (currentPin && socket) {
-                                            socket.emit('check_reveal_status', { pin: currentPin });
-                                            toast.info("Syncing with Arena...");
-                                        } else {
-                                            setIsSyncing(false);
-                                        }
-                                    }}
-                                    disabled={isSyncing}
-                                    className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-full text-xs font-bold text-teal-400 border border-teal-500/20 transition-colors flex items-center justify-center gap-2 mx-auto disabled:opacity-50"
-                                >
-                                    <RefreshCcw className={`w-3 h-3 ${isSyncing ? 'animate-spin' : ''}`} />
-                                    {isSyncing ? "Syncing..." : "Sync Status"}
-                                </button>
+                                <p className="text-slate-400 text-sm font-medium max-w-[240px] mx-auto italic mb-4">Waiting for lead gladiator execution...</p>
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
+                                    <span className="text-xs text-teal-500/50 font-mono tracking-widest uppercase">Live Sync Active</span>
+                                </div>
                             </div>
                         </motion.div>
                     )}
