@@ -119,6 +119,10 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
             setGameState("result");
             setResult((prev: any) => ({ ...(prev || {}), ...data }));
             if (data.leaderboard) setLeaderboard(data.leaderboard);
+            if (data.lastAnswerIndex !== undefined) {
+                setSelectedAnswerIndex(data.lastAnswerIndex);
+                setHasAnswered(true);
+            }
         });
 
         // Polling response handler

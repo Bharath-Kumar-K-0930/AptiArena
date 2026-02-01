@@ -26,11 +26,12 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
     const [answerCount, setAnswerCount] = useState(0);
     const [phase, setPhase] = useState<"waiting" | "question" | "reveal" | "leaderboard" | "finished">("waiting"); // 'waiting' | 'question' | 'reveal' | 'leaderboard' | 'finished'
     const [leaderboard, setLeaderboard] = useState<any[]>([]);
-    const [players, setPlayers] = useState<string[]>([]);
+    const [players, setPlayers] = useState<any[]>([]); // { name, participantId }
     const [timer, setTimer] = useState(30);
     const [kickNotifications, setKickNotifications] = useState<any[]>([]);
     const [stats, setStats] = useState<number[]>([0, 0, 0, 0]);
     const [quizDetails, setQuizDetails] = useState<any>(null);
+    const [kickingPlayer, setKickingPlayer] = useState<any | null>(null);
 
     useEffect(() => {
         if (!socket.connected) socket.connect();
@@ -45,8 +46,8 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
             if (onGameCreated) onGameCreated(data.pin);
         });
 
-        socket.on("player_joined", ({ name }) => {
-            setPlayers((prev) => [...prev, name]);
+        socket.on("player_joined", ({ name, participantId }) => {
+            setPlayers((prev) => [...prev, { name, participantId }]);
             toast.info(`${name} joined!`);
         });
 
@@ -86,6 +87,7 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
 
         socket.on("player_left", (data: any) => {
             setLeaderboard(prev => prev.filter(p => p.socketId !== data.participantId));
+            setPlayers(prev => prev.filter(p => p.participantId !== data.participantId));
             setAnswerCount(prev => Math.max(0, prev - 1));
             setKickNotifications(prev => [{
                 id: Date.now(),
@@ -117,6 +119,14 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
     const handleReveal = () => {
         setPhase("reveal");
         socket.emit("reveal_answer", { pin });
+    };
+
+    const handleKick = () => {
+        if (kickingPlayer) {
+            socket.emit("KICK_PARTICIPANT", { pin, participantId: kickingPlayer.participantId });
+            setKickingPlayer(null);
+            toast.success(`${kickingPlayer.name} has been kicked.`);
+        }
     };
 
     const handleShowStats = () => socket.emit("show_leaderboard", { pin });
@@ -165,14 +175,19 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
 
                         <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 ${mode === 'practice' ? 'max-h-[120px]' : 'max-h-[200px]'} overflow-y-auto pr-2 custom-scrollbar`}>
                             <AnimatePresence>
-                                {players.map((name, i) => (
+                                {players.map((player, i) => (
                                     <motion.div
-                                        key={i}
+                                        key={player.participantId || i}
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 flex items-center justify-center text-center truncate hover:border-teal-500/30 transition-colors"
+                                        whileHover={{ scale: 1.05 }}
+                                        onClick={() => setKickingPlayer(player)}
+                                        className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-slate-300 flex items-center justify-center text-center truncate hover:border-red-500/30 hover:bg-red-500/5 cursor-pointer transition-all relative group"
                                     >
-                                        {name}
+                                        <span className="group-hover:opacity-20 transition-opacity">{player.name}</span>
+                                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <XCircle className="h-4 w-4 text-red-500" />
+                                        </div>
                                     </motion.div>
                                 ))}
                                 {players.length === 0 && (
@@ -216,6 +231,50 @@ export default function HostArena({ quizId, hostId, initialPin, mode = "live", o
                         <StopCircle className="h-4 w-4 mr-2" /> Stop Arena
                     </Button>
                 </div>
+
+                {/* Kick Confirmation Modal */}
+                <AnimatePresence>
+                    {kickingPlayer && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+                                onClick={() => setKickingPlayer(null)}
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="relative bg-slate-900 border border-white/10 p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center space-y-6"
+                            >
+                                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto">
+                                    <ShieldAlert className="h-8 w-8 text-red-500" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-black text-white uppercase tracking-tight">Kick Gladiator?</h3>
+                                    <p className="text-slate-400 text-sm">Are you sure you want to remove <span className="text-white font-bold">{kickingPlayer.name}</span> from the Arena?</p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Button
+                                        variant="ghost"
+                                        className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-xs border border-white/5 hover:bg-white/5"
+                                        onClick={() => setKickingPlayer(null)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        className="flex-1 h-12 rounded-xl font-black uppercase tracking-widest text-xs bg-red-500 hover:bg-red-400 text-white"
+                                        onClick={handleKick}
+                                    >
+                                        Kick Out
+                                    </Button>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         );
     }

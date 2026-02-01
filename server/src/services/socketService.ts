@@ -130,7 +130,7 @@ export const setupSocket = (io: Server) => {
                     await session.save();
 
                     socket.join(pin);
-                    io.to(pin).emit('player_joined', { name, total: session.participants.length, isFlagged });
+                    io.to(pin).emit('player_joined', { name, total: session.participants.length, isFlagged, participantId: socket.id });
                     socket.emit('joined_game', { pin, mode: session.gameMode });
 
                     if (isFlagged) {
@@ -334,11 +334,21 @@ export const setupSocket = (io: Server) => {
                         isFlagged: p.isFlagged
                     }));
 
-                io.to(pin).emit('answer_revealed', {
-                    correctIndex,
-                    answerText,
-                    explanation: currentQ.explanation,
-                    leaderboard
+                // Emit personalized results to each participant
+                session.participants.forEach((participant) => {
+                    const rank = leaderboard.findIndex(p => p.socketId === participant.socketId) + 1;
+                    const isCorrect = typeof participant.lastAnswerIndex === 'number' && currentQ.options[participant.lastAnswerIndex]?.isCorrect;
+
+                    io.to(participant.socketId).emit('answer_revealed', {
+                        correctIndex,
+                        answerText,
+                        explanation: currentQ.explanation,
+                        leaderboard,
+                        lastAnswerIndex: participant.lastAnswerIndex,
+                        isCorrect,
+                        score: participant.score,
+                        rank
+                    });
                 });
 
             } catch (error) {
