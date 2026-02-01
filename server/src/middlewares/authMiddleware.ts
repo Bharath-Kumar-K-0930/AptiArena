@@ -18,7 +18,9 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
 export const restrictTo = (...roles: string[]) => {
     return (req: Request, res: Response, next: NextFunction) => {
         if (!req.user || !roles.includes(req.user.role)) {
-            return res.status(403).json({ message: 'You do not have permission to perform this action' });
+            return res.status(403).json({
+                message: `Permission denied. This action requires one of the following roles: ${roles.join(', ')}. Your current role is: ${req.user?.role || 'Guest'}`
+            });
         }
         next();
     };

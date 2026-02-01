@@ -9,6 +9,10 @@ export const register = async (req: Request, res: Response) => {
     try {
         const { username, email, password, role } = req.body;
 
+        if (typeof username !== 'string' || typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Invalid input types' });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
@@ -43,6 +47,10 @@ export const login = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body;
 
+        if (typeof email !== 'string' || typeof password !== 'string') {
+            return res.status(400).json({ message: 'Invalid input types' });
+        }
+
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
@@ -65,6 +73,9 @@ export const login = async (req: Request, res: Response) => {
 export const verifyEmail = async (req: Request, res: Response) => {
     try {
         const { token } = req.body;
+        if (typeof token !== 'string') {
+            return res.status(400).json({ message: 'Invalid token type' });
+        }
         const user = await User.findOne({ verificationToken: token });
 
         if (!user) return res.status(400).json({ message: 'Invalid or expired token' });
@@ -83,6 +94,7 @@ export const getMe = async (req: Request, res: Response) => {
     try {
         if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
         const user = await User.findById(req.user.id).select('-password');
+        if (!user) return res.status(401).json({ message: 'User not found, please login again' });
         res.json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error });

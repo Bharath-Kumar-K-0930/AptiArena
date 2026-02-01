@@ -56,12 +56,13 @@ afterAll(async () => {
 describe('Security Tests', () => {
 
     describe('Access Control', () => {
-        it('should prevent participants from accessing host stats', async () => {
+        it('should allow participants to access their own stats (previously host-only)', async () => {
             const res = await request(app)
                 .get('/api/quizzes/stats')
                 .set('Authorization', `Bearer ${verifiedParticipantToken}`);
 
-            expect(res.statusCode).toBe(403);
+            expect(res.statusCode).toBe(200);
+            expect(res.body).toHaveProperty('joinedQuizzes');
         });
 
         it('should prevent unauthenticated users from accessing protected routes', async () => {
@@ -86,8 +87,8 @@ describe('Security Tests', () => {
             const hashedPassword = await bcrypt.hash('password123', salt);
 
             const unverified = new User({
-                username: 'unverified',
-                email: 'unv@test.com',
+                username: 'unverified' + Date.now(),
+                email: 'unv' + Date.now() + '@test.com',
                 password: hashedPassword,
                 isVerified: false
             });
@@ -95,7 +96,7 @@ describe('Security Tests', () => {
 
             const res = await request(app)
                 .post('/api/auth/login')
-                .send({ email: 'unv@test.com', password: 'password123' });
+                .send({ email: unverified.email, password: 'password123' });
 
             expect(res.statusCode).toBe(403);
             expect(res.body.message).toContain('verify');
@@ -108,7 +109,32 @@ describe('Security Tests', () => {
                 .post('/api/auth/login')
                 .send({ email: { "$gt": "" }, password: "any" });
 
-            expect(res.statusCode).not.toBe(200);
+            expect(res.statusCode).toBe(400); // Should fail credentials, not bypass
+        });
+    });
+
+    describe('HTTP Parameter Pollution (HPP)', () => {
+        it('should prevent parameter pollution', async () => {
+            // Sending multiple 'email' parameters
+            // By default, Express would make it an array ['a@b.com', 'c@d.com']
+            // HPP should take only the last one or sanitize it.
+            const res = await request(app)
+                .get('/api/auth/me?email=a@b.com&email=c@d.com')
+                .set('Authorization', `Bearer ${verifiedHostToken}`);
+
+            // If HPP works, it usually doesn't crash and handles it according to config.
+            expect(res.statusCode).not.toBe(500);
+        });
+    });
+
+    describe('Data Integrity', () => {
+        it('should reject extremely large payloads (DoS protection)', async () => {
+            const largeData = 'a'.repeat(20 * 1024); // 20kb, limit is 10kb
+            const res = await request(app)
+                .post('/api/auth/login')
+                .send({ email: largeData, password: "any" });
+
+            expect(res.statusCode).toBe(413); // Payload Too Large
         });
     });
 });

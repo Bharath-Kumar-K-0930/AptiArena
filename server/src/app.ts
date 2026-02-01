@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import hpp from 'hpp';
 import mongoSanitize from 'express-mongo-sanitize';
+const xss = require('xss-clean');
 
 import authRoutes from './routes/authRoutes';
 import quizRoutes from './routes/quizRoutes';
@@ -59,6 +60,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Data Sanitization
 app.use(mongoSanitize());
+app.use(xss());
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

@@ -12,7 +12,7 @@ router.post('/generate', protect, restrictTo('host'), upload.single('file'), gen
 router.post('/', protect, restrictTo('host'), createQuiz);
 router.put('/:id', protect, restrictTo('host'), updateQuiz);
 router.delete('/:id', protect, restrictTo('host'), deleteQuiz);
-router.get('/stats', protect, restrictTo('host'), getHostStats);
+router.get('/stats', protect, getHostStats);
 
 // Protected (any authenticated user)
 router.get('/my', protect, getMyQuizzes);

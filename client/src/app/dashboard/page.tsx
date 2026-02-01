@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Plus, Play, Edit, Trash, Users, Trophy, BookOpen, Clock, Monitor } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface Quiz {
     _id: string;
@@ -213,7 +214,12 @@ export default function DashboardPage() {
                                 <CardContent className="space-y-4">
                                     <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
                                         <span className="text-gray-400">Account Status</span>
-                                        <span className="text-green-400 font-medium bg-green-900/20 px-2 py-1 rounded text-xs border border-green-500/20">Active Host</span>
+                                        <span className={cn(
+                                            "font-medium bg-green-900/20 px-2 py-1 rounded text-xs border border-green-500/20 uppercase",
+                                            (JSON.parse(typeof window !== 'undefined' ? (localStorage.getItem("user") || "{}") : "{}")?.role === 'host') ? "text-green-400" : "text-blue-400"
+                                        )}>
+                                            {JSON.parse(typeof window !== 'undefined' ? (localStorage.getItem("user") || "{}") : "{}")?.role || 'User'}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
                                         <span className="text-gray-400">Total Questions Created</span>

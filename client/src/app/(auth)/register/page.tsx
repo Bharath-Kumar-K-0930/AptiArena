@@ -10,7 +10,7 @@ import { Lock, Mail, User } from "lucide-react";
 
 export default function RegisterPage() {
     const router = useRouter();
-    const [formData, setFormData] = useState({ username: "", email: "", password: "" });
+    const [formData, setFormData] = useState({ username: "", email: "", password: "", role: "participant" });
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -115,10 +115,24 @@ export default function RegisterPage() {
                                 required
                             />
                         </div>
-                    </div>
-                    <Button className="w-full bg-teal hover:bg-teal/80" disabled={loading}>
-                        {loading ? "Creating account..." : "Sign Up"}
-                    </Button>
+                        <div className="grid gap-2">
+                            <div className="relative">
+                                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <select
+                                    id="role"
+                                    className="flex h-10 w-full rounded-md border border-input bg-background px-10 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                    value={formData.role}
+                                    onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                                    required
+                                >
+                                    <option value="participant">Participant (Take Quizzes)</option>
+                                    <option value="host">Host (Create & Manage Quizzes)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <Button className="w-full bg-teal hover:bg-teal/80" disabled={loading}>
+                            {loading ? "Creating account..." : "Sign Up"}
+                        </Button>
                 </form>
             </CardContent>
             <CardFooter>
