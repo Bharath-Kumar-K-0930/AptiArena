@@ -334,21 +334,35 @@ export const setupSocket = (io: Server) => {
                         isFlagged: p.isFlagged
                     }));
 
-                // Emit personalized results to each participant
-                session.participants.forEach((participant) => {
-                    const rank = leaderboard.findIndex(p => p.socketId === participant.socketId) + 1;
-                    const isCorrect = typeof participant.lastAnswerIndex === 'number' && currentQ.options[participant.lastAnswerIndex]?.isCorrect;
+                // 1. First, broadcast general data to the whole room (Reliable Fallback)
+                io.to(pin).emit('answer_revealed', {
+                    correctIndex,
+                    answerText,
+                    explanation: currentQ.explanation,
+                    leaderboard
+                });
 
-                    io.to(participant.socketId).emit('answer_revealed', {
-                        correctIndex,
-                        answerText,
-                        explanation: currentQ.explanation,
-                        leaderboard,
-                        lastAnswerIndex: participant.lastAnswerIndex,
-                        isCorrect,
-                        score: participant.score,
-                        rank
-                    });
+                // 2. Then, emit personalized results to each participant
+                session.participants.forEach((participant) => {
+                    try {
+                        if (participant.socketId) {
+                            const rank = leaderboard.findIndex(p => p.socketId === participant.socketId) + 1;
+                            const isCorrect = typeof participant.lastAnswerIndex === 'number' && currentQ.options[participant.lastAnswerIndex]?.isCorrect;
+
+                            io.to(participant.socketId).emit('answer_revealed', {
+                                correctIndex,
+                                answerText,
+                                explanation: currentQ.explanation,
+                                leaderboard,
+                                lastAnswerIndex: participant.lastAnswerIndex,
+                                isCorrect,
+                                score: participant.score,
+                                rank
+                            });
+                        }
+                    } catch (err) {
+                        console.error(`Error emitting to participant ${participant.name}:`, err);
+                    }
                 });
 
             } catch (error) {
