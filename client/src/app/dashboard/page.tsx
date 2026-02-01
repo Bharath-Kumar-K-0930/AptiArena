@@ -35,15 +35,20 @@ export default function DashboardPage() {
     const [stats, setStats] = useState<Stats>({ totalQuizzes: 0, totalSessions: 0, totalParticipants: 0 });
     const [loading, setLoading] = useState(true);
     const [memberSince, setMemberSince] = useState<string>("N/A");
+    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
             try {
-                const user = JSON.parse(localStorage.getItem("user") || "{}");
-                const date = new Date(user.createdAt || Date.now());
-                setMemberSince(date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }));
+                const userData = localStorage.getItem("user");
+                if (userData) {
+                    const parsedUser = JSON.parse(userData);
+                    setUser(parsedUser);
+                    const date = new Date(parsedUser.createdAt || Date.now());
+                    setMemberSince(date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }));
+                }
             } catch (e) {
-                console.error("Date parsing error", e);
+                console.error("User data parsing error", e);
             }
         }
     }, []);
@@ -216,9 +221,9 @@ export default function DashboardPage() {
                                         <span className="text-gray-400">Account Status</span>
                                         <span className={cn(
                                             "font-medium bg-green-900/20 px-2 py-1 rounded text-xs border border-green-500/20 uppercase",
-                                            (JSON.parse(typeof window !== 'undefined' ? (localStorage.getItem("user") || "{}") : "{}")?.role === 'host') ? "text-green-400" : "text-blue-400"
+                                            user?.role === 'host' ? "text-green-400" : "text-blue-400"
                                         )}>
-                                            {JSON.parse(typeof window !== 'undefined' ? (localStorage.getItem("user") || "{}") : "{}")?.role || 'User'}
+                                            {user?.role || 'User'}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 bg-gray-900 rounded-lg">
