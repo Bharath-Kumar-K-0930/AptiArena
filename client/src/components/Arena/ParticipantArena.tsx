@@ -132,13 +132,24 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         });
 
         newSocket.on("answer_revealed", (data) => {
-            setGameState("result");
-            setResult((prev: any) => ({ ...(prev || {}), ...data }));
+            console.log("socket_event: answer_revealed", data);
+
+            // Critical: Ensure result state is fully populated BEFORE switching view
+            setResult((prev: any) => ({
+                ...(prev || {}),
+                ...data,
+                // Ensure these specific fields are explicitly set from the payload
+                correctIndex: data.correctIndex,
+                isRevealed: true
+            }));
+
             if (data.leaderboard) setLeaderboard(data.leaderboard);
             if (data.lastAnswerIndex !== undefined) {
                 setSelectedAnswerIndex(data.lastAnswerIndex);
                 setHasAnswered(true);
             }
+            // Switch state last to ensure data is ready
+            setGameState("result");
         });
 
         // Polling response handler
@@ -458,17 +469,15 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
         );
     }
 
-    return (
-        <div className={`${isSimulation ? 'h-full' : 'min-h-[calc(100svh-4rem)]'} ${isSimulation ? 'bg-slate-950 rounded-[3rem]' : 'bg-slate-950'} relative flex flex-col overflow-hidden`}>
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 to-slate-900" />
-                <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/5 blur-[100px] rounded-full" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full" />
-            </div>
+    // Check if we have a valid result state to force render
+    const isValidResultState = (gameState === 'result') || (gameState === 'submitted' && result && (result.correctIndex !== undefined || result.isRevealed));
 
-            <div className="relative z-10 flex-1 flex flex-col container mx-auto max-w-2xl p-4 md:p-6">
-                {/* Header Stats */}
-                <div className="flex justify-between items-center mb-4 md:mb-8 shrink-0">
+    return (
+        <div className="min-h-[100dvh] bg-slate-950 text-white font-sans selection:bg-teal-500/30 flex flex-col items-center relative overflow-hidden">
+            <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_50%,rgba(13,148,136,0.1),rgba(0,0,0,1))]" />
+            
+            {(gameState === "waiting" || gameState === "join") && (
+                <div className="absolute top-0 w-full p-4 flex justify-between items-center z-20">
                     <div className="flex flex-col">
                         <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Question</span>
                         <span className="text-base md:text-lg font-black text-white">{questionIndex + 1}<span className="text-slate-600 ml-1">/ {totalQuestions || currentQuestion?.total || '?'}</span></span>
@@ -517,7 +526,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                         </motion.div>
                     )}
 
-                    {gameState === "submitted" && (
+                    {gameState === "submitted" && !isValidResultState && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -544,7 +553,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                         </motion.div>
                     )}
 
-                    {gameState === "result" && result && (
+                    {(gameState === "result" || isValidResultState) && result && (
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -646,7 +655,7 @@ export default function ParticipantArena({ initialPin = "", initialName = "", is
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
