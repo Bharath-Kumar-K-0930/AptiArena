@@ -3,21 +3,20 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { app } from '../src/app';
 import User from '../src/models/User';
-import Quiz from '../src/models/Quiz';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 let mongoServer: MongoMemoryServer;
-let verifiedHostToken: string;
-let verifiedParticipantToken: string;
-let hostId: string;
-let participantId: string;
+let verifiedHostToken: string = '';
+let verifiedParticipantToken: string = '';
 const JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
 
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create();
     const uri = mongoServer.getUri();
-    await mongoose.disconnect();
+    if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect();
+    }
     await mongoose.connect(uri);
 
     const salt = await bcrypt.genSalt(10);
@@ -25,26 +24,26 @@ beforeAll(async () => {
 
     // Create a verified host
     const host = new User({
-        username: 'secure_host',
-        email: 'host@secure.com',
+        username: 'secure_host' + Date.now(),
+        email: 'host' + Date.now() + '@secure.com',
         password: hashedPassword,
         role: 'host',
         isVerified: true
     });
     await host.save();
-    hostId = host._id.toString();
+    const hostId = host._id.toString();
     verifiedHostToken = jwt.sign({ id: hostId, role: 'host' }, JWT_SECRET);
 
     // Create a verified participant
     const participant = new User({
-        username: 'secure_part',
-        email: 'part@secure.com',
+        username: 'secure_part' + Date.now(),
+        email: 'part' + Date.now() + '@secure.com',
         password: hashedPassword,
         role: 'participant',
         isVerified: true
     });
     await participant.save();
-    participantId = participant._id.toString();
+    const participantId = participant._id.toString();
     verifiedParticipantToken = jwt.sign({ id: participantId, role: 'participant' }, JWT_SECRET);
 });
 
@@ -115,14 +114,10 @@ describe('Security Tests', () => {
 
     describe('HTTP Parameter Pollution (HPP)', () => {
         it('should prevent parameter pollution', async () => {
-            // Sending multiple 'email' parameters
-            // By default, Express would make it an array ['a@b.com', 'c@d.com']
-            // HPP should take only the last one or sanitize it.
             const res = await request(app)
                 .get('/api/auth/me?email=a@b.com&email=c@d.com')
                 .set('Authorization', `Bearer ${verifiedHostToken}`);
 
-            // If HPP works, it usually doesn't crash and handles it according to config.
             expect(res.statusCode).not.toBe(500);
         });
     });
